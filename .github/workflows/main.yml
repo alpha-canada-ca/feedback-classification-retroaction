@@ -11,37 +11,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+
+    - name: Decrypt large secret
+      run: ./decrypt.sh
+      env:
+        CONFIG_INI_PASSPHRASE: ${{ secrets.CONFIG_INI_PASSPHRASE }}
     
     - uses: Azure/docker-login@v1
       with:
-        login-server: cloudlifeacr.azurecr.io
+        login-server: tbsacr.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     
     - run: |
-        docker build . -t cloudlifeacr.azurecr.io/k8sflask:${{ github.sha }}
-        docker push cloudlifeacr.azurecr.io/k8sflask:${{ github.sha }}
+        docker build . -t tbsacr.azurecr.io/suggestion:1.0.0
+        docker push tbsacr.azurecr.io/suggestion:1.0.0
       
     # Set the target AKS cluster.
     - uses: Azure/aks-set-context@v1
       with:
         creds: '${{ secrets.AZURE_CREDENTIALS }}'
-        cluster-name: aksdemokasun
-        resource-group: AKS-Demo-Cluster-RG
+        cluster-name: tbs-prod-aks
+        resource-group: tbs-prod-rg
         
-    - uses: Azure/k8s-create-secret@v1
-      with:
-        container-registry-url: cloudlifeacr.azurecr.io
-        container-registry-username: ${{ secrets.ACR_USERNAME }}
-        container-registry-password: ${{ secrets.ACR_PASSWORD }}
-        secret-name: k8s-secret
-
     - uses: Azure/k8s-deploy@v1
       with:
         manifests: |
           manifests/deployment.yaml
           manifests/service.yaml
         images: |
-          cloudlifeacr.azurecr.io/k8sflask:${{ github.sha }}
-        imagepullsecrets: |
-          k8s-secret
+          tbsacr.azurecr.io/k8sflask:1.0.0
