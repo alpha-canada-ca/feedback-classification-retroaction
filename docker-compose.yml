@@ -1,7 +1,7 @@
 version: '3'
 services:
   suggestion:
-    image: "ryanhyma/suggestion:1.0.0"
+    image: "tbsacr.azurecr.io/suggestion:1.0.0"
     build: 
       context: .
       dockerfile: docker/both/Dockerfile

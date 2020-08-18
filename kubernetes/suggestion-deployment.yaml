@@ -16,7 +16,7 @@ spec:
         app: suggestion
     spec:
       containers:
-      - image: ryanhyma/suggestion:1.0.0
+      - image: tbsacr.azurecr.io/suggestion:1.0.0
         imagePullPolicy: Always
         name: suggestion
         resources: 
