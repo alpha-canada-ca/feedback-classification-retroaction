@@ -1,2 +1,5 @@
 #ignore file with API key
 **/config/
+.DS_Store
+*/.DS_Store
+*.ini
