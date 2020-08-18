@@ -11,11 +11,12 @@ import warnings
 import pickle
 from configparser import ConfigParser
 
-#get api key from config file and get data from Airtable
+#get api key from config file and get data from Airtable - base and api key are in a hidden config folder
 config = ConfigParser()
 config.read('config/config.ini')
 key = config.get('default', 'api_key')
-airtable = Airtable('appLPxRhEr8nQ27pQ', 'Page feedback', api_key=key)
+base = config.get('default', 'base')
+airtable = Airtable(base, 'Page feedback', api_key=key)
 record_list = airtable.get_all()
 
 #convert data to Pandas dataframe
