@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: suggestion
+  name: suggestion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: suggestion
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: suggestion
+    spec:
+      containers:
+      - image: ryanhyma/suggestion:1.0.0
+        imagePullPolicy: Always
+        name: suggestion
+        resources: 
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+
