@@ -23,7 +23,7 @@ jobs:
         password: ${{ secrets.ACR_PASSWORD }}
     
     - run: |
-        docker build . -t tbsacr.azurecr.io/suggestion:1.0.0
+        docker build -f ./docker/both/Dockerfile . -t tbsacr.azurecr.io/suggestion:1.0.0
         docker push tbsacr.azurecr.io/suggestion:1.0.0
       
     # Set the target AKS cluster.
