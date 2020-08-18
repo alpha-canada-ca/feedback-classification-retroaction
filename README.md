@@ -49,7 +49,7 @@ Every day, the prediction algorithm gets retrained with all confirmed tags. In e
 
 ***
 
-#Classer la rétroaction Web automatiquement par l'entraînement d'un algorithme de classification - Entraînement supervisé
+##Classer la rétroaction Web automatiquement par l'entraînement d'un algorithme de classification - Entraînement supervisé
 
 Ces scripts ont été développés pour aider à étiqueter automatiquement les commentaires recueillis sur les pages de Canada.ca.
 
