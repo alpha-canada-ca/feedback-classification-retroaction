@@ -40,3 +40,5 @@ jobs:
           kubernetes/suggestion-service.yaml
         images: |
           tbsacr.azurecr.io/suggestion:1.0.0
+        namespace: |
+          pagesuccess
