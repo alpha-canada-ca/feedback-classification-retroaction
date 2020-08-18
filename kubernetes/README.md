@@ -10,11 +10,12 @@ There are three files:
 
 ## How to deploy initially and manually
 - Install kubectl and setup with your cluster
-- Create a namespace for 
+- Create a namespace for the service
+- edit suggestion-deployment and update the image section with the tag from docker-compose
 - kubectl apply -f suggetion-deployment.yaml
 - kubectl apply -f suggestion-service.yaml
 - kubectl apply -f suggestion-ingress.yaml
-- From that base folder of the project run: docker-compose build
+
 
 ## How to run locally
 - run: docker-compose up

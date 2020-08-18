@@ -18,7 +18,7 @@ There are three folders:
 
 ## If a new container version is needed
 - edit docker-compose.yml from the base directory
-- on line 4 change: image: "ryanhyma/suggestion:1.0.0" to a new version or update the dockerhub repo by assigning a new account
+- on line 4 change: image: "yourrepo/suggestion:1.0.0" to a new version or update the dockerhub repo by assigning a new account
 - run docker-compose build from the base folder
 
 
