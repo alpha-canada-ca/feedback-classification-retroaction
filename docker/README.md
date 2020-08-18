@@ -12,8 +12,9 @@ There are three folders:
 - From that base folder of the project run: docker-compose build
 
 ## How to run locally
-- run: docker-compose run
-- go to localhost:5000/suggestCategory?lang=en&model=Health&text=Should I wear a mask
+- run: docker-compose up
+- go to localhost:5000/suggestCategory?lang=en&section=Health&text=Should I wear a mask
+- You should see PPE in the browser window if using the default models
 
 ## If a new container version is needed
 - edit docker-compose.yml from the base directory
