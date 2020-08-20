@@ -12,7 +12,6 @@ def bypage():
 
     #import libraries
     import requests
-    from airtable import Airtable
     import pandas as pd
     from nltk.corpus import stopwords
     import nltk
@@ -21,18 +20,14 @@ def bypage():
     import sys
     import warnings
     import pickle
-    from configparser import ConfigParser
 
-    #get api key from config file and get data from AirTabe
-    config = ConfigParser()
-    config.read('config/config.ini')
-    key = config.get('default', 'api_key')
-    base = config.get('default', 'base')
-    airtable = Airtable(base, 'Page feedback', api_key=key)
-    record_list = airtable.get_all()
+    #define deserialize
+    def deserialize(file):
+        with open(file, 'rb') as f:
+            return pickle.load(f)
 
-    #convert data to Pandas dataframe
-    data = pd.DataFrame([record['fields'] for record in record_list])
+    #import data as pickle
+    data = deserialize('data/all_data.pickle')
 
     #get variables
     lang = request.args.get('lang')
@@ -110,6 +105,7 @@ def bypage():
         from nltk import FreqDist
         fdist1 = FreqDist(words_ns_en)
         most_common = fdist1.most_common(15)
+
 
         #count the number for each tag
         tag_count = tags_en.apply(pd.Series.value_counts)
@@ -198,7 +194,11 @@ def bypage():
 
         by_tag = by_tag.reset_index()
 
-        column_names = ['Tag', 'Tag count', 'Significant words']
+        column_names = ['Tag count', 'Tag', 'Significant words']
+
+        by_tag['Significant words'] = by_tag['Significant words'].apply(lambda x: ', '.join(x))
+
+        by_tag = by_tag[['Feedback count', 'index', 'Significant words']]
 
         return render_template("info_by_page_en.html", most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page)
 
