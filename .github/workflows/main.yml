@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: Decrypt large secret
-      run: ./decrypt.sh
+      run: ./config/decrypt.sh
       env:
         CONFIG_INI_PASSPHRASE: ${{ secrets.CONFIG_INI_PASSPHRASE }}
     
