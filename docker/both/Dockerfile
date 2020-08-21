@@ -9,7 +9,8 @@ COPY docker/both/entrypoint.sh /app/
 RUN chmod a+x /app/entrypoint.sh
 RUN crontab /crontab
 COPY data/ /app/data/
-COPY config.ini /app/
+RUN mkdir /app/config
+COPY ./config/config.ini /app/config/config.ini
 WORKDIR /app
 
 ENV FLASK_APP=suggest.py
