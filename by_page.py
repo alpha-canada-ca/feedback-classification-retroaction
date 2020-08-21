@@ -107,6 +107,19 @@ def bypage():
         most_common = fdist1.most_common(15)
 
 
+        #by what's wrong reason
+        page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace([False], ['None'])
+        reasons = page_data_en["What's wrong"].value_counts()
+        by_reason= reasons.to_frame()
+        by_reason.columns = ['Feedback count']
+
+        reason_dict = {}
+
+        for reason, topic_df_en in page_data_en.groupby("What's wrong"):
+            reason_dict[reason] = ' '.join(topic_df_en['Comment'].tolist())
+
+
+
         #count the number for each tag
         tag_count = tags_en.apply(pd.Series.value_counts)
         tag_count = tag_count.fillna(0)
@@ -189,7 +202,6 @@ def bypage():
 
         by_tag['Significant words'] = imp_words_en['EN_words']
 
-
         by_tag = by_tag.sort_values(by = 'Feedback count', ascending=False)
 
         by_tag = by_tag.reset_index()
@@ -199,6 +211,8 @@ def bypage():
         by_tag['Significant words'] = by_tag['Significant words'].apply(lambda x: ', '.join(x))
 
         by_tag = by_tag[['Feedback count', 'index', 'Significant words']]
+
+
 
         return render_template("info_by_page_en.html", most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page)
 
