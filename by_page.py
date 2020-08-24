@@ -45,14 +45,11 @@ def bypage():
         data_en = data[data['Lang'].str.contains("EN", na=False)]
 
         #keep only relevant columns from the dataframe
-        data_en_pages = data_en[["Comment", "Lookup_page_title", "What's wrong", "Lookup_tags", 'Tags confirmed']]
+        data_en_pages = data_en[["Comment", "Combined EN/FR field", "What's wrong", "Lookup_tags", 'Tags confirmed']]
         data_en_pages["What's wrong"].fillna(False, inplace=True)
 
         #remove all rows thave have null content
         data_en_pages = data_en_pages.dropna()
-
-        #convert the page title to a string
-        data_en_pages['Page_title'] = [','.join(map(str, l)) for l in data_en_pages['Lookup_page_title']]
 
         #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
         data_en_pages['tags'] = [','.join(map(str, l)) for l in data_en_pages['Lookup_tags']]
@@ -60,8 +57,6 @@ def bypage():
         #remove the Lookup_tags column (it's not needed anymore)
         data_en_pages = data_en_pages.drop(columns=['Lookup_tags'])
 
-        #remove the Lookup_page_title column (it's not needed anymore)
-        data_en_pages = data_en_pages.drop(columns=['Lookup_page_title'])
 
         #remove the Lookup_page_title column (it's not needed anymore)
         data_en_pages = data_en_pages.drop(columns=['Tags confirmed'])
@@ -72,7 +67,7 @@ def bypage():
         #split dataframe for French comments - same comments as above for each line
 
         #get data for specific page
-        page_data_en = data_en_pages.loc[data_en_pages['Page_title'] == page]
+        page_data_en = data_en_pages.loc[data_en_pages['Combined EN/FR field'] == page]
 
         page_data_en = page_data_en.reset_index(drop=True)
 
@@ -182,7 +177,7 @@ def bypage():
         by_reason= by_reason.sort_values(by = 'Feedback count', ascending=False)
 
 
-        reason_column_names = ['Nombre', 'Raison', 'Mots sinificatifs']
+        reason_column_names = ['Feedback count', 'Reason', 'Significant words']
 
         by_reason['Significant words'] = by_reason['Significant words'].apply(lambda x: ', '.join(x))
 
@@ -194,7 +189,12 @@ def bypage():
         tag_count = tags_en.apply(pd.Series.value_counts)
         tag_count = tag_count.fillna(0)
         tag_count = tag_count.astype(int)
-        tag_count = tag_count[0] + tag_count[1]
+        if 2 in tag_count.columns:
+            tag_count = tag_count[0] + tag_count[1] + tag_count[2]
+        elif 1 in tag_count.columns:
+            tag_count = tag_count[0] + tag_count[1]
+        else:
+            tag_count = tag_count[0]
         tag_count = tag_count.sort_values(ascending = False)
         by_tag = tag_count.to_frame()
         by_tag = by_tag.sort_index(axis=0, level=None, ascending=True)
@@ -294,14 +294,12 @@ def bypage():
         data_fr = data[data['Lang'].str.contains("FR", na=False)]
 
         #keep only relevant columns from the dataframe
-        data_fr_pages = data_fr[["Comment", "Lookup_page_title", "What's wrong", "Lookup_tags", 'Tags confirmed']]
+        data_fr_pages = data_fr[["Comment", "Combined EN/FR field", "What's wrong", "Lookup_tags", 'Tags confirmed']]
         data_fr_pages["What's wrong"].fillna(False, inplace=True)
 
         #remove all rows thave have null content
         data_fr_pages = data_fr_pages.dropna()
 
-        #convert the page title to a string
-        data_fr_pages['Page_title'] = [','.join(map(str, l)) for l in data_fr_pages['Lookup_page_title']]
 
         #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
         data_fr_pages['tags'] = [','.join(map(str, l)) for l in data_fr_pages['Lookup_tags']]
@@ -309,8 +307,6 @@ def bypage():
         #remove the Lookup_tags column (it's not needed anymore)
         data_fr_pages = data_fr_pages.drop(columns=['Lookup_tags'])
 
-        #remove the Lookup_page_title column (it's not needed anymore)
-        data_fr_pages = data_fr_pages.drop(columns=['Lookup_page_title'])
 
         #remove the Lookup_page_title column (it's not needed anymore)
         data_fr_pages = data_fr_pages.drop(columns=['Tags confirmed'])
@@ -321,7 +317,7 @@ def bypage():
         #split dataframe for French comments - same comments as above for each line
 
         #get data for specific page
-        page_data_fr = data_fr_pages.loc[data_fr_pages['Page_title'] == page]
+        page_data_fr = data_fr_pages.loc[data_fr_pages['Combined EN/FR field'] == page]
 
         page_data_fr = page_data_fr.reset_index(drop=True)
 

@@ -18,19 +18,11 @@
 
 <h1>Feedback data by page</h1>
 
-<form action="{{ url_for('bypage') }}" method="POST">
-<label for="page">Select page</label>
-<select name= page id="page" onchange="this.form.submit()">
-  <option value="Coronavirus disease (COVID-19): Symptoms and treatment">Coronavirus disease (COVID-19): Symptoms and treatment</option>
-  <option value="COVID-19 Economic Response Plan">COVID-19 Economic Response Plan</option>
-  <option value="Coronavirus disease (COVID-19): Prevention and risks">Coronavirus disease (COVID-19): Prevention and risks</option>
-  <option value="Managing your business during COVID-19">Managing your business during COVID-19</option>
-</select>
-</form>
 
 
 
 <h2>Page title: {{ page }}</h2>
+
 <h2>Most frequent words in feedback</h2>
 <p>{{ most_common }}</p>
 
