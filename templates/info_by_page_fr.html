@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Rétroaction par page</title>
+
+<style>
+      table,
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+    </style>
+
+  </head>
+  <body>
+
+<h1>Rétroaction par page</h1>
+
+<h2>Titre de la page: {{ page }}</h2>
+<h2>Mots les plus fréquents dans la rétroaction</h2>
+<p>{{ most_common }}</p>
+
+<h2>Rétroaction par raison</h2>
+<table>
+    <tr>
+        {% for col in reason_column_names %}
+        <th>{{col}}</th>
+        {% endfor %}
+    </tr>
+        {% for row in row_data_reason %}
+    <tr>
+      {% for col, row_ in zip(reason_column_names, row) %}
+      <td>{{row_}}</td>
+      {% endfor %}
+      </tr>
+      {% endfor %}
+</table>
+
+<h2>Rétroaction par étiquette</h2>
+<table>
+    <tr>
+        {% for col in column_names %}
+        <th>{{col}}</th>
+        {% endfor %}
+    </tr>
+        {% for row in row_data %}
+    <tr>
+      {% for col, row_ in zip(column_names, row) %}
+      <td>{{row_}}</td>
+      {% endfor %}
+      </tr>
+      {% endfor %}
+</table>
+
+</body>
+</html>

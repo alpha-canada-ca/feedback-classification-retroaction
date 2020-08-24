@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Feedbak by page</title>
+
+<style>
+      table,
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+    </style>
+
+  </head>
+  <body>
+
+<h1>Feedback data by page</h1>
+
+<form action="{{ url_for('bypage') }}" method="POST">
+<label for="page">Select page</label>
+<select name= page id="page" onchange="this.form.submit()">
+  <option value="Coronavirus disease (COVID-19): Symptoms and treatment">Coronavirus disease (COVID-19): Symptoms and treatment</option>
+  <option value="COVID-19 Economic Response Plan">COVID-19 Economic Response Plan</option>
+  <option value="Coronavirus disease (COVID-19): Prevention and risks">Coronavirus disease (COVID-19): Prevention and risks</option>
+  <option value="Managing your business during COVID-19">Managing your business during COVID-19</option>
+</select>
+</form>
+
+
+
+<h2>Page title: {{ page }}</h2>
+<h2>Most frequent words in feedback</h2>
+<p>{{ most_common }}</p>
+
+<h2>Feedback by reason</h2>
+<table>
+    <tr>
+        {% for col in reason_column_names %}
+        <th>{{col}}</th>
+        {% endfor %}
+    </tr>
+        {% for row in row_data_reason %}
+    <tr>
+      {% for col, row_ in zip(reason_column_names, row) %}
+      <td>{{row_}}</td>
+      {% endfor %}
+      </tr>
+      {% endfor %}
+</table>
+
+<h2>Feedback by tag</h2>
+<table>
+    <tr>
+        {% for col in column_names %}
+        <th>{{col}}</th>
+        {% endfor %}
+    </tr>
+        {% for row in row_data %}
+    <tr>
+      {% for col, row_ in zip(column_names, row) %}
+      <td>{{row_}}</td>
+      {% endfor %}
+      </tr>
+      {% endfor %}
+</table>
+
+</body>
+</html>
