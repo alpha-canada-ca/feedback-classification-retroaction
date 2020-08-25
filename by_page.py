@@ -20,6 +20,11 @@ def bypage():
     import sys
     import warnings
     import pickle
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+    import io
+    import base64
 
     #define deserialize
     def deserialize(file):
@@ -36,40 +41,89 @@ def bypage():
 
     #get variables
 
+    data = data[data['Date'] <= end_date]
+    data = data[data['Date'] >= start_date]
+
     if lang == 'en':
 
-        data = data[data['Date'] <= end_date]
-        data = data[data['Date'] >= start_date]
-
-        #split dataframe for English comments
         data_en = data[data['Lang'].str.contains("EN", na=False)]
 
-        #keep only relevant columns from the dataframe
-        data_en_pages = data_en[["Comment", "Combined EN/FR field", "What's wrong", "Lookup_tags", 'Tags confirmed']]
-        data_en_pages["What's wrong"].fillna(False, inplace=True)
+        #split dataframe for English comments
+        data_en_pages = data_en[["Comment", "Date", "Status", "Combined EN/FR field", "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No']]
+        data_en_pages = data_en_pages[data_en_pages.Status != 'Spam']
+        data_en_pages = data_en_pages[data_en_pages.Status != 'Ignore']
+        data_en_pages = data_en_pages[data_en_pages.Status != 'Duplicate']
+        page_data_en = data_en_pages.loc[data_en_pages['Combined EN/FR field'] == page]
 
-        #remove all rows thave have null content
-        data_en_pages = data_en_pages.dropna()
+
+        yes_no = page_data_en[["Date", 'Yes/No']]
+        yes_no = yes_no.dropna()
+        yes_no = yes_no.sort_values(by = 'Date', ascending=False)
+        yes_no = yes_no.reset_index(drop=True)
+
+        by_date = {}
+        for date in yes_no['Date']:
+          by_date[date] = yes_no.loc[yes_no['Date'] == date]
+
+        for date in by_date:
+          by_date[date] =  by_date[date]['Yes/No'].value_counts()
+
+        for date in by_date:
+          if 'No' not in by_date[date]:
+            by_date['2020-08-13']['No'] = 0
+
+        for date in by_date:
+          if 'Yes' not in by_date[date]:
+            by_date['2020-08-13']['Yes'] = 0
+
+        for date in by_date:
+          by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
+
+
+        dates = list(by_date.keys())
+        values = list(by_date.values())
+        dates.reverse()
+        values.reverse()
+        img = io.BytesIO()
+        x = dates
+        y = values
+        plt.xticks(rotation=90)
+        plt.plot(x, y, linewidth=2.0)
+        plt.savefig(img, format='png')
+        plt.close()
+        img.seek(0)
+
+        plot_url = base64.b64encode(img.getvalue()).decode()
+
+        if yes_no.empty:
+            score = 'unavailable'
+        else:
+            total = yes_no['Yes/No'].value_counts()
+            score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
+            score = format(score, '.2f')
+
+        page_data_en = page_data_en.drop(columns=['Date'])
+        page_data_en = page_data_en.drop(columns=['Status'])
+        page_data_en = page_data_en.drop(columns=['Yes/No'])
+        page_data_en["What's wrong"].fillna(False, inplace=True)
+        page_data_en = page_data_en.dropna()
 
         #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
-        data_en_pages['tags'] = [','.join(map(str, l)) for l in data_en_pages['Lookup_tags']]
+        page_data_en['tags'] = [','.join(map(str, l)) for l in page_data_en['Lookup_tags']]
 
         #remove the Lookup_tags column (it's not needed anymore)
-        data_en_pages = data_en_pages.drop(columns=['Lookup_tags'])
+        page_data_en = page_data_en.drop(columns=['Lookup_tags'])
 
 
         #remove the Lookup_page_title column (it's not needed anymore)
-        data_en_pages = data_en_pages.drop(columns=['Tags confirmed'])
+        page_data_en = page_data_en.drop(columns=['Tags confirmed'])
 
         #resets the index for each row - needed for further processing
-        data_en_pages = data_en_pages.reset_index(drop=True)
+        page_data_en = page_data_en.reset_index(drop=True)
 
         #split dataframe for French comments - same comments as above for each line
 
         #get data for specific page
-        page_data_en = data_en_pages.loc[data_en_pages['Combined EN/FR field'] == page]
-
-        page_data_en = page_data_en.reset_index(drop=True)
 
         #split tags and expand
         tags_en = page_data_en["tags"].str.split(",", n = 3, expand = True)
@@ -284,7 +338,7 @@ def bypage():
 
 
 
-        return render_template("info_by_page_en.html", most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_en.html", plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
 
 
@@ -294,32 +348,46 @@ def bypage():
         data_fr = data[data['Lang'].str.contains("FR", na=False)]
 
         #keep only relevant columns from the dataframe
-        data_fr_pages = data_fr[["Comment", "Combined EN/FR field", "What's wrong", "Lookup_tags", 'Tags confirmed']]
-        data_fr_pages["What's wrong"].fillna(False, inplace=True)
+        data_fr_pages = data_fr[["Comment", "Date", "Status", "Combined EN/FR field", "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No']]
+        data_fr_pages = data_fr_pages[data_fr_pages.Status != 'Spam']
+        data_fr_pages = data_fr_pages[data_fr_pages.Status != 'Ignore']
+        data_fr_pages = data_fr_pages[data_fr_pages.Status != 'Duplicate']
+        page_data_fr = data_fr_pages.loc[data_fr_pages['Combined EN/FR field'] == page]
 
-        #remove all rows thave have null content
-        data_fr_pages = data_fr_pages.dropna()
+
+        yes_no = page_data_fr[["Date", 'Yes/No']]
+        yes_no = yes_no.dropna()
+        yes_no = yes_no.sort_values(by = 'Date', ascending=False)
+        yes_no = yes_no.reset_index(drop=True)
+        if yes_no.empty:
+            score = 'unavailable'
+        else:
+            total = yes_no['Yes/No'].value_counts()
+            score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
+            score = format(score, '.2f')
+
+        page_data_fr = page_data_fr.drop(columns=['Date'])
+        page_data_fr = page_data_fr.drop(columns=['Status'])
+        page_data_fr = page_data_fr.drop(columns=['Yes/No'])
+        page_data_fr["What's wrong"].fillna(False, inplace=True)
+        page_data_fr = page_data_fr.dropna()
 
 
         #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
-        data_fr_pages['tags'] = [','.join(map(str, l)) for l in data_fr_pages['Lookup_tags']]
+        page_data_fr['tags'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_tags']]
 
         #remove the Lookup_tags column (it's not needed anymore)
-        data_fr_pages = data_fr_pages.drop(columns=['Lookup_tags'])
+        page_data_fr = page_data_fr.drop(columns=['Lookup_tags'])
 
 
         #remove the Lookup_page_title column (it's not needed anymore)
-        data_fr_pages = data_fr_pages.drop(columns=['Tags confirmed'])
+        page_data_fr = page_data_fr.drop(columns=['Tags confirmed'])
 
         #resets the index for each row - needed for further processing
-        data_fr_pages = data_fr_pages.reset_index(drop=True)
+        page_data_fr = page_data_fr.reset_index(drop=True)
 
         #split dataframe for French comments - same comments as above for each line
 
-        #get data for specific page
-        page_data_fr = data_fr_pages.loc[data_fr_pages['Combined EN/FR field'] == page]
-
-        page_data_fr = page_data_fr.reset_index(drop=True)
 
         #split tags and expand
         tags_fr = page_data_fr["tags"].str.split(",", n = 3, expand = True)
@@ -573,7 +641,7 @@ def bypage():
 
         by_tag = by_tag[['Feedback count', 'index', 'Significant words']]
 
-        return render_template("info_by_page_fr.html", most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_fr.html", score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
 if __name__ == '__main__':
     app.run()

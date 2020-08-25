@@ -19,9 +19,11 @@
 <h1>Feedback data by page</h1>
 
 
+<h2>{{ page }}</h2>
 
-
-<h2>Page title: {{ page }}</h2>
+<h2>Percentage who found their answer</h2>
+<p>Over the period: {{ score }} %</p>
+<img src="data:image/png;base64, {{ plot_url }}">
 
 <h2>Most frequent words in feedback</h2>
 <p>{{ most_common }}</p>
