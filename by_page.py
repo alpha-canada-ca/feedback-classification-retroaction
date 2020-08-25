@@ -340,7 +340,7 @@ def bypage():
 
 
 
-        return render_template("info_by_page_en.html", yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_en.html", start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
 
 
@@ -681,7 +681,7 @@ def bypage():
 
         by_tag = by_tag[['Feedback count', 'index', 'Significant words']]
 
-        return render_template("info_by_page_fr.html", yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_fr.html", start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
 if __name__ == '__main__':
     app.run()

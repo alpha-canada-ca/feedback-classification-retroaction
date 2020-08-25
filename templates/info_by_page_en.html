@@ -17,19 +17,26 @@
   <body>
 
 <h1>Feedback data for {{ page }}</h1>
+<p>Feedback from <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong>: </p>
+<h2>On this page</h2>
+<ul>
+<li><a href="#found">Found their answer?</a</li>
+<li><a href="#frequent">Most frequent words in feedback</a></li>
+<li><a href="#reason">Feedback by reason</a></li>
+<li><a href="#tag">Feedback by tag</a></li>
+</ul>
+<h2 id="found">Found their answer?</h2>
 
-
-<h2>Found their answer?</h2>
-<p>Yes: {{ yes }}</p>
-<p>No: {{ no }}</p>
+<p><strong>Yes:</strong> {{ yes }}</p>
+<p><strong>No:</strong> {{ no }}</p>
 <p>Average for the period: <strong>{{ score }}%</strong></p>
 <h3>Over time</h3>
 <img src="data:image/png;base64, {{ plot_url }}">
 
-<h2>Most frequent words in feedback</h2>
+<h2 id="frequent">Most frequent words in feedback</h2>
 <p>{{ most_common }}</p>
 
-<h2>Feedback by reason</h2>
+<h2 id="reason">Feedback by reason</h2>
 <table>
     <tr>
         {% for col in reason_column_names %}
@@ -45,7 +52,7 @@
       {% endfor %}
 </table>
 
-<h2>Feedback by tag</h2>
+<h2 id="tag">Feedback by tag</h2>
 <table>
     <tr>
         {% for col in column_names %}
