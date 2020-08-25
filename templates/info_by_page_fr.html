@@ -16,12 +16,15 @@
   </head>
   <body>
 
-<h1>Rétroaction par page</h1>
+<h1>Rétroaction pour {{ page }}</h1>
 
-<h2>Pourcentage des gens qui ont trouvé leur réponse</h2>
-<p>{{ score }} %</p>
+<h2>Trouvé ce qu'ils cherchaient?</h2>
+<p>Oui : {{ yes }}</p>
+<p>Non : {{ no }}</p>
+<p>Moyenne pour la période : <strong>{{ score }}%</strong></p>
+<h3>À travers le temps</h3>
+<img src="data:image/png;base64, {{ plot_url }}">
 
-<h2>Titre de la page: {{ page }}</h2>
 <h2>Mots les plus fréquents dans la rétroaction</h2>
 <p>{{ most_common }}</p>
 

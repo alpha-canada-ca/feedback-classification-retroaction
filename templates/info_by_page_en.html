@@ -16,13 +16,14 @@
   </head>
   <body>
 
-<h1>Feedback data by page</h1>
+<h1>Feedback data for {{ page }}</h1>
 
 
-<h2>{{ page }}</h2>
-
-<h2>Percentage who found their answer</h2>
-<p>Over the period: {{ score }} %</p>
+<h2>Found their answer?</h2>
+<p>Yes: {{ yes }}</p>
+<p>No: {{ no }}</p>
+<p>Average for the period: <strong>{{ score }}%</strong></p>
+<h3>Over time</h3>
 <img src="data:image/png;base64, {{ plot_url }}">
 
 <h2>Most frequent words in feedback</h2>

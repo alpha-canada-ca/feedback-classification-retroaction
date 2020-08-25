@@ -70,11 +70,11 @@ def bypage():
 
         for date in by_date:
           if 'No' not in by_date[date]:
-            by_date['2020-08-13']['No'] = 0
+            by_date[date]['No'] = 0
 
         for date in by_date:
           if 'Yes' not in by_date[date]:
-            by_date['2020-08-13']['Yes'] = 0
+            by_date[date]['Yes'] = 0
 
         for date in by_date:
           by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
@@ -99,6 +99,8 @@ def bypage():
             score = 'unavailable'
         else:
             total = yes_no['Yes/No'].value_counts()
+            yes = total['Yes']
+            no = total['No']
             score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
             score = format(score, '.2f')
 
@@ -338,7 +340,7 @@ def bypage():
 
 
 
-        return render_template("info_by_page_en.html", plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_en.html", yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
 
 
@@ -359,11 +361,49 @@ def bypage():
         yes_no = yes_no.dropna()
         yes_no = yes_no.sort_values(by = 'Date', ascending=False)
         yes_no = yes_no.reset_index(drop=True)
+
+
+        by_date = {}
+        for date in yes_no['Date']:
+          by_date[date] = yes_no.loc[yes_no['Date'] == date]
+
+        for date in by_date:
+          by_date[date] =  by_date[date]['Yes/No'].value_counts()
+
+        for date in by_date:
+          if 'No' not in by_date[date]:
+            by_date[date]['No'] = 0
+
+        for date in by_date:
+          if 'Yes' not in by_date[date]:
+            by_date[date]['Yes'] = 0
+
+        for date in by_date:
+          by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
+
+
+        dates = list(by_date.keys())
+        values = list(by_date.values())
+        dates.reverse()
+        values.reverse()
+        img = io.BytesIO()
+        x = dates
+        y = values
+        plt.xticks(rotation=90)
+        plt.plot(x, y, linewidth=2.0)
+        plt.savefig(img, format='png')
+        plt.close()
+        img.seek(0)
+
+        plot_url = base64.b64encode(img.getvalue()).decode()
+
         if yes_no.empty:
             score = 'unavailable'
         else:
             total = yes_no['Yes/No'].value_counts()
             score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
+            yes = total['Yes']
+            no = total['No']
             score = format(score, '.2f')
 
         page_data_fr = page_data_fr.drop(columns=['Date'])
@@ -641,7 +681,7 @@ def bypage():
 
         by_tag = by_tag[['Feedback count', 'index', 'Significant words']]
 
-        return render_template("info_by_page_fr.html", score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_fr.html", yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
 if __name__ == '__main__':
     app.run()
