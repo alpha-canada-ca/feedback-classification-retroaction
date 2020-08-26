@@ -89,6 +89,7 @@ def bypage():
         x = dates
         y = values
         plt.xticks(rotation=90)
+        plt.ylim(0, 100)
         plt.plot(x, y, linewidth=2.0)
         plt.savefig(img, format='png')
         plt.close()
@@ -392,6 +393,7 @@ def bypage():
         x = dates
         y = values
         plt.xticks(rotation=90)
+        plt.ylim(0, 100)
         plt.plot(x, y, linewidth=2.0)
         plt.savefig(img, format='png')
         plt.close()
