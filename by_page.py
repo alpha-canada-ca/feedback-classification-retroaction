@@ -160,6 +160,9 @@ def bypage():
         from nltk import FreqDist
         fdist1 = FreqDist(words_ns_en)
         most_common = fdist1.most_common(15)
+        mc = pd.DataFrame(most_common, columns =['Word', 'Count'])
+        mc = mc[['Count', 'Word']]
+        word_column_names = ['Count', 'Word']
 
 
         #by what's wrong reason
@@ -342,7 +345,7 @@ def bypage():
 
 
 
-        return render_template("info_by_page_en.html", lang = lang, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_en.html", lang = lang, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()))
 
 
 
@@ -496,6 +499,9 @@ def bypage():
         from nltk import FreqDist
         fdist1 = FreqDist(words_ns_fr)
         most_common = fdist1.most_common(15)
+        mc = pd.DataFrame(most_common, columns =['Word', 'Count'])
+        mc = mc[['Count', 'Word']]
+        word_column_names = ['Count', 'Word']
 
 
         #by what's wrong reason
@@ -685,7 +691,7 @@ def bypage():
 
         by_tag = by_tag[['Feedback count', 'index', 'Significant words']]
 
-        return render_template("info_by_page_fr.html", lang = lang, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_fr.html", lang = lang, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()))
 
 if __name__ == '__main__':
     app.run()

@@ -84,7 +84,20 @@
 
 
 <h2 id="frequent">Mots les plus fréquents dans la rétroaction</h2>
-<p>{{ most_common }}</p>
+<table class="wb-tables table table-striped">
+    <tr>
+        {% for col in word_column_names %}
+        <th>{{col}}</th>
+        {% endfor %}
+    </tr>
+        {% for row in row_data_word %}
+    <tr>
+      {% for col, row_ in zip(word_column_names, row) %}
+      <td>{{row_}}</td>
+      {% endfor %}
+      </tr>
+      {% endfor %}
+</table>
 
 <h2 id="reason">Rétroaction par raison</h2>
 <table class="wb-tables table table-striped">
