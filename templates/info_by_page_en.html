@@ -15,15 +15,7 @@
                       document.write(wet.builder.refTop({
                       }));
                    </script>
-<style>
-      table,
-      th,
-      td {
-        padding: 10px;
-        border: 1px solid black;
-        border-collapse: collapse;
-      }
-    </style>
+
 
   </head>
   <body vocab="http://schema.org/" typeof="WebPage">
@@ -99,7 +91,7 @@
 <p>{{ most_common }}</p>
 
 <h2 id="reason">Feedback by reason</h2>
-<table>
+<table class="wb-tables table table-striped">
     <tr>
         {% for col in reason_column_names %}
         <th>{{col}}</th>
@@ -115,7 +107,7 @@
 </table>
 
 <h2 id="tag">Feedback by tag</h2>
-<table>
+<table class="wb-tables table table-striped">
     <tr>
         {% for col in column_names %}
         <th>{{col}}</th>
