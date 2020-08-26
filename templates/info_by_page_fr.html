@@ -1,20 +1,54 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Rétroaction par page</title>
+<head>
 
+  <meta charset="utf-8">
+  <title>Rétroaction par page</title>
+  <meta content="width=device-width,initial-scale=1" name="viewport">
+       <meta name=”robots” content=”noindex, follow”>
+    <script type="text/javascript" src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_30/cdts/compiled/soyutils.js"></script>
+    <script type="text/javascript" src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_30/cdts/compiled/wet-en.js"></script>
+  <link href="https://test.canada.ca/covid-19-guidance/proto/css/alpha-beta-banner.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous"/>
+                 <!-- Write closure template -->
+                 <script type="text/javascript">
+                    document.write(wet.builder.refTop({
+                    }));
+                 </script>
 <style>
-      table,
-      th,
-      td {
-        padding: 10px;
-        border: 1px solid black;
-        border-collapse: collapse;
-      }
-    </style>
+    table,
+    th,
+    td {
+      padding: 10px;
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+  </style>
 
-  </head>
-  <body>
+</head>
+<body vocab="http://schema.org/" typeof="WebPage">
+
+  <div id="def-top">
+         </div>
+         <script type="text/javascript">
+                     var defTop = document.getElementById("def-top");
+                     defTop.outerHTML = wet.builder.top({
+                      lngLinks: [{
+                        lang: "fr",
+                        href: "#",
+                        text: "Français"
+                      }],
+                          breadcrumbs: [{
+                           title: "Canada.ca",
+                           href: "https://www.canada.ca/fr.html"
+                        }],
+                      search: true,
+                      siteMenu: true,
+                      showPreContent: true
+                     });
+                  </script>
+
+            <main role="main" property="mainContentOfPage" class="container">
 
 <h1>Rétroaction pour {{ page }}</h1>
 <h2>Rétroaction de <strong>{{ start_date }}</strong> à <strong>{{ end_date }}</strong></h2>
@@ -43,17 +77,25 @@
     }
     </script>
 
-<h2>Trouvé ce qu'ils cherchaient?</h2>
+    <h2 class='h3'>Sur cette page</h2>
+    <ul>
+    <li><a href="#found">Trouvé ce qu'ils cherchaient?</a</li>
+    <li><a href="#frequent">Mots les plus fréquents dans la rétroaction</a></li>
+    <li><a href="#reason">Rétroaction par raison</a></li>
+    <li><a href="#tag">Rétroaction par étiquette</a></li>
+    </ul>
+
+<h2 id="found"> Trouvé ce qu'ils cherchaient?</h2>
+<img src="data:image/png;base64, {{ plot_url }}">
 <p>Oui : {{ yes }}</p>
 <p>Non : {{ no }}</p>
 <p>Moyenne pour la période : <strong>{{ score }}%</strong></p>
-<h3>À travers le temps</h3>
-<img src="data:image/png;base64, {{ plot_url }}">
 
-<h2>Mots les plus fréquents dans la rétroaction</h2>
+
+<h2 id="frequent">Mots les plus fréquents dans la rétroaction</h2>
 <p>{{ most_common }}</p>
 
-<h2>Rétroaction par raison</h2>
+<h2 id="reason">Rétroaction par raison</h2>
 <table>
     <tr>
         {% for col in reason_column_names %}
@@ -69,7 +111,7 @@
       {% endfor %}
 </table>
 
-<h2>Rétroaction par étiquette</h2>
+<h2 id="tag">Rétroaction par étiquette</h2>
 <table>
     <tr>
         {% for col in column_names %}
