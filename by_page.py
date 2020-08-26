@@ -36,8 +36,8 @@ def bypage():
 
     lang = request.args.get('lang')
     page = request.args.get('page')
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
+    start_date = request.args.get('start_date', '2020-01-01')
+    end_date = request.args.get('end_date', '2020-12-31')
 
     #get variables
 
@@ -53,6 +53,7 @@ def bypage():
         data_en_pages = data_en_pages[data_en_pages.Status != 'Spam']
         data_en_pages = data_en_pages[data_en_pages.Status != 'Ignore']
         data_en_pages = data_en_pages[data_en_pages.Status != 'Duplicate']
+        data_en_pages['Combined EN/FR field'] = data_en_pages['Combined EN/FR field'].str.replace(' ', '_')
         page_data_en = data_en_pages.loc[data_en_pages['Combined EN/FR field'] == page]
 
 
@@ -340,7 +341,7 @@ def bypage():
 
 
 
-        return render_template("info_by_page_en.html", start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_en.html", lang = lang, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
 
 
@@ -354,6 +355,7 @@ def bypage():
         data_fr_pages = data_fr_pages[data_fr_pages.Status != 'Spam']
         data_fr_pages = data_fr_pages[data_fr_pages.Status != 'Ignore']
         data_fr_pages = data_fr_pages[data_fr_pages.Status != 'Duplicate']
+        data_fr_pages['Combined EN/FR field'] = data_fr_pages['Combined EN/FR field'].str.replace(' ', '_')
         page_data_fr = data_fr_pages.loc[data_fr_pages['Combined EN/FR field'] == page]
 
 
@@ -681,7 +683,7 @@ def bypage():
 
         by_tag = by_tag[['Feedback count', 'index', 'Significant words']]
 
-        return render_template("info_by_page_fr.html", start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+        return render_template("info_by_page_fr.html", lang = lang, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
 if __name__ == '__main__':
     app.run()

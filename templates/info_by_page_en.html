@@ -17,7 +17,33 @@
   <body>
 
 <h1>Feedback data for {{ page }}</h1>
-<p>Feedback from <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong>: </p>
+<h2>Feedback from <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong></h2>
+<p>Change the date range:</p>
+<form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
+<input type="hidden" name="lang" value={{ lang }}>
+<input type="hidden" name="page" value={{ page }}>
+<label for="start_date">Start date:</label>
+<input type="date" id="start_date" name="start_date">
+<label for="end_date">End date:</label>
+<input type="date" id="end_date" name="end_date">
+<input type="submit">
+</form>
+
+<script>
+    const form = window.document.getElementById("attributes");
+    form.addEventListener('submit', submitRedirect);
+    function submitRedirect(event) {
+        event.preventDefault();
+        var formData = new FormData(form);
+        var queryString = "?";
+        for (var key of formData.keys()) {
+	    	queryString = queryString + key+"="+formData.get(key)+"&";
+	    }
+        location.href = 'bypage'+queryString;
+    }
+    </script>
+
+
 <h2>On this page</h2>
 <ul>
 <li><a href="#found">Found their answer?</a</li>
