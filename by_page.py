@@ -154,7 +154,7 @@ def bypage():
         sw.append('19')
         words_ns_en = []
         for word in words_en:
-                if word not in sw:
+                if word not in sw and word.isalpha():
                     words_ns_en.append(word)
         #get most common words
         from nltk import FreqDist
@@ -490,9 +490,8 @@ def bypage():
 
         words_ns_fr = []
         for word in words_fr:
-                if word not in sw:
+                if word not in sw and word.isalpha():
                     words_ns_fr.append(word)
-
 
 
         #get most common words
