@@ -34,7 +34,6 @@ def bypage():
     #import data as pickle
     data = deserialize('data/all_data.pickle')
 
-    lang = request.args.get('lang')
     page = request.args.get('page')
     start_date = request.args.get('start_date', '2020-01-01')
     end_date = request.args.get('end_date', '2020-12-31')
@@ -44,18 +43,24 @@ def bypage():
     data = data[data['Date'] <= end_date]
     data = data[data['Date'] >= start_date]
 
-    if lang == 'en':
+    data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
+    data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
+    page_data = data.loc[data['URL'] == page]
+    page_data = page_data.reset_index(drop=True)
 
-        data_en = data[data['Lang'].str.contains("EN", na=False)]
+    url = page_data['URL'][0]
+
+    if page_data['Lang'][0] == 'EN':
 
         #split dataframe for English comments
-        data_en_pages = data_en[["Comment", "Date", "Status", "Combined EN/FR field", "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No']]
-        data_en_pages = data_en_pages[data_en_pages.Status != 'Spam']
-        data_en_pages = data_en_pages[data_en_pages.Status != 'Ignore']
-        data_en_pages = data_en_pages[data_en_pages.Status != 'Duplicate']
-        data_en_pages['Combined EN/FR field'] = data_en_pages['Combined EN/FR field'].str.replace(' ', '_')
-        page_data_en = data_en_pages.loc[data_en_pages['Combined EN/FR field'] == page]
+        page_data_en = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title']]
+        page_data_en = page_data_en[page_data_en.Status != 'Spam']
+        page_data_en = page_data_en[page_data_en.Status != 'Ignore']
+        page_data_en = page_data_en[page_data_en.Status != 'Duplicate']
 
+        page_data_en['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_en['Lookup_page_title']]
+
+        title = page_data_en['Lookup_page_title'][0]
 
         yes_no = page_data_en[["Date", 'Yes/No']]
         yes_no = yes_no.dropna()
@@ -345,23 +350,22 @@ def bypage():
 
 
 
-        return render_template("info_by_page_en.html", lang = lang, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()))
+        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()))
 
 
 
     #process to follow if English
     else:
 
-        data_fr = data[data['Lang'].str.contains("FR", na=False)]
-
         #keep only relevant columns from the dataframe
-        data_fr_pages = data_fr[["Comment", "Date", "Status", "Combined EN/FR field", "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No']]
-        data_fr_pages = data_fr_pages[data_fr_pages.Status != 'Spam']
-        data_fr_pages = data_fr_pages[data_fr_pages.Status != 'Ignore']
-        data_fr_pages = data_fr_pages[data_fr_pages.Status != 'Duplicate']
-        data_fr_pages['Combined EN/FR field'] = data_fr_pages['Combined EN/FR field'].str.replace(' ', '_')
-        page_data_fr = data_fr_pages.loc[data_fr_pages['Combined EN/FR field'] == page]
+        page_data_fr = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title']]
+        page_data_fr = page_data_fr[page_data_fr.Status != 'Spam']
+        page_data_fr = page_data_fr[page_data_fr.Status != 'Ignore']
+        page_data_fr = page_data_fr[page_data_fr.Status != 'Duplicate']
 
+        page_data_fr['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_page_title']]
+
+        title = page_data_fr['Lookup_page_title'][0]
 
         yes_no = page_data_fr[["Date", 'Yes/No']]
         yes_no = yes_no.dropna()
@@ -690,7 +694,7 @@ def bypage():
 
         by_tag = by_tag[['Feedback count', 'index', 'Significant words']]
 
-        return render_template("info_by_page_fr.html", lang = lang, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()))
+        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()))
 
 if __name__ == '__main__':
     app.run()
