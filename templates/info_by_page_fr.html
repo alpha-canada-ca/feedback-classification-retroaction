@@ -41,96 +41,143 @@
 
             <main role="main" property="mainContentOfPage" class="container">
 
-<h1>Feedback data for {{ title }}</h1>
-<a href='{{ url }}'>{{ url }}</a>
-<h2>Rétroaction de <strong>{{ start_date }}</strong> à <strong>{{ end_date }}</strong></h2>
-<p>Changer la période :</p>
-<form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
-<input type="hidden" name="lang" value={{ lang }}>
-<input type="hidden" name="page" value={{ page }}>
-<label for="start_date">Date de début :</label>
-<input type="date" id="start_date" name="start_date">
-<label for="end_date">Date de fin :</label>
-<input type="date" id="end_date" name="end_date">
-<input type="submit">
-</form>
+  <h1>Données de rétroaction pour {{ title }}</h1>
+  <a href='{{ url }}'>{{ url }}</a>
+  <h2>Rétroaction de <strong>{{ start_date }}</strong> à <strong>{{ end_date }}</strong></h2>
+  <p>Changer les dates :</p>
+  <form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
+  <input type="hidden" name="page" value={{ page }}>
+  <label for="start_date">Date de début :</label>
+  <input type="date" id="start_date" name="start_date" value={{ start_date }}>
+  <label for="end_date">Date de fin:</label>
+  <input type="date" id="end_date" name="end_date" value={{ end_date }}>
+  <input type="submit">
+  </form>
 
-<script>
-    const form = window.document.getElementById("attributes");
-    form.addEventListener('submit', submitRedirect);
-    function submitRedirect(event) {
-        event.preventDefault();
-        var formData = new FormData(form);
-        var queryString = "?";
-        for (var key of formData.keys()) {
-	    	queryString = queryString + key+"="+formData.get(key)+"&";
-	    }
-        location.href = 'bypage'+queryString;
-    }
-    </script>
+  <script>
+      const form = window.document.getElementById("attributes");
+      form.addEventListener('submit', submitRedirect);
+      function submitRedirect(event) {
+          event.preventDefault();
+          var formData = new FormData(form);
+          var queryString = "?";
+          for (var key of formData.keys()) {
+  	    	queryString = queryString + key+"="+formData.get(key)+"&";
+  	    }
+          location.href = 'bypage'+queryString;
+      }
+      </script>
 
-    <h2 class='h3'>Sur cette page</h2>
-    <ul>
-    <li><a href="#found">Trouvé ce qu'ils cherchaient?</a</li>
-    <li><a href="#frequent">Mots les plus fréquents dans la rétroaction</a></li>
-    <li><a href="#reason">Rétroaction par raison</a></li>
-    <li><a href="#tag">Rétroaction par étiquette</a></li>
+
+  <h2 class='h3'>Sur cette page</h2>
+  <ul>
+  <li><a href="#found">Trouvé leur réponse?</a</li>
+  <li><a href="#tag">Par étiquette</a></li>
+  <li><a href="#clusters">Groupements automatiques (expérimental)</a></li>
+  <li><a href="#common">Mots les plus fréquents</a></li>
+  <li><a href="#reason">Par raison</a></li>
+
+  </ul>
+  <h2 id="found">Trouvé leur réponse?</h2>
+
+    <img src="data:image/png;base64, {{ plot_url }}">
+
+    <div class="column"><p><strong>Oui :</strong> {{ yes }}</p>
+    <p><strong>Non :</strong> {{ no }}</p>
+    <p>Moyenne pour la période : <strong>{{ score }}%</strong></p></div>
+
+
+
+  <h2 id="tag">Rétroaction par étiquette</h2>
+  <ul class="list-unstyled">
+
+    {% for tag, count, unique_tag in tags %}
+    <li>
+    <details>
+     <summary>{{tag}} ({{count}})</summary>
+
+     <table class="wb-tables table table-striped">
+         <tr>
+             {% for col in tag_columns %}
+             <th>{{col}}</th>
+             {% endfor %}
+         </tr>
+         {%for row in zip(list(tag_dico[unique_tag]['Date']), list(tag_dico[unique_tag]['Comment'])) %}
+         <tr>
+           {% for col, row_ in zip(tag_columns, row) %}
+           <td>
+             {{row_}}
+            </td>
+            {% endfor %}
+           </tr>
+          {% endfor %}
+     </table>
+   </details>
+  </li>
+  {% endfor %}
+  </ul>
+
+
+  <h2 id="clusters">Groupements automatiques (expérimental)</h2>
+  <ul class="list-unstyled">
+
+    {% for group, count, unique_group in groups %}
+    <li>
+    <details>
+     <summary>"{{group}}" ({{count}})</summary>
+
+     <table class="wb-tables table table-striped">
+         <tr>
+             {% for col in group_columns %}
+             <th>{{col}}</th>
+             {% endfor %}
+         </tr>
+         {%for row in zip(list(group_dict[unique_group]['Date']), list(group_dict[unique_group]['Comment'])) %}
+         <tr>
+           {% for col, row_ in zip(group_columns, row) %}
+           <td>
+             {{row_}}
+            </td>
+            {% endfor %}
+           </tr>
+          {% endfor %}
+     </table>
+   </details>
+  </li>
+  {% endfor %}
     </ul>
 
-<h2 id="found"> Trouvé ce qu'ils cherchaient?</h2>
-<img src="data:image/png;base64, {{ plot_url }}">
-<p>Oui : {{ yes }}</p>
-<p>Non : {{ no }}</p>
-<p>Moyenne pour la période : <strong>{{ score }}%</strong></p>
+    <h2 id="common">Mots les plus fréquents dans la rétroaction</h2>
+    <table class="wb-tables table table-striped">
+        <tr>
+            {% for col in word_column_names %}
+            <th>{{col}}</th>
+            {% endfor %}
+        </tr>
+            {% for row in row_data_word %}
+        <tr>
+          {% for col, row_ in zip(word_column_names, row) %}
+          <td>{{row_}}</td>
+          {% endfor %}
+          </tr>
+          {% endfor %}
+    </table>
 
-
-<h2 id="frequent">Mots les plus fréquents dans la rétroaction</h2>
-<table class="wb-tables table table-striped">
-    <tr>
-        {% for col in word_column_names %}
-        <th>{{col}}</th>
-        {% endfor %}
-    </tr>
-        {% for row in row_data_word %}
-    <tr>
-      {% for col, row_ in zip(word_column_names, row) %}
-      <td>{{row_}}</td>
-      {% endfor %}
-      </tr>
-      {% endfor %}
-</table>
-
-<h2 id="reason">Rétroaction par raison</h2>
-<table class="wb-tables table table-striped">
-    <tr>
-        {% for col in reason_column_names %}
-        <th>{{col}}</th>
-        {% endfor %}
-    </tr>
-        {% for row in row_data_reason %}
-    <tr>
-      {% for col, row_ in zip(reason_column_names, row) %}
-      <td>{{row_}}</td>
-      {% endfor %}
-      </tr>
-      {% endfor %}
-</table>
-
-<h2 id="tag">Rétroaction par étiquette</h2>
-<table class="wb-tables table table-striped">
-    <tr>
-        {% for col in column_names %}
-        <th>{{col}}</th>
-        {% endfor %}
-    </tr>
-        {% for row in row_data %}
-    <tr>
-      {% for col, row_ in zip(column_names, row) %}
-      <td>{{row_}}</td>
-      {% endfor %}
-      </tr>
-      {% endfor %}
-</table>
+    <h2 id="reason">Par raison</h2>
+    <table class="wb-tables table table-striped">
+        <tr>
+            {% for col in reason_column_names %}
+            <th>{{col}}</th>
+            {% endfor %}
+        </tr>
+            {% for row in row_data_reason %}
+        <tr>
+          {% for col, row_ in zip(reason_column_names, row) %}
+          <td>{{row_}}</td>
+          {% endfor %}
+          </tr>
+          {% endfor %}
+    </table>
 
 </body>
 </html>
