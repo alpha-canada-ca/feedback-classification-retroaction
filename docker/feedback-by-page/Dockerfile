@@ -1,6 +1,5 @@
-FROM dtobtn/python-ml-base:1.0.0
+FROM dtobtn/python-ml-base:latest
 
-RUN python3 -mpip install matplotlib
 COPY by_page.py /app/
 COPY fetch_table.py /app/
 COPY docker/feedback-by-page/entrypoint.sh /app/

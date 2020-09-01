@@ -19,5 +19,6 @@ RUN pip3 install -U requests
 RUN pip3 install -U pandas
 RUN pip3 install -U scikit-learn
 RUN pip3 install airtable-python-wrapper
+RUN python3 -mpip install matplotlib
 
 
