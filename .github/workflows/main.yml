@@ -48,9 +48,9 @@ jobs:
     - uses: Azure/k8s-deploy@v1
       with:
         manifests: |
-          kubernetes/feedback_by_page-deployment.yaml
-          kubernetes/feedback_by_page-service.yaml
+          kubernetes/feedback-by-page-deployment.yaml
+          kubernetes/feedback-by-page-service.yaml
         images: |
-          tbsacr.azurecr.io/feedback_by_page:${{ github.sha }}
+          tbsacr.azurecr.io/feedback-by-page:${{ github.sha }}
         namespace: |
           pagesuccess
