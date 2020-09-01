@@ -1,4 +1,4 @@
-FROM dtobtn/python-ml-base:1.0.0
+FROM dtobtn/python-ml-base:latest
 
 COPY suggest.py /app/
 COPY process_feedback.py /app/
