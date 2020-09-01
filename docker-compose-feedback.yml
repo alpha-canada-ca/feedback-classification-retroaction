@@ -1,10 +1,10 @@
 version: '3'
 services:
   feedback_by_page:
-    image: "tbsacr.azurecr.io/feedback_by_page:1.0.0"
+    image: "tbsacr.azurecr.io/feedback-by-page:1.0.0"
     build: 
       context: .
-      dockerfile: docker/feedback_by_page/Dockerfile
+      dockerfile: docker/feedback-by-page/Dockerfile
     working_dir: /app
     ports:
     - 5000:5000

@@ -2,23 +2,23 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: feedback_by_page
-  name: feedback_by_page
+    app: feedback-by-page
+  name: feedback-by-page
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: feedback_by_page
+      app: feedback-by-page
   strategy: {}
   template:
     metadata:
       labels:
-        app: feedback_by_page
+        app: feedback-by-page
     spec:
       containers:
-      - image: tbsacr.azurecr.io/feedback_by_page:latest
+      - image: tbsacr.azurecr.io/feedback-by-page:latest
         imagePullPolicy: Always
-        name: feedback_by_page
+        name: feedback-by-page
         resources: 
           limits:
             cpu: 500m
