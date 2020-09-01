@@ -203,6 +203,7 @@ def bypage():
             reason_words_en.append(values)
 
 
+        nltk.download('wordnet')
         from nltk.stem import WordNetLemmatizer
 
         lemmatizer = WordNetLemmatizer()
@@ -498,6 +499,7 @@ def bypage():
             reason_words_fr.append(values)
 
 
+        nltk.download('wordnet')
         from nltk.stem import WordNetLemmatizer
 
         lemmatizer = WordNetLemmatizer()
