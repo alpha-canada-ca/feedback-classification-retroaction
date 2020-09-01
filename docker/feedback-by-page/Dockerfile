@@ -11,6 +11,8 @@ RUN crontab /crontab
 COPY data/ /app/data/
 RUN mkdir /app/config
 COPY ./config/config.ini /app/config/config.ini
+COPY ./templates/info_by_page_en.html /app/templates/info_by_page_en.html
+COPY ./templates/info_by_page_en.html /app/templates/info_by_page_fr.html
 WORKDIR /app
 
 ENV FLASK_APP=by_page.py
