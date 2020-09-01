@@ -240,6 +240,7 @@ def bypage():
         afprop = AffinityPropagation(max_iter=300, damping=0.6)
         afprop.fit(X)
         cluster_centers_indices = afprop.cluster_centers_indices_
+        X.todense()
         P = afprop.predict(X)
 
         import collections
@@ -651,6 +652,7 @@ def bypage():
         afprop = AffinityPropagation(max_iter=300, damping=0.6)
         afprop.fit(X)
         cluster_centers_indices = afprop.cluster_centers_indices_
+        X.todense()
         P = afprop.predict(X)
 
         import collections
