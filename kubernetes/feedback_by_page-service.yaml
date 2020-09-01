@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: feedback_by_page
+spec:
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: feedback_by_page
+  sessionAffinity: None
+  type: ClusterIP
+      
