@@ -54,6 +54,7 @@
 <label for="end_date">End date:</label>
 <input type="date" id="end_date" name="end_date" value={{ end_date }}><br>
 <input type="submit">
+
 </form>
 
 <script>
@@ -75,7 +76,6 @@
 <ul>
 <li><a href="#found">Found their answer?</a</li>
 <li><a href="#tag">By tag</a></li>
-<li><a href="#clusters">Automatic clusters (experimental)</a></li>
 <li><a href="#common">Most frequent words</a></li>
 <li><a href="#reason">By reason</a></li>
 </ul>
@@ -117,36 +117,6 @@
 </li>
 {% endfor %}
 </ul>
-
-
-<h2 id="clusters">Automatic clusters (experimental)</h2>
-<ul class="list-unstyled">
-
-  {% for group, count, unique_group in groups %}
-  <li>
-  <details>
-   <summary>"{{group}}"</summary>
-
-   <table class="wb-tables table table-striped">
-       <tr>
-           {% for col in group_columns %}
-           <th>{{col}}</th>
-           {% endfor %}
-       </tr>
-       {%for row in zip(list(group_dict[unique_group]['Date']), list(group_dict[unique_group]['Comment'])) %}
-       <tr>
-         {% for col, row_ in zip(group_columns, row) %}
-         <td>
-           {{row_}}
-          </td>
-          {% endfor %}
-         </tr>
-        {% endfor %}
-   </table>
- </details>
-</li>
-{% endfor %}
-  </ul>
 
   <h2 id="common">Most frequent words in feedback</h2>
   <table class="wb-tables table table-striped">
