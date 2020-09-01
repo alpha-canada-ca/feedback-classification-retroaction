@@ -403,14 +403,14 @@ def bypage():
                 if tag_dico[tag].empty:
                     tag_dico[tag] = topic_df_en[['Date', 'Comment']]
                 else:
-                    tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
+                    tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
 
         if 2 in page_data_en.columns:
             for tag, topic_df_en in page_data_en.groupby(2):
                 if tag_dico[tag].empty:
                     tag_dico[tag] = topic_df_en[['Date', 'Comment']]
                 else:
-                    tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
+                    tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
 
 
         for tag in tag_dico:
