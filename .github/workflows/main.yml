@@ -25,8 +25,8 @@ jobs:
     - run: |
         docker build -f ./docker/both/Dockerfile . -t tbsacr.azurecr.io/suggestion:${{ github.sha }}
         docker push tbsacr.azurecr.io/suggestion:${{ github.sha }}
-        docker build -f ./docker/feedback_by_page/Dockerfile . -t tbsacr.azurecr.io/feedback_by_page:${{ github.sha }}
-        docker push tbsacr.azurecr.io/feedback_by_page:${{ github.sha }}
+        docker build -f ./docker/feedback-by-page/Dockerfile . -t tbsacr.azurecr.io/feedback-by-page:${{ github.sha }}
+        docker push tbsacr.azurecr.io/feedback-by-page:${{ github.sha }}
 
     # Set the target AKS cluster.
     - uses: Azure/aks-set-context@v1
@@ -48,9 +48,9 @@ jobs:
     - uses: Azure/k8s-deploy@v1
       with:
         manifests: |
-          kubernetes/feedback_by_page-deployment.yaml
-          kubernetes/feedback_by_page-service.yaml
+          kubernetes/feedback-by-page-deployment.yaml
+          kubernetes/feedback-by-page-service.yaml
         images: |
-          tbsacr.azurecr.io/feedback_by_page:${{ github.sha }}
+          tbsacr.azurecr.io/feedback-by-page:${{ github.sha }}
         namespace: |
           pagesuccess
