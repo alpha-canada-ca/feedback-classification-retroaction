@@ -172,122 +172,6 @@ def bypage():
 
         page_data_en = page_data_en.reset_index(drop=True)
 
-        if not sys.warnoptions:
-            warnings.simplefilter("ignore")
-
-        #function to clean the word of any punctuation or special characters
-        def cleanPunc(sentence):
-            cleaned = re.sub(r'[?|!|\'|"|#]',r'',sentence)
-            cleaned = re.sub(r'[.|,|)|(|\|/]',r' ',cleaned)
-            cleaned = cleaned.strip()
-            cleaned = cleaned.replace("\n"," ")
-            return cleaned
-
-        #function to convert to lowercase
-        def keepAlpha(sentence):
-            alpha_sent = ""
-            for word in sentence.split():
-                alpha_word = re.sub('[^a-z A-Z]+', ' ', word)
-                alpha_sent += alpha_word
-                alpha_sent += " "
-            alpha_sent = alpha_sent.strip()
-            return alpha_sent
-
-
-        #function to stem feedbck (English)
-        stemmer_en = SnowballStemmer("english")
-        def stemming_en(sentence):
-            stemSentence = ""
-            for word in sentence.split():
-                stem = stemmer_en.stem(word)
-                stemSentence += stem
-                stemSentence += " "
-            stemSentence = stemSentence.strip()
-            return stemSentence
-
-        clean_columns = ['Comment']
-        clean_en = pd.DataFrame(columns = clean_columns)
-        clean_en['Comment'] = page_data_en['Comment'].str.lower()
-        clean_en['Comment'] = clean_en['Comment'].apply(cleanPunc)
-        clean_en['Comment'] = clean_en['Comment'].apply(keepAlpha)
-        clean_en['Comment'] = clean_en['Comment'].apply(stemming_en)
-
-
-        from sklearn.feature_extraction.text import TfidfVectorizer
-
-
-        all_text_en = []
-        all_text_en = clean_en['Comment'].values.astype('U')
-
-
-        vects_en = []
-        all_x_en = []
-        vectorizer_en = TfidfVectorizer(strip_accents='unicode', analyzer='word', ngram_range=(1,3), norm='l2')
-        vects_en = vectorizer_en.fit(all_text_en)
-        all_x_en = vects_en.transform(all_text_en)
-
-        from sklearn.cluster import AffinityPropagation
-        from sklearn import metrics
-        from sklearn.datasets import make_blobs
-
-        X = all_x_en
-
-
-        from sklearn.cluster import AffinityPropagation
-        from sklearn import metrics
-        from sklearn.datasets import make_blobs
-
-        afprop = AffinityPropagation(max_iter=300, damping=0.6)
-        afprop.fit(X)
-        cluster_centers_indices = afprop.cluster_centers_indices_
-        X.toarray()
-        P = afprop.predict(X)
-
-        import collections
-
-        occurrences = collections.Counter(P)
-
-
-
-        cluster_columns = ['Number of feedback', 'Representative comment']
-        clusters = pd.DataFrame(columns = cluster_columns)
-
-        cluster_rep = list(cluster_centers_indices)
-        rep_comment = []
-        for indice in cluster_rep:
-          rep_comment.append(page_data_en['Comment'][indice])
-
-
-        clusters['Representative comment'] = rep_comment
-
-        cluster_couple = sorted(occurrences.items())
-        cluster_count = []
-
-        cluster_count = [x[1] for x in cluster_couple]
-        clusters['Number of feedback'] = cluster_count
-        clusters = clusters.sort_values(by = 'Number of feedback', ascending=False)
-        clusters = clusters.reset_index(drop=True)
-
-        page_data_en['group'] = P
-        cluster_group = page_data_en[['Comment', 'Date', 'group']]
-
-        for group in cluster_group['group']:
-          cluster_group[group] = rep_comment[group]
-
-
-        group_dict = {}
-
-        for group, group_df_en in page_data_en.groupby("group"):
-              group_dict[group] = group_df_en[['Date', 'Comment']]
-
-
-        for group in group_dict:
-          group_dict[group] = group_dict[group].sort_values(by = 'Date', ascending=False)
-
-
-        group_columns = ['Date', 'Comment']
-
-        unique_groups = list(page_data_en['group'].unique())
 
         #by what's wrong reason
         page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace([False], ['None'])
@@ -427,7 +311,7 @@ def bypage():
 
 
 
-        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), cluster_columns = cluster_columns, groups = zip(list(clusters['Representative comment'].values.tolist()), list(clusters['Number of feedback'].values.tolist()), unique_groups), group_dict = group_dict, group_columns = group_columns, unique_groups = unique_groups, list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
+        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
 
 
 
@@ -584,123 +468,6 @@ def bypage():
 
         page_data_fr = page_data_fr.reset_index(drop=True)
 
-        if not sys.warnoptions:
-            warnings.simplefilter("ignore")
-
-        #function to clean the word of any punctuation or special characters
-        def cleanPunc(sentence):
-            cleaned = re.sub(r'[?|!|\'|"|#]',r'',sentence)
-            cleaned = re.sub(r'[.|,|)|(|\|/]',r' ',cleaned)
-            cleaned = cleaned.strip()
-            cleaned = cleaned.replace("\n"," ")
-            return cleaned
-
-        #function to convert to lowercase
-        def keepAlpha(sentence):
-            alpha_sent = ""
-            for word in sentence.split():
-                alpha_word = re.sub('[^a-z A-Z]+', ' ', word)
-                alpha_sent += alpha_word
-                alpha_sent += " "
-            alpha_sent = alpha_sent.strip()
-            return alpha_sent
-
-
-        #function to stem feedbck (English)
-        stemmer_fr = SnowballStemmer("french")
-        def stemming_fr(sentence):
-            stemSentence = ""
-            for word in sentence.split():
-                stem = stemmer_fr.stem(word)
-                stemSentence += stem
-                stemSentence += " "
-            stemSentence = stemSentence.strip()
-            return stemSentence
-
-        clean_columns = ['Comment']
-        clean_fr = pd.DataFrame(columns = clean_columns)
-        clean_fr['Comment'] = page_data_fr['Comment'].str.lower()
-        clean_fr['Comment'] = clean_fr['Comment'].apply(cleanPunc)
-        clean_fr['Comment'] = clean_fr['Comment'].apply(keepAlpha)
-        clean_fr['Comment'] = clean_fr['Comment'].apply(stemming_fr)
-
-
-        from sklearn.feature_extraction.text import TfidfVectorizer
-
-
-        all_text_fr = []
-        all_text_fr = clean_fr['Comment'].values.astype('U')
-
-
-        vects_fr = []
-        all_x_fr = []
-        vectorizer_fr = TfidfVectorizer(strip_accents='unicode', analyzer='word', ngram_range=(1,3), norm='l2')
-        vects_fr = vectorizer_fr.fit(all_text_fr)
-        all_x_fr = vects_fr.transform(all_text_fr)
-
-        from sklearn.cluster import AffinityPropagation
-        from sklearn import metrics
-        from sklearn.datasets import make_blobs
-
-        X = all_x_fr
-
-
-        from sklearn.cluster import AffinityPropagation
-        from sklearn import metrics
-        from sklearn.datasets import make_blobs
-
-        afprop = AffinityPropagation(max_iter=300, damping=0.6)
-        afprop.fit(X)
-        cluster_centers_indices = afprop.cluster_centers_indices_
-        X.toarray()
-        P = afprop.predict(X)
-
-        import collections
-
-        occurrences = collections.Counter(P)
-
-
-
-        cluster_columns = ['Nombre de rétroactions', 'Commentaire représentatif']
-        clusters = pd.DataFrame(columns = cluster_columns)
-
-        cluster_rep = list(cluster_centers_indices)
-        rep_comment = []
-        for indice in cluster_rep:
-          rep_comment.append(page_data_fr['Comment'][indice])
-
-
-        clusters['Commentaire représentatif'] = rep_comment
-
-        cluster_couple = sorted(occurrences.items())
-        cluster_count = []
-
-        cluster_count = [x[1] for x in cluster_couple]
-        clusters['Nombre de rétroactions'] = cluster_count
-        clusters = clusters.sort_values(by = 'Nombre de rétroactions', ascending=False)
-        clusters = clusters.reset_index(drop=True)
-
-        page_data_fr['group'] = P
-        cluster_group = page_data_fr[['Comment', 'Date', 'group']]
-
-        for group in cluster_group['group']:
-          cluster_group[group] = rep_comment[group]
-
-
-        group_dict = {}
-
-        for group, group_df_fr in page_data_fr.groupby("group"):
-              group_dict[group] = group_df_fr[['Date', 'Comment']]
-
-
-        for group in group_dict:
-          group_dict[group] = group_dict[group].sort_values(by = 'Date', ascending=False)
-
-
-        group_columns = ['Date', 'Commentaire']
-
-        unique_groups = list(page_data_fr['group'].unique())
-
         #by what's wrong reason
         page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace([False], ['None'])
         page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["The information isn't clear"], ["The information isn’t clear"])
@@ -839,7 +606,7 @@ def bypage():
 
 
 
-        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), cluster_columns = cluster_columns, groups = zip(list(clusters['Commentaire représentatif'].values.tolist()), list(clusters['Nombre de rétroactions'].values.tolist()), unique_groups), group_dict = group_dict, group_columns = group_columns, unique_groups = unique_groups, list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
+        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
 
 if __name__ == '__main__':
     app.run()
