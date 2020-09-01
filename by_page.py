@@ -103,6 +103,8 @@ def bypage():
 
         if yes_no.empty:
             score = 'unavailable'
+            yes = 'unavailable'
+            no = 'unavailable'
         else:
             total = yes_no['Yes/No'].value_counts()
             yes = total['Yes']
