@@ -16,14 +16,14 @@ spec:
         app: suggestion
     spec:
       containers:
-      - image: tbsacr.azurecr.io/suggestion:1.0.0
+      - image: tbsacr.azurecr.io/suggestion:latest
         imagePullPolicy: Always
         name: suggestion
         resources: 
           limits:
             cpu: 500m
-            memory: 256Mi
+            memory: 512Mi
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: 250m
+            memory: 256Mi
 

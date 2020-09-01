@@ -23,8 +23,8 @@ jobs:
         password: ${{ secrets.ACR_PASSWORD }}
     
     - run: |
-        docker build -f ./docker/both/Dockerfile . -t tbsacr.azurecr.io/suggestion:1.0.0
-        docker push tbsacr.azurecr.io/suggestion:1.0.0
+        docker build -f ./docker/both/Dockerfile . -t tbsacr.azurecr.io/suggestion:${{ github.sha }}
+        docker push tbsacr.azurecr.io/suggestion:${{ github.sha }}
       
     # Set the target AKS cluster.
     - uses: Azure/aks-set-context@v1
@@ -39,6 +39,6 @@ jobs:
           kubernetes/suggestion-deployment.yaml
           kubernetes/suggestion-service.yaml
         images: |
-          tbsacr.azurecr.io/suggestion:1.0.0
+          tbsacr.azurecr.io/suggestion:${{ github.sha }}
         namespace: |
           pagesuccess
