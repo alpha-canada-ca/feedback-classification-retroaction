@@ -34,581 +34,591 @@ def bypage():
     #import data as pickle
     data = deserialize('data/all_data.pickle')
 
-    page = request.args.get('page')
+    page = request.args.get('page', 'no_page')
     start_date = request.args.get('start_date', '2020-01-01')
     end_date = request.args.get('end_date', '2020-12-31')
 
-    #get variables
+    if page == 'no_page':
 
-    data = data[data['Date'] <= end_date]
-    data = data[data['Date'] >= start_date]
+        return render_template("no_page.html")
 
-    data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
-    data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
-    page_data = data.loc[data['URL'] == page]
-    page_data = page_data.reset_index(drop=True)
-
-    url = page_data['URL'][0]
-
-    if page_data['Lang'][0] == 'EN':
-
-        page_data_en = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title']]
-        page_data_en = page_data_en[page_data_en.Status != 'Spam']
-        page_data_en = page_data_en[page_data_en.Status != 'Ignore']
-        page_data_en = page_data_en[page_data_en.Status != 'Duplicate']
-
-        page_data_en['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_en['Lookup_page_title']]
-
-        title = page_data_en['Lookup_page_title'][0]
-
-        yes_no = page_data_en[["Date", 'Yes/No']]
-        yes_no = yes_no.dropna()
-        yes_no = yes_no.sort_values(by = 'Date', ascending=False)
-        yes_no = yes_no.reset_index(drop=True)
-
-        by_date = {}
-        for date in yes_no['Date']:
-          by_date[date] = yes_no.loc[yes_no['Date'] == date]
-
-        for date in by_date:
-          by_date[date] =  by_date[date]['Yes/No'].value_counts()
-
-        for date in by_date:
-          if 'No' not in by_date[date]:
-            by_date[date]['No'] = 0
-
-        for date in by_date:
-          if 'Yes' not in by_date[date]:
-            by_date[date]['Yes'] = 0
-
-        for date in by_date:
-          by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
-
-
-        dates = list(by_date.keys())
-        values = list(by_date.values())
-        dates.reverse()
-        values.reverse()
-        img = io.BytesIO()
-        x = dates
-        y = values
-        plt.xticks(rotation=90)
-        plt.ylim(0, 100)
-        plt.plot(x, y, linewidth=2.0)
-        plt.savefig(img, format='png')
-        plt.close()
-        img.seek(0)
-
-        plot_url = base64.b64encode(img.getvalue()).decode()
-
-        if yes_no.empty:
-            score = 'unavailable'
-            yes = 'unavailable'
-            no = 'unavailable'
-        else:
-            total = yes_no['Yes/No'].value_counts()
-            yes = total['Yes']
-            no = total['No']
-            score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
-            score = format(score, '.2f')
-
-        page_data_en = page_data_en.drop(columns=['Status'])
-        page_data_en = page_data_en.drop(columns=['Yes/No'])
-        page_data_en["What's wrong"].fillna(False, inplace=True)
-        page_data_en = page_data_en.dropna()
-
-        #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
-        page_data_en['tags'] = [','.join(map(str, l)) for l in page_data_en['Lookup_tags']]
-
-        #remove the Lookup_tags column (it's not needed anymore)
-        page_data_en = page_data_en.drop(columns=['Lookup_tags'])
-
-
-        #remove the Lookup_page_title column (it's not needed anymore)
-        page_data_en = page_data_en.drop(columns=['Tags confirmed'])
-
-        #resets the index for each row - needed for further processing
-        page_data_en = page_data_en.reset_index(drop=True)
-
-        #split dataframe for French comments - same comments as above for each line
-
-        #get data for specific page
-
-        #split tags and expand
-        tags_en = page_data_en["tags"].str.split(",", n = 3, expand = True)
-        page_data_en = page_data_en.join(tags_en)
-        page_data_en = page_data_en.drop(columns=['tags'])
-
-        #get most frequent words for all of page
-        #get all words in a list
-        word_list_en = page_data_en["Comment"].tolist()
-        word_list_en = [str(i) for i in word_list_en]
-        all_words_en = ' '.join([str(elem) for elem in word_list_en])
-
-        #tokenize words
-        tokenizer = nltk.RegexpTokenizer(r"\w+")
-        tokens_en = tokenizer.tokenize(all_words_en)
-        words_en = []
-        for word in tokens_en:
-                words_en.append(word.lower())
-
-        #remove English stop words to get most frequent words
-        nltk.download('stopwords')
-        sw = nltk.corpus.stopwords.words('english')
-        sw.append('covid')
-        sw.append('19')
-        words_ns_en = []
-        for word in words_en:
-                if word not in sw and word.isalpha():
-                    words_ns_en.append(word)
-        #get most common words
-        from nltk import FreqDist
-        fdist1 = FreqDist(words_ns_en)
-        most_common = fdist1.most_common(15)
-        mc = pd.DataFrame(most_common, columns =['Word', 'Count'])
-        mc = mc[['Count', 'Word']]
-        word_column_names = ['Count', 'Word']
-
-
-        page_data_en = page_data_en.reset_index(drop=True)
-
-
-        #by what's wrong reason
-        page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace([False], ['None'])
-        page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace(["The information isn't clear"], ["The information isn’t clear"])
-        page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace(["I'm not in the right place"], ["I’m not in the right place"])
-        reasons = page_data_en["What's wrong"].value_counts()
-        by_reason= reasons.to_frame()
-        by_reason.columns = ['Feedback count']
-
-        reason_dict = {}
-
-        for reason, topic_df_en in page_data_en.groupby("What's wrong"):
-            reason_dict[reason] = ' '.join(topic_df_en['Comment'].tolist())
-
-
-        tokenizer = nltk.RegexpTokenizer(r"\w+")
-
-        for value in reason_dict:
-            reason_dict[value] = tokenizer.tokenize(reason_dict[value])
-
-
-        reason_list_en= []
-        for keys in reason_dict.keys():
-            reason_list_en.append(keys)
-
-
-        reason_words_en = []
-        for values in reason_dict.values():
-            reason_words_en.append(values)
-
-
-        nltk.download('wordnet')
-        from nltk.stem import WordNetLemmatizer
-
-        lemmatizer = WordNetLemmatizer()
-        from nltk.corpus import stopwords
-
-        reason_words_en = [[word.lower() for word in value] for value in reason_words_en]
-        reason_words_en = [[lemmatizer.lemmatize(word) for word in value] for value in reason_words_en]
-        reason_words_en = [[word for word in value if word not in sw] for value in reason_words_en]
-        reason_words_en = [[word for word in value if word.isalpha()] for value in reason_words_en]
-
-        from gensim.corpora.dictionary import Dictionary
-
-        reason_dictionary_en = Dictionary(reason_words_en)
-
-        reason_corpus_en = [reason_dictionary_en.doc2bow(reason) for reason in reason_words_en]
-
-        from gensim.models.tfidfmodel import TfidfModel
-
-        reason_tfidf_en = TfidfModel(reason_corpus_en)
-
-        reason_tfidf_weights_en = [sorted(reason_tfidf_en[doc], key=lambda w: w[1], reverse=True) for doc in reason_corpus_en]
-
-        reason_weighted_words_en = [[(reason_dictionary_en.get(id), weight) for id, weight in ar] for ar in reason_tfidf_weights_en]
-
-        reason_imp_words_en = pd.DataFrame({'Reason': reason_list_en, 'EN_words':  reason_weighted_words_en})
-
-        reason_imp_words_en = reason_imp_words_en.sort_values(by = 'Reason')
-
-        reason_imp_words_en = reason_imp_words_en.reset_index(drop=True)
-
-        reason_imp_words_en['EN_words'] = reason_imp_words_en['EN_words'].apply(lambda x: list(x))
-
-        reason_imp_words_en['EN_words'] = reason_imp_words_en['EN_words'].apply(lambda x: x[:15])
-
-        reason_imp_words_en['EN_words'] = reason_imp_words_en['EN_words'].apply(lambda x: [y[0] for y in x])
-
-        by_reason = by_reason.reset_index()
-
-        by_reason['Significant words'] = reason_imp_words_en['EN_words']
-
-        by_reason= by_reason.sort_values(by = 'Feedback count', ascending=False)
-
-
-        reason_column_names = ['Feedback count', 'Reason', 'Significant words']
-
-        by_reason['Significant words'] = by_reason['Significant words'].apply(lambda x: ', '.join(x))
-
-        by_reason = by_reason[['Feedback count', 'index', 'Significant words']]
-
-
-
-        #count the number for each tag
-        tag_count = tags_en.apply(pd.Series.value_counts)
-        tag_count = tag_count.fillna(0)
-        tag_count = tag_count.astype(int)
-        if 2 in tag_count.columns:
-            tag_count = tag_count[0] + tag_count[1] + tag_count[2]
-        elif 1 in tag_count.columns:
-            tag_count = tag_count[0] + tag_count[1]
-        else:
-            tag_count = tag_count[0]
-        tag_count = tag_count.sort_values(ascending = False)
-        by_tag = tag_count.to_frame()
-        by_tag = by_tag.sort_index(axis=0, level=None, ascending=True)
-        by_tag.columns = ['Feedback count']
-
-        by_tag = by_tag.sort_values(by = 'Feedback count', ascending=False)
-        unique_tags = list(by_tag.index)
-
-        #split feedback by tag
-
-        tag_dico = {}
-
-        tag_dico_columns = ['Date', 'Comment']
-
-        for tag in unique_tags:
-          tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
-
-        for tag, topic_df_en in page_data_en.groupby(0):
-          tag_dico[tag] = topic_df_en[['Date', 'Comment']]
-
-
-        if 1 in page_data_en.columns:
-            for tag, topic_df_en in page_data_en.groupby(1):
-                if tag_dico[tag].empty:
-                    tag_dico[tag] = topic_df_en[['Date', 'Comment']]
-                else:
-                    tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
-
-        if 2 in page_data_en.columns:
-            for tag, topic_df_en in page_data_en.groupby(2):
-                if tag_dico[tag].empty:
-                    tag_dico[tag] = topic_df_en[['Date', 'Comment']]
-                else:
-                    tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
-
-
-        for tag in tag_dico:
-            tag_dico[tag] = tag_dico[tag].sort_values(by = 'Date', ascending=False)
-
-
-        tag_columns = ['Date', 'Comment']
-
-
-        column_names = ['Tag count', 'Tag', 'Significant words']
-
-
-
-        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
-
-
-
-    #process to follow if English
     else:
 
-        #keep only relevant columns from the dataframe
-        page_data_fr = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title']]
-        page_data_fr = page_data_fr[page_data_fr.Status != 'Spam']
-        page_data_fr = page_data_fr[page_data_fr.Status != 'Ignore']
-        page_data_fr = page_data_fr[page_data_fr.Status != 'Duplicate']
+        data = data[data['Date'] <= end_date]
+        data = data[data['Date'] >= start_date]
 
-        page_data_fr['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_page_title']]
+        data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
+        data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
+        page_data = data.loc[data['URL'] == page]
+        page_data = page_data.reset_index(drop=True)
 
-        title = page_data_fr['Lookup_page_title'][0]
+        if page_data.empty:
 
-        yes_no = page_data_fr[["Date", 'Yes/No']]
-        yes_no = yes_no.dropna()
-        yes_no = yes_no.sort_values(by = 'Date', ascending=False)
-        yes_no = yes_no.reset_index(drop=True)
+            return render_template("empty.html")
 
-        by_date = {}
-        for date in yes_no['Date']:
-          by_date[date] = yes_no.loc[yes_no['Date'] == date]
-
-        for date in by_date:
-          by_date[date] =  by_date[date]['Yes/No'].value_counts()
-
-        for date in by_date:
-          if 'No' not in by_date[date]:
-            by_date[date]['No'] = 0
-
-        for date in by_date:
-          if 'Yes' not in by_date[date]:
-            by_date[date]['Yes'] = 0
-
-        for date in by_date:
-          by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
-
-
-        dates = list(by_date.keys())
-        values = list(by_date.values())
-        dates.reverse()
-        values.reverse()
-        img = io.BytesIO()
-        x = dates
-        y = values
-        plt.xticks(rotation=90)
-        plt.ylim(0, 100)
-        plt.plot(x, y, linewidth=2.0)
-        plt.savefig(img, format='png')
-        plt.close()
-        img.seek(0)
-
-        plot_url = base64.b64encode(img.getvalue()).decode()
-
-        if yes_no.empty:
-            score = 'unavailable'
         else:
-            total = yes_no['Yes/No'].value_counts()
-            yes = total['Yes']
-            no = total['No']
-            score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
-            score = format(score, '.2f')
 
-        page_data_fr = page_data_fr.drop(columns=['Status'])
-        page_data_fr = page_data_fr.drop(columns=['Yes/No'])
-        page_data_fr["What's wrong"].fillna(False, inplace=True)
-        page_data_fr = page_data_fr.dropna()
+            url = page_data['URL'][0]
 
-        #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
-        page_data_fr['tags'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_tags']]
+            if page_data['Lang'][0] == 'EN':
 
-        #remove the Lookup_tags column (it's not needed anymore)
-        page_data_fr = page_data_fr.drop(columns=['Lookup_tags'])
+                page_data_en = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title']]
+                page_data_en = page_data_en[page_data_en.Status != 'Spam']
+                page_data_en = page_data_en[page_data_en.Status != 'Ignore']
+                page_data_en = page_data_en[page_data_en.Status != 'Duplicate']
 
+                page_data_en['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_en['Lookup_page_title']]
 
-        #remove the Lookup_page_title column (it's not needed anymore)
-        page_data_fr = page_data_fr.drop(columns=['Tags confirmed'])
+                title = page_data_en['Lookup_page_title'][0]
 
-        #resets the index for each row - needed for further processing
-        page_data_fr = page_data_fr.reset_index(drop=True)
+                yes_no = page_data_en[["Date", 'Yes/No']]
+                yes_no = yes_no.dropna()
+                yes_no = yes_no.sort_values(by = 'Date', ascending=False)
+                yes_no = yes_no.reset_index(drop=True)
 
-        #split dataframe for French comments - same comments as above for each line
+                by_date = {}
+                for date in yes_no['Date']:
+                  by_date[date] = yes_no.loc[yes_no['Date'] == date]
 
-        #get data for specific page
+                for date in by_date:
+                  by_date[date] =  by_date[date]['Yes/No'].value_counts()
 
-        #split tags and expand
-        tags_fr = page_data_fr["tags"].str.split(",", n = 3, expand = True)
-        page_data_fr = page_data_fr.join(tags_fr)
-        page_data_fr = page_data_fr.drop(columns=['tags'])
+                for date in by_date:
+                  if 'No' not in by_date[date]:
+                    by_date[date]['No'] = 0
 
-        #get most frequent words for all of page
-        #get all words in a list
-        word_list_fr = page_data_fr["Comment"].tolist()
-        word_list_fr = [str(i) for i in word_list_fr]
-        all_words_fr = ' '.join([str(elem) for elem in word_list_fr])
+                for date in by_date:
+                  if 'Yes' not in by_date[date]:
+                    by_date[date]['Yes'] = 0
 
-        #tokenize words
-        tokenizer = nltk.RegexpTokenizer(r"\w+")
-        tokens_fr = tokenizer.tokenize(all_words_fr)
-        words_fr = []
-        for word in tokens_fr:
-                words_fr.append(word.lower())
+                for date in by_date:
+                  by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
 
 
-        #remove English stop words to get most frequent words
-        nltk.download('stopwords')
-        sw = nltk.corpus.stopwords.words('french')
-        sw.append('covid')
-        sw.append('19')
-        sw.append('a')
-        sw.append('si')
-        sw.append('avoir')
-        sw.append('savoir')
-        sw.append('combien')
-        sw.append('être')
-        sw.append('où')
-        sw.append('comment')
-        sw.append('puis')
-        sw.append('peuvent')
-        sw.append('fait')
-        sw.append('aucun')
-        sw.append('bonjour')
-        sw.append('depuis')
-        sw.append('chez')
-        sw.append('faire')
-        sw.append('peut')
-        sw.append('plus')
-        sw.append('veux')
-        sw.append('dois')
-        sw.append('doit')
-        sw.append('dit')
-        sw.append('merci')
-        sw.append('cela')
-        sw.append('pouvons')
-        sw.append('pouvaient')
-        sw.append('vers')
+                dates = list(by_date.keys())
+                values = list(by_date.values())
+                dates.reverse()
+                values.reverse()
+                img = io.BytesIO()
+                x = dates
+                y = values
+                plt.xticks(rotation=90)
+                plt.ylim(0, 100)
+                plt.plot(x, y, linewidth=2.0)
+                plt.savefig(img, format='png')
+                plt.close()
+                img.seek(0)
 
-        words_ns_fr = []
-        for word in words_fr:
-                if word not in sw and word.isalpha():
-                    words_ns_fr.append(word)
+                plot_url = base64.b64encode(img.getvalue()).decode()
 
-
-        #get most common words
-        from nltk import FreqDist
-        fdist1 = FreqDist(words_ns_fr)
-        most_common = fdist1.most_common(15)
-        mc = pd.DataFrame(most_common, columns =['Mots', 'Nombre'])
-        mc = mc[['Nombre', 'Mots']]
-        word_column_names = ['Nombre', 'Mots']
-
-
-        page_data_fr = page_data_fr.reset_index(drop=True)
-
-        #by what's wrong reason
-        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace([False], ['None'])
-        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["The information isn't clear"], ["The information isn’t clear"])
-        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["I'm not in the right place"], ["I’m not in the right place"])
-        reasons = page_data_fr["What's wrong"].value_counts()
-        by_reason= reasons.to_frame()
-        by_reason.columns = ['Feedback count']
-
-        reason_dict = {}
-
-        for reason, topic_df_fr in page_data_fr.groupby("What's wrong"):
-            reason_dict[reason] = ' '.join(topic_df_fr['Comment'].tolist())
-
-
-        tokenizer = nltk.RegexpTokenizer(r"\w+")
-
-        for value in reason_dict:
-            reason_dict[value] = tokenizer.tokenize(reason_dict[value])
-
-
-        reason_list_fr= []
-        for keys in reason_dict.keys():
-            reason_list_fr.append(keys)
-
-
-        reason_words_fr = []
-        for values in reason_dict.values():
-            reason_words_fr.append(values)
-
-
-        nltk.download('wordnet')
-        from nltk.stem import WordNetLemmatizer
-
-        lemmatizer = WordNetLemmatizer()
-        from nltk.corpus import stopwords
-
-        reason_words_fr = [[word.lower() for word in value] for value in reason_words_fr]
-        reason_words_fr = [[lemmatizer.lemmatize(word) for word in value] for value in reason_words_fr]
-        reason_words_fr = [[word for word in value if word not in sw] for value in reason_words_fr]
-        reason_words_fr = [[word for word in value if word.isalpha()] for value in reason_words_fr]
-
-        from gensim.corpora.dictionary import Dictionary
-
-        reason_dictionary_fr = Dictionary(reason_words_fr)
-
-        reason_corpus_fr = [reason_dictionary_fr.doc2bow(reason) for reason in reason_words_fr]
-
-        from gensim.models.tfidfmodel import TfidfModel
-
-        reason_tfidf_fr = TfidfModel(reason_corpus_fr)
-
-        reason_tfidf_weights_fr = [sorted(reason_tfidf_fr[doc], key=lambda w: w[1], reverse=True) for doc in reason_corpus_fr]
-
-        reason_weighted_words_fr = [[(reason_dictionary_fr.get(id), weight) for id, weight in ar] for ar in reason_tfidf_weights_fr]
-
-        reason_imp_words_fr = pd.DataFrame({'Reason': reason_list_fr, 'FR_words':  reason_weighted_words_fr})
-
-        reason_imp_words_fr = reason_imp_words_fr.sort_values(by = 'Reason')
-
-        reason_imp_words_fr = reason_imp_words_fr.reset_index(drop=True)
-
-        reason_imp_words_fr['FR_words'] = reason_imp_words_fr['FR_words'].apply(lambda x: list(x))
-
-        reason_imp_words_fr['FR_words'] = reason_imp_words_fr['FR_words'].apply(lambda x: x[:15])
-
-        reason_imp_words_fr['FR_words'] = reason_imp_words_fr['FR_words'].apply(lambda x: [y[0] for y in x])
-
-        by_reason = by_reason.reset_index()
-
-        by_reason['Significant words'] = reason_imp_words_fr['FR_words']
-
-        by_reason= by_reason.sort_values(by = 'Feedback count', ascending=False)
-
-
-        reason_column_names = ['Nombre de rétroactions', 'Raison', 'Mots significatifs']
-
-        by_reason['Significant words'] = by_reason['Significant words'].apply(lambda x: ', '.join(x))
-
-        by_reason = by_reason[['Feedback count', 'index', 'Significant words']]
-
-
-
-        #count the number for each tag
-        tag_count = tags_fr.apply(pd.Series.value_counts)
-        tag_count = tag_count.fillna(0)
-        tag_count = tag_count.astype(int)
-        if 2 in tag_count.columns:
-            tag_count = tag_count[0] + tag_count[1] + tag_count[2]
-        elif 1 in tag_count.columns:
-            tag_count = tag_count[0] + tag_count[1]
-        else:
-            tag_count = tag_count[0]
-        tag_count = tag_count.sort_values(ascending = False)
-        by_tag = tag_count.to_frame()
-        by_tag = by_tag.sort_index(axis=0, level=None, ascending=True)
-        by_tag.columns = ['Feedback count']
-
-        by_tag = by_tag.sort_values(by = 'Feedback count', ascending=False)
-        unique_tags = list(by_tag.index)
-
-        #split feedback by tag
-
-        tag_dico = {}
-
-        tag_dico_columns = ['Date', 'Commentaire']
-
-        for tag in unique_tags:
-          tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
-
-        for tag, topic_df_fr in page_data_fr.groupby(0):
-          tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
-
-
-        if 1 in page_data_fr.columns:
-            for tag, topic_df_fr in page_data_fr.groupby(1):
-                if tag_dico[tag].empty:
-                    tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                if yes_no.empty:
+                    score = 'unavailable'
+                    yes = 'unavailable'
+                    no = 'unavailable'
                 else:
-                    tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
+                    total = yes_no['Yes/No'].value_counts()
+                    yes = total['Yes']
+                    no = total['No']
+                    score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
+                    score = format(score, '.2f')
 
-        if 2 in page_data_fr.columns:
-            for tag, topic_df_fr in page_data_fr.groupby(2):
-                if tag_dico[tag].empty:
-                    tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                page_data_en = page_data_en.drop(columns=['Status'])
+                page_data_en = page_data_en.drop(columns=['Yes/No'])
+                page_data_en["What's wrong"].fillna(False, inplace=True)
+                page_data_en = page_data_en.dropna()
+
+                #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
+                page_data_en['tags'] = [','.join(map(str, l)) for l in page_data_en['Lookup_tags']]
+
+                #remove the Lookup_tags column (it's not needed anymore)
+                page_data_en = page_data_en.drop(columns=['Lookup_tags'])
+
+
+                #remove the Lookup_page_title column (it's not needed anymore)
+                page_data_en = page_data_en.drop(columns=['Tags confirmed'])
+
+                #resets the index for each row - needed for further processing
+                page_data_en = page_data_en.reset_index(drop=True)
+
+                #split dataframe for French comments - same comments as above for each line
+
+                #get data for specific page
+
+                #split tags and expand
+                tags_en = page_data_en["tags"].str.split(",", n = 3, expand = True)
+                page_data_en = page_data_en.join(tags_en)
+                page_data_en = page_data_en.drop(columns=['tags'])
+
+                #get most frequent words for all of page
+                #get all words in a list
+                word_list_en = page_data_en["Comment"].tolist()
+                word_list_en = [str(i) for i in word_list_en]
+                all_words_en = ' '.join([str(elem) for elem in word_list_en])
+
+                #tokenize words
+                tokenizer = nltk.RegexpTokenizer(r"\w+")
+                tokens_en = tokenizer.tokenize(all_words_en)
+                words_en = []
+                for word in tokens_en:
+                        words_en.append(word.lower())
+
+                #remove English stop words to get most frequent words
+                nltk.download('stopwords')
+                sw = nltk.corpus.stopwords.words('english')
+                sw.append('covid')
+                sw.append('19')
+                words_ns_en = []
+                for word in words_en:
+                        if word not in sw and word.isalpha():
+                            words_ns_en.append(word)
+                #get most common words
+                from nltk import FreqDist
+                fdist1 = FreqDist(words_ns_en)
+                most_common = fdist1.most_common(15)
+                mc = pd.DataFrame(most_common, columns =['Word', 'Count'])
+                mc = mc[['Count', 'Word']]
+                word_column_names = ['Count', 'Word']
+
+
+                page_data_en = page_data_en.reset_index(drop=True)
+
+
+                #by what's wrong reason
+                page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace([False], ['None'])
+                page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace(["The information isn't clear"], ["The information isn’t clear"])
+                page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace(["I'm not in the right place"], ["I’m not in the right place"])
+                reasons = page_data_en["What's wrong"].value_counts()
+                by_reason= reasons.to_frame()
+                by_reason.columns = ['Feedback count']
+
+                reason_dict = {}
+
+                for reason, topic_df_en in page_data_en.groupby("What's wrong"):
+                    reason_dict[reason] = ' '.join(topic_df_en['Comment'].tolist())
+
+
+                tokenizer = nltk.RegexpTokenizer(r"\w+")
+
+                for value in reason_dict:
+                    reason_dict[value] = tokenizer.tokenize(reason_dict[value])
+
+
+                reason_list_en= []
+                for keys in reason_dict.keys():
+                    reason_list_en.append(keys)
+
+
+                reason_words_en = []
+                for values in reason_dict.values():
+                    reason_words_en.append(values)
+
+
+                nltk.download('wordnet')
+                from nltk.stem import WordNetLemmatizer
+
+                lemmatizer = WordNetLemmatizer()
+                from nltk.corpus import stopwords
+
+                reason_words_en = [[word.lower() for word in value] for value in reason_words_en]
+                reason_words_en = [[lemmatizer.lemmatize(word) for word in value] for value in reason_words_en]
+                reason_words_en = [[word for word in value if word not in sw] for value in reason_words_en]
+                reason_words_en = [[word for word in value if word.isalpha()] for value in reason_words_en]
+
+                from gensim.corpora.dictionary import Dictionary
+
+                reason_dictionary_en = Dictionary(reason_words_en)
+
+                reason_corpus_en = [reason_dictionary_en.doc2bow(reason) for reason in reason_words_en]
+
+                from gensim.models.tfidfmodel import TfidfModel
+
+                reason_tfidf_en = TfidfModel(reason_corpus_en)
+
+                reason_tfidf_weights_en = [sorted(reason_tfidf_en[doc], key=lambda w: w[1], reverse=True) for doc in reason_corpus_en]
+
+                reason_weighted_words_en = [[(reason_dictionary_en.get(id), weight) for id, weight in ar] for ar in reason_tfidf_weights_en]
+
+                reason_imp_words_en = pd.DataFrame({'Reason': reason_list_en, 'EN_words':  reason_weighted_words_en})
+
+                reason_imp_words_en = reason_imp_words_en.sort_values(by = 'Reason')
+
+                reason_imp_words_en = reason_imp_words_en.reset_index(drop=True)
+
+                reason_imp_words_en['EN_words'] = reason_imp_words_en['EN_words'].apply(lambda x: list(x))
+
+                reason_imp_words_en['EN_words'] = reason_imp_words_en['EN_words'].apply(lambda x: x[:15])
+
+                reason_imp_words_en['EN_words'] = reason_imp_words_en['EN_words'].apply(lambda x: [y[0] for y in x])
+
+                by_reason = by_reason.reset_index()
+
+                by_reason['Significant words'] = reason_imp_words_en['EN_words']
+
+                by_reason= by_reason.sort_values(by = 'Feedback count', ascending=False)
+
+
+                reason_column_names = ['Feedback count', 'Reason', 'Significant words']
+
+                by_reason['Significant words'] = by_reason['Significant words'].apply(lambda x: ', '.join(x))
+
+                by_reason = by_reason[['Feedback count', 'index', 'Significant words']]
+
+
+
+                #count the number for each tag
+                tag_count = tags_en.apply(pd.Series.value_counts)
+                tag_count = tag_count.fillna(0)
+                tag_count = tag_count.astype(int)
+                if 2 in tag_count.columns:
+                    tag_count = tag_count[0] + tag_count[1] + tag_count[2]
+                elif 1 in tag_count.columns:
+                    tag_count = tag_count[0] + tag_count[1]
                 else:
-                    tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
+                    tag_count = tag_count[0]
+                tag_count = tag_count.sort_values(ascending = False)
+                by_tag = tag_count.to_frame()
+                by_tag = by_tag.sort_index(axis=0, level=None, ascending=True)
+                by_tag.columns = ['Feedback count']
+
+                by_tag = by_tag.sort_values(by = 'Feedback count', ascending=False)
+                unique_tags = list(by_tag.index)
+
+                #split feedback by tag
+
+                tag_dico = {}
+
+                tag_dico_columns = ['Date', 'Comment']
+
+                for tag in unique_tags:
+                  tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
+
+                for tag, topic_df_en in page_data_en.groupby(0):
+                  tag_dico[tag] = topic_df_en[['Date', 'Comment']]
 
 
-        for tag in tag_dico:
-            tag_dico[tag] = tag_dico[tag].sort_values(by = 'Date', ascending=False)
+                if 1 in page_data_en.columns:
+                    for tag, topic_df_en in page_data_en.groupby(1):
+                        if tag_dico[tag].empty:
+                            tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+                        else:
+                            tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
+
+                if 2 in page_data_en.columns:
+                    for tag, topic_df_en in page_data_en.groupby(2):
+                        if tag_dico[tag].empty:
+                            tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+                        else:
+                            tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
 
 
-        tag_columns = ['Date', 'Commentaire']
+                for tag in tag_dico:
+                    tag_dico[tag] = tag_dico[tag].sort_values(by = 'Date', ascending=False)
 
 
-        column_names = ['Nombre de rétroactions', 'Étiquette', 'Mots significatifs']
+                tag_columns = ['Date', 'Comment']
+
+
+                column_names = ['Tag count', 'Tag', 'Significant words']
 
 
 
-        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
+                return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
+
+
+
+            #process to follow if English
+            else:
+
+                #keep only relevant columns from the dataframe
+                page_data_fr = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title']]
+                page_data_fr = page_data_fr[page_data_fr.Status != 'Spam']
+                page_data_fr = page_data_fr[page_data_fr.Status != 'Ignore']
+                page_data_fr = page_data_fr[page_data_fr.Status != 'Duplicate']
+
+                page_data_fr['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_page_title']]
+
+                title = page_data_fr['Lookup_page_title'][0]
+
+                yes_no = page_data_fr[["Date", 'Yes/No']]
+                yes_no = yes_no.dropna()
+                yes_no = yes_no.sort_values(by = 'Date', ascending=False)
+                yes_no = yes_no.reset_index(drop=True)
+
+                by_date = {}
+                for date in yes_no['Date']:
+                  by_date[date] = yes_no.loc[yes_no['Date'] == date]
+
+                for date in by_date:
+                  by_date[date] =  by_date[date]['Yes/No'].value_counts()
+
+                for date in by_date:
+                  if 'No' not in by_date[date]:
+                    by_date[date]['No'] = 0
+
+                for date in by_date:
+                  if 'Yes' not in by_date[date]:
+                    by_date[date]['Yes'] = 0
+
+                for date in by_date:
+                  by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
+
+
+                dates = list(by_date.keys())
+                values = list(by_date.values())
+                dates.reverse()
+                values.reverse()
+                img = io.BytesIO()
+                x = dates
+                y = values
+                plt.xticks(rotation=90)
+                plt.ylim(0, 100)
+                plt.plot(x, y, linewidth=2.0)
+                plt.savefig(img, format='png')
+                plt.close()
+                img.seek(0)
+
+                plot_url = base64.b64encode(img.getvalue()).decode()
+
+                if yes_no.empty:
+                    score = 'unavailable'
+                else:
+                    total = yes_no['Yes/No'].value_counts()
+                    yes = total['Yes']
+                    no = total['No']
+                    score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
+                    score = format(score, '.2f')
+
+                page_data_fr = page_data_fr.drop(columns=['Status'])
+                page_data_fr = page_data_fr.drop(columns=['Yes/No'])
+                page_data_fr["What's wrong"].fillna(False, inplace=True)
+                page_data_fr = page_data_fr.dropna()
+
+                #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
+                page_data_fr['tags'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_tags']]
+
+                #remove the Lookup_tags column (it's not needed anymore)
+                page_data_fr = page_data_fr.drop(columns=['Lookup_tags'])
+
+
+                #remove the Lookup_page_title column (it's not needed anymore)
+                page_data_fr = page_data_fr.drop(columns=['Tags confirmed'])
+
+                #resets the index for each row - needed for further processing
+                page_data_fr = page_data_fr.reset_index(drop=True)
+
+                #split dataframe for French comments - same comments as above for each line
+
+                #get data for specific page
+
+                #split tags and expand
+                tags_fr = page_data_fr["tags"].str.split(",", n = 3, expand = True)
+                page_data_fr = page_data_fr.join(tags_fr)
+                page_data_fr = page_data_fr.drop(columns=['tags'])
+
+                #get most frequent words for all of page
+                #get all words in a list
+                word_list_fr = page_data_fr["Comment"].tolist()
+                word_list_fr = [str(i) for i in word_list_fr]
+                all_words_fr = ' '.join([str(elem) for elem in word_list_fr])
+
+                #tokenize words
+                tokenizer = nltk.RegexpTokenizer(r"\w+")
+                tokens_fr = tokenizer.tokenize(all_words_fr)
+                words_fr = []
+                for word in tokens_fr:
+                        words_fr.append(word.lower())
+
+
+                #remove English stop words to get most frequent words
+                nltk.download('stopwords')
+                sw = nltk.corpus.stopwords.words('french')
+                sw.append('covid')
+                sw.append('19')
+                sw.append('a')
+                sw.append('si')
+                sw.append('avoir')
+                sw.append('savoir')
+                sw.append('combien')
+                sw.append('être')
+                sw.append('où')
+                sw.append('comment')
+                sw.append('puis')
+                sw.append('peuvent')
+                sw.append('fait')
+                sw.append('aucun')
+                sw.append('bonjour')
+                sw.append('depuis')
+                sw.append('chez')
+                sw.append('faire')
+                sw.append('peut')
+                sw.append('plus')
+                sw.append('veux')
+                sw.append('dois')
+                sw.append('doit')
+                sw.append('dit')
+                sw.append('merci')
+                sw.append('cela')
+                sw.append('pouvons')
+                sw.append('pouvaient')
+                sw.append('vers')
+
+                words_ns_fr = []
+                for word in words_fr:
+                        if word not in sw and word.isalpha():
+                            words_ns_fr.append(word)
+
+
+                #get most common words
+                from nltk import FreqDist
+                fdist1 = FreqDist(words_ns_fr)
+                most_common = fdist1.most_common(15)
+                mc = pd.DataFrame(most_common, columns =['Mots', 'Nombre'])
+                mc = mc[['Nombre', 'Mots']]
+                word_column_names = ['Nombre', 'Mots']
+
+
+                page_data_fr = page_data_fr.reset_index(drop=True)
+
+                #by what's wrong reason
+                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace([False], ['None'])
+                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["The information isn't clear"], ["The information isn’t clear"])
+                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["I'm not in the right place"], ["I’m not in the right place"])
+                reasons = page_data_fr["What's wrong"].value_counts()
+                by_reason= reasons.to_frame()
+                by_reason.columns = ['Feedback count']
+
+                reason_dict = {}
+
+                for reason, topic_df_fr in page_data_fr.groupby("What's wrong"):
+                    reason_dict[reason] = ' '.join(topic_df_fr['Comment'].tolist())
+
+
+                tokenizer = nltk.RegexpTokenizer(r"\w+")
+
+                for value in reason_dict:
+                    reason_dict[value] = tokenizer.tokenize(reason_dict[value])
+
+
+                reason_list_fr= []
+                for keys in reason_dict.keys():
+                    reason_list_fr.append(keys)
+
+
+                reason_words_fr = []
+                for values in reason_dict.values():
+                    reason_words_fr.append(values)
+
+
+                nltk.download('wordnet')
+                from nltk.stem import WordNetLemmatizer
+
+                lemmatizer = WordNetLemmatizer()
+                from nltk.corpus import stopwords
+
+                reason_words_fr = [[word.lower() for word in value] for value in reason_words_fr]
+                reason_words_fr = [[lemmatizer.lemmatize(word) for word in value] for value in reason_words_fr]
+                reason_words_fr = [[word for word in value if word not in sw] for value in reason_words_fr]
+                reason_words_fr = [[word for word in value if word.isalpha()] for value in reason_words_fr]
+
+                from gensim.corpora.dictionary import Dictionary
+
+                reason_dictionary_fr = Dictionary(reason_words_fr)
+
+                reason_corpus_fr = [reason_dictionary_fr.doc2bow(reason) for reason in reason_words_fr]
+
+                from gensim.models.tfidfmodel import TfidfModel
+
+                reason_tfidf_fr = TfidfModel(reason_corpus_fr)
+
+                reason_tfidf_weights_fr = [sorted(reason_tfidf_fr[doc], key=lambda w: w[1], reverse=True) for doc in reason_corpus_fr]
+
+                reason_weighted_words_fr = [[(reason_dictionary_fr.get(id), weight) for id, weight in ar] for ar in reason_tfidf_weights_fr]
+
+                reason_imp_words_fr = pd.DataFrame({'Reason': reason_list_fr, 'FR_words':  reason_weighted_words_fr})
+
+                reason_imp_words_fr = reason_imp_words_fr.sort_values(by = 'Reason')
+
+                reason_imp_words_fr = reason_imp_words_fr.reset_index(drop=True)
+
+                reason_imp_words_fr['FR_words'] = reason_imp_words_fr['FR_words'].apply(lambda x: list(x))
+
+                reason_imp_words_fr['FR_words'] = reason_imp_words_fr['FR_words'].apply(lambda x: x[:15])
+
+                reason_imp_words_fr['FR_words'] = reason_imp_words_fr['FR_words'].apply(lambda x: [y[0] for y in x])
+
+                by_reason = by_reason.reset_index()
+
+                by_reason['Significant words'] = reason_imp_words_fr['FR_words']
+
+                by_reason= by_reason.sort_values(by = 'Feedback count', ascending=False)
+
+
+                reason_column_names = ['Nombre de rétroactions', 'Raison', 'Mots significatifs']
+
+                by_reason['Significant words'] = by_reason['Significant words'].apply(lambda x: ', '.join(x))
+
+                by_reason = by_reason[['Feedback count', 'index', 'Significant words']]
+
+
+
+                #count the number for each tag
+                tag_count = tags_fr.apply(pd.Series.value_counts)
+                tag_count = tag_count.fillna(0)
+                tag_count = tag_count.astype(int)
+                if 2 in tag_count.columns:
+                    tag_count = tag_count[0] + tag_count[1] + tag_count[2]
+                elif 1 in tag_count.columns:
+                    tag_count = tag_count[0] + tag_count[1]
+                else:
+                    tag_count = tag_count[0]
+                tag_count = tag_count.sort_values(ascending = False)
+                by_tag = tag_count.to_frame()
+                by_tag = by_tag.sort_index(axis=0, level=None, ascending=True)
+                by_tag.columns = ['Feedback count']
+
+                by_tag = by_tag.sort_values(by = 'Feedback count', ascending=False)
+                unique_tags = list(by_tag.index)
+
+                #split feedback by tag
+
+                tag_dico = {}
+
+                tag_dico_columns = ['Date', 'Commentaire']
+
+                for tag in unique_tags:
+                  tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
+
+                for tag, topic_df_fr in page_data_fr.groupby(0):
+                  tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+
+
+                if 1 in page_data_fr.columns:
+                    for tag, topic_df_fr in page_data_fr.groupby(1):
+                        if tag_dico[tag].empty:
+                            tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                        else:
+                            tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
+
+                if 2 in page_data_fr.columns:
+                    for tag, topic_df_fr in page_data_fr.groupby(2):
+                        if tag_dico[tag].empty:
+                            tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                        else:
+                            tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
+
+
+                for tag in tag_dico:
+                    tag_dico[tag] = tag_dico[tag].sort_values(by = 'Date', ascending=False)
+
+
+                tag_columns = ['Date', 'Commentaire']
+
+
+                column_names = ['Nombre de rétroactions', 'Étiquette', 'Mots significatifs']
+
+
+
+                return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
 
 if __name__ == '__main__':
     app.run()
