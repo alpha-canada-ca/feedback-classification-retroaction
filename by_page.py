@@ -330,7 +330,7 @@ def bypage():
             else:
 
                 #keep only relevant columns from the dataframe
-                page_data_fr = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title']]
+                page_data_fr = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_FR_tag", 'Tags confirmed', 'Yes/No', 'Lookup_page_title']]
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Spam']
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Ignore']
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Duplicate']
@@ -394,10 +394,10 @@ def bypage():
                 page_data_fr = page_data_fr.dropna()
 
                 #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
-                page_data_fr['tags'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_tags']]
+                page_data_fr['tags'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_FR_tag']]
 
-                #remove the Lookup_tags column (it's not needed anymore)
-                page_data_fr = page_data_fr.drop(columns=['Lookup_tags'])
+                #remove the Lookup_FR_tag column (it's not needed anymore)
+                page_data_fr = page_data_fr.drop(columns=['Lookup_FR_tag'])
 
 
                 #remove the Lookup_page_title column (it's not needed anymore)
