@@ -1,153 +1,134 @@
 <!DOCTYPE html>
-<html>
-  <head>
-
-    <meta charset="utf-8">
-    <title>Feedbak by page</title>
-    <meta content="width=device-width,initial-scale=1" name="viewport">
-         <meta name=”robots” content=”noindex, follow”>
-      <script type="text/javascript" src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_30/cdts/compiled/soyutils.js"></script>
-      <script type="text/javascript" src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_30/cdts/compiled/wet-en.js"></script>
-    <link href="https://test.canada.ca/covid-19-guidance/proto/css/alpha-beta-banner.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous"/>
-                   <!-- Write closure template -->
-                   <script type="text/javascript">
-                      document.write(wet.builder.refTop({
-                      }));
-                   </script>
-
-
-  </head>
-  <body vocab="http://schema.org/" typeof="WebPage">
-
-    <div id="def-top">
-           </div>
-           <script type="text/javascript">
-                       var defTop = document.getElementById("def-top");
-                       defTop.outerHTML = wet.builder.top({
-                       	lngLinks: [{
-                       		lang: "fr",
-                       		href: "#",
-                       		text: "Français"
-                       	}],
-                       			breadcrumbs: [{
-                             title: "Canada.ca",
-                             href: "https://www.canada.ca/en.html"
-                          }],
-                       	search: true,
-                       	siteMenu: true,
-                       	showPreContent: true
-                       });
-                    </script>
-
-              <main role="main" property="mainContentOfPage" class="container">
-
-
-<h1>Feedback data for {{ title }}</h1>
-<a href='{{ url }}'>{{ url }}</a>
-<h2>Feedback from <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong></h2>
-<p>Change the date range:</p>
-<form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
-<input type="hidden" name="page" value={{ page }}>
-<label for="start_date">Start date:</label>
-<input type="date" id="start_date" name="start_date" value={{ start_date }}><br>
-<label for="end_date">End date:</label>
-<input type="date" id="end_date" name="end_date" value={{ end_date }}><br>
-<input type="submit">
-
-</form>
-
-<script>
-    const form = window.document.getElementById("attributes");
-    form.addEventListener('submit', submitRedirect);
-    function submitRedirect(event) {
-        event.preventDefault();
-        var formData = new FormData(form);
-        var queryString = "?";
-        for (var key of formData.keys()) {
-	    	queryString = queryString + key+"="+formData.get(key)+"&";
-	    }
-        location.href = 'bypage'+queryString;
-    }
-    </script>
-
-
-<h2 class='h3'>On this page</h2>
-<ul>
-<li><a href="#found">Found their answer?</a</li>
-<li><a href="#tag">By tag</a></li>
-<li><a href="#common">Most frequent words</a></li>
-<li><a href="#reason">By reason</a></li>
-</ul>
-<h2 id="found">Found their answer?</h2>
-
-  <img src="data:image/png;base64, {{ plot_url }}">
-
-  <div class="column"><p><strong>Yes:</strong> {{ yes }}</p>
-  <p><strong>No:</strong> {{ no }}</p>
-  <p>Average for the period: <strong>{{ score }}%</strong></p></div>
-
-
-
-<h2 id="tag">By tag</h2>
-<ul class="list-unstyled">
-
-  {% for tag, count, unique_tag in tags %}
-  <li>
-  <details>
-   <summary>{{tag}} ({{count}})</summary>
-
-   <table class="wb-tables table table-striped">
-       <tr>
-           {% for col in tag_columns %}
-           <th>{{col}}</th>
-           {% endfor %}
-       </tr>
-       {%for row in zip(list(tag_dico[unique_tag]['Date']), list(tag_dico[unique_tag]['Comment'])) %}
-       <tr>
-         {% for col, row_ in zip(tag_columns, row) %}
-         <td>
-           {{row_}}
-          </td>
-          {% endfor %}
-         </tr>
-        {% endfor %}
-   </table>
- </details>
-</li>
-{% endfor %}
-</ul>
-
-  <h2 id="common">Most frequent words in feedback</h2>
-  <table class="wb-tables table table-striped">
-      <tr>
-          {% for col in word_column_names %}
-          <th>{{col}}</th>
-          {% endfor %}
-      </tr>
-          {% for row in row_data_word %}
-      <tr>
-        {% for col, row_ in zip(word_column_names, row) %}
-        <td>{{row_}}</td>
-        {% endfor %}
-        </tr>
-        {% endfor %}
-  </table>
-
-  <h2 id="reason">By reason</h2>
-  <table class="wb-tables table table-striped">
-      <tr>
-          {% for col in reason_column_names %}
-          <th>{{col}}</th>
-          {% endfor %}
-      </tr>
-          {% for row in row_data_reason %}
-      <tr>
-        {% for col, row_ in zip(reason_column_names, row) %}
-        <td>{{row_}}</td>
-        {% endfor %}
-        </tr>
-        {% endfor %}
-  </table>
-</body>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Feedbak by page</title>
+		<meta content="width=device-width,initial-scale=1" name="viewport">
+		<meta name=”robots” content=”noindex, follow”>
+		<script type="text/javascript" src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_30/cdts/compiled/soyutils.js"></script>
+		<script type="text/javascript" src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_30/cdts/compiled/wet-en.js"></script>
+		<link href="https://test.canada.ca/covid-19-guidance/proto/css/alpha-beta-banner.css" rel="stylesheet">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+		<!-- Write closure template -->
+		<script type="text/javascript">
+			document.write(wet.builder.refTop({
+			}));
+		</script>
+	</head>
+	<body vocab="http://schema.org/" typeof="WebPage">
+		<div id="def-top"></div>
+		<script type="text/javascript">
+			var defTop = document.getElementById("def-top");
+			defTop.outerHTML = wet.builder.top({
+				lngLinks: [{
+					lang: "fr",
+					href: "#",
+					text: "Français"
+				}],
+				breadcrumbs: [{
+					title: "Canada.ca",
+					href: "https://www.canada.ca/en.html"
+				}],
+				search: true,
+				siteMenu: true,
+				showPreContent: true
+			});
+		</script>
+		<main property="mainContentOfPage" class="container">
+			<h1>Feedback data for {{ title }}</h1>
+			<a href='{{ url }}'>{{ url }}</a>
+			<h2>Feedback from <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong></h2>
+			<p>Change the date range:</p>
+			<form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
+				<input type="hidden" name="page" value={{ page }}>
+				<label for="start_date">Start date:</label>
+				<input type="date" id="start_date" name="start_date" value={{ start_date }}><br>
+				<label for="end_date">End date:</label>
+				<input type="date" id="end_date" name="end_date" value={{ end_date }}><br>
+				<input type="submit">
+			</form>
+			<script>
+				const form = window.document.getElementById("attributes");
+				form.addEventListener('submit', submitRedirect);
+				function submitRedirect(event) {
+					event.preventDefault();
+					var formData = new FormData(form);
+					var queryString = "?";
+					for (var key of formData.keys()) {
+						queryString = queryString + key + "=" + formData.get(key) + "&";
+					}
+					location.href = 'bypage' + queryString;
+				}
+			</script>
+			<h2 class='h3'>On this page</h2>
+			<ul>
+				<li><a href="#found">Found their answer?</a< /li>
+				<li><a href="#tag">By tag</a></li>
+				<li><a href="#common">Most frequent words</a></li>
+				<li><a href="#reason">By reason</a></li>
+			</ul>
+			<h2 id="found">Found their answer?</h2>
+			<img src="data:image/png;base64, {{ plot_url }}" alt="">
+			<div class="column">
+				<p><strong>Yes:</strong> {{ yes }}</p>
+				<p><strong>No:</strong> {{ no }}</p>
+				<p>Average for the period: <strong>{{ score }}%</strong></p>
+			</div>
+			<h2 id="tag">By tag</h2>
+			<ul class="list-unstyled">
+				{% for tag, count, unique_tag in tags %}
+				<li>
+					<details>
+						<summary>{{tag}} ({{count}})</summary>
+						<table class="wb-tables table table-striped">
+							<tr>
+								{% for col in tag_columns %}
+								<th>{{col}}</th>
+								{% endfor %}
+							</tr>
+							{%for row in zip(list(tag_dico[unique_tag]['Date']), list(tag_dico[unique_tag]['Comment'])) %}
+							<tr>
+								{% for col, row_ in zip(tag_columns, row) %}
+								<td>
+									{{row_}}
+								</td>
+								{% endfor %}
+							</tr>
+							{% endfor %}
+						</table>
+					</details>
+				</li>
+				{% endfor %}
+			</ul>
+			<h2 id="common">Most frequent words in feedback</h2>
+			<table class="wb-tables table table-striped">
+				<tr>
+					{% for col in word_column_names %}
+					<th>{{col}}</th>
+					{% endfor %}
+				</tr>
+				{% for row in row_data_word %}
+				<tr>
+					{% for col, row_ in zip(word_column_names, row) %}
+					<td>{{row_}}</td>
+					{% endfor %}
+				</tr>
+				{% endfor %}
+			</table>
+			<h2 id="reason">By reason</h2>
+			<table class="wb-tables table table-striped">
+				<tr>
+					{% for col in reason_column_names %}
+					<th>{{col}}</th>
+					{% endfor %}
+				</tr>
+				{% for row in row_data_reason %}
+				<tr>
+					{% for col, row_ in zip(reason_column_names, row) %}
+					<td>{{row_}}</td>
+					{% endfor %}
+				</tr>
+				{% endfor %}
+			</table>
+	</body>
 </html>
