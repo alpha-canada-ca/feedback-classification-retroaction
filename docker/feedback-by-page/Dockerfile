@@ -12,7 +12,7 @@ COPY data/ /app/data/
 RUN mkdir /app/config
 COPY ./config/config.ini /app/config/config.ini
 COPY ./templates/info_by_page_en.html /app/templates/info_by_page_en.html
-COPY ./templates/info_by_page_en.html /app/templates/info_by_page_fr.html
+COPY ./templates/info_by_page_fr.html /app/templates/info_by_page_fr.html
 COPY ./templates/empty.html /app/templates/empty.html
 COPY ./templates/no_page.html /app/templates/no_page.html
 
