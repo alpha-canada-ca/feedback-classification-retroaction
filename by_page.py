@@ -94,10 +94,7 @@ def bypage():
                 for date in by_date:
                   by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
 
-                column_yes = ['Date', 'Percentage', 'Rolling mean']
-                df_yes = pd.DataFrame(columns=column_yes)
-                df_yes['Date'] = by_date.keys()
-                df_yes['Percentage'] = by_date.values()
+                df_yes = pd.DataFrame(list(by_date.items()),columns = ['Date','Percentage'])
                 df_yes = df_yes.sort_values(by = 'Date')
                 df_yes['Rolling mean'] = df_yes.iloc[:,1].rolling(window=7).mean()
                 dates = list(df_yes['Date'])
@@ -372,11 +369,7 @@ def bypage():
                 for date in by_date:
                   by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
 
-
-                column_yes = ['Date', 'Percentage', 'Rolling mean']
-                df_yes = pd.DataFrame(columns=column_yes)
-                df_yes['Date'] = by_date.keys()
-                df_yes['Percentage'] = by_date.values()
+                df_yes = pd.DataFrame(list(by_date.items()),columns = ['Date','Percentage'])
                 df_yes = df_yes.sort_values(by = 'Date')
                 df_yes['Rolling mean'] = df_yes.iloc[:,1].rolling(window=7).mean()
                 dates = list(df_yes['Date'])
