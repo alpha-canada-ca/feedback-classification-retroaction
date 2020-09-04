@@ -94,17 +94,27 @@ def bypage():
                 for date in by_date:
                   by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
 
+                column_yes = ['Date', 'Percentage', 'Rolling mean']
+                df_yes = pd.DataFrame(columns=column_yes)
+                df_yes['Date'] = by_date.keys()
+                df_yes['Percentage'] = by_date.values()
+                df_yes = df_yes.sort_values(by = 'Date')
+                df_yes['Rolling mean'] = df_yes.iloc[:,1].rolling(window=7).mean()
+                dates = list(df_yes['Date'])
+                daily_values = list(df_yes['Percentage'])
+                weekly_values = list(df_yes['Rolling mean'])
 
-                dates = list(by_date.keys())
-                values = list(by_date.values())
-                dates.reverse()
-                values.reverse()
+
                 img = io.BytesIO()
                 x = dates
-                y = values
+                y1 = daily_values
+                y2 = weekly_values
                 plt.xticks(rotation=90)
                 plt.ylim(0, 100)
-                plt.plot(x, y, linewidth=2.0)
+                plt.plot(x, y1, linewidth=0.5, label='Daily value')
+                plt.plot(x, y2, linewidth=3.0, label='Weekly rolling mean')
+                plt.legend()
+                plt.title('Percentage of people who said they found their answer')
                 plt.savefig(img, format='png')
                 plt.close()
                 img.seek(0)
@@ -363,16 +373,27 @@ def bypage():
                   by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
 
 
-                dates = list(by_date.keys())
-                values = list(by_date.values())
-                dates.reverse()
-                values.reverse()
+                column_yes = ['Date', 'Percentage', 'Rolling mean']
+                df_yes = pd.DataFrame(columns=column_yes)
+                df_yes['Date'] = by_date.keys()
+                df_yes['Percentage'] = by_date.values()
+                df_yes = df_yes.sort_values(by = 'Date')
+                df_yes['Rolling mean'] = df_yes.iloc[:,1].rolling(window=7).mean()
+                dates = list(df_yes['Date'])
+                daily_values = list(df_yes['Percentage'])
+                weekly_values = list(df_yes['Rolling mean'])
+
+
                 img = io.BytesIO()
                 x = dates
-                y = values
+                y1 = daily_values
+                y2 = weekly_values
                 plt.xticks(rotation=90)
                 plt.ylim(0, 100)
-                plt.plot(x, y, linewidth=2.0)
+                plt.plot(x, y1, linewidth=0.5, label='Valeur quotidienne')
+                plt.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
+                plt.legend()
+                plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
                 plt.savefig(img, format='png')
                 plt.close()
                 img.seek(0)
