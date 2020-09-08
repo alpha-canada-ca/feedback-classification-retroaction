@@ -25,6 +25,7 @@ def bypage():
     import matplotlib.pyplot as plt
     import io
     import base64
+    import matplotlib.ticker as plticker
 
     #define deserialize
     def deserialize(file):
@@ -43,9 +44,6 @@ def bypage():
         return render_template("no_page.html")
 
     else:
-
-        data = data[data['Date'] <= end_date]
-        data = data[data['Date'] >= start_date]
 
         data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
         data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
@@ -70,6 +68,8 @@ def bypage():
                 page_data_en['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_en['Lookup_page_title']]
 
                 title = page_data_en['Lookup_page_title'][0]
+
+                #yes_no for all period
 
                 yes_no = page_data_en[["Date", 'Yes/No']]
                 yes_no = yes_no.dropna()
@@ -101,18 +101,31 @@ def bypage():
                 daily_values = list(df_yes['Percentage'])
                 weekly_values = list(df_yes['Rolling mean'])
 
+                start_plot = start_date
+                end_plot = end_date
+
+                if start_plot < dates[0]:
+                    start_plot = dates[0]
+
+                if end_plot > dates[-1]:
+                    end_plot = dates[-1]
 
                 img = io.BytesIO()
                 x = dates
                 y1 = daily_values
                 y2 = weekly_values
-                plt.xticks(rotation=90)
+                fig, ax = plt.subplots()
+                plt.xticks(rotation=45)
                 plt.ylim(0, 100)
-                plt.plot(x, y1, linewidth=0.5, label='Daily value')
-                plt.plot(x, y2, linewidth=3.0, label='Weekly rolling mean')
+                ax.plot(x, y1, linewidth=0.5, label='Daily value')
+                ax.plot(x, y2, linewidth=3.0, label='Weekly rolling mean')
+                plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                 plt.legend()
                 plt.title('Percentage of people who said they found their answer')
-                plt.savefig(img, format='png')
+                loc = plticker.MultipleLocator(base=7.0)
+                plt.gcf().subplots_adjust(bottom=0.2)
+                ax.xaxis.set_major_locator(loc)
+                fig.savefig(img, format='png')
                 plt.close()
                 img.seek(0)
 
@@ -128,6 +141,31 @@ def bypage():
                     no = total['No']
                     score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
                     score = format(score, '.2f')
+
+
+
+
+                #limit page_data to period
+
+                page_data_en = page_data_en[page_data_en['Date'] <= end_date]
+                page_data_en = page_data_en[page_data_en['Date'] >= start_date]
+
+                yes_no_period = page_data_en[["Date", 'Yes/No']]
+                yes_no_period = yes_no_period.dropna()
+                yes_no_period = yes_no_period.sort_values(by = 'Date', ascending=False)
+                yes_no_period = yes_no_period.reset_index(drop=True)
+
+                if yes_no_period.empty:
+                    score_period = 'unavailable'
+                    yes_period = 'unavailable'
+                    no_period = 'unavailable'
+                else:
+                    total_period = yes_no_period['Yes/No'].value_counts()
+                    yes_period = total_period['Yes']
+                    no_period = total_period['No']
+                    score_period = (total_period['Yes'] / ( total_period['Yes'] +  total_period['No'])) * 100
+                    score_period = format(score_period, '.2f')
+
 
                 page_data_en = page_data_en.drop(columns=['Status'])
                 page_data_en = page_data_en.drop(columns=['Yes/No'])
@@ -329,7 +367,7 @@ def bypage():
 
 
 
-                return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
+                return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico, yes_period = yes_period, no_period = no_period, score_period = score_period)
 
 
 
@@ -376,17 +414,30 @@ def bypage():
                 daily_values = list(df_yes['Percentage'])
                 weekly_values = list(df_yes['Rolling mean'])
 
+                start_plot = start_date
+                end_plot = end_date
+
+                if start_plot < dates[0]:
+                    start_plot = dates[0]
+
+                if end_plot > dates[-1]:
+                    end_plot = dates[-1]
 
                 img = io.BytesIO()
                 x = dates
                 y1 = daily_values
                 y2 = weekly_values
-                plt.xticks(rotation=90)
+                fig, ax = plt.subplots()
+                plt.xticks(rotation=45)
                 plt.ylim(0, 100)
-                plt.plot(x, y1, linewidth=0.5, label='Valeur quotidienne')
-                plt.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
+                ax.plot(x, y1, linewidth=0.5, label='Valeur quotidienne')
+                ax.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
+                plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                 plt.legend()
                 plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
+                loc = plticker.MultipleLocator(base=7.0)
+                plt.gcf().subplots_adjust(bottom=0.2)
+                ax.xaxis.set_major_locator(loc)
                 plt.savefig(img, format='png')
                 plt.close()
                 img.seek(0)
@@ -401,6 +452,26 @@ def bypage():
                     no = total['No']
                     score = (total['Yes'] / ( total['Yes'] +  total['No'])) * 100
                     score = format(score, '.2f')
+
+                page_data_fr = page_data_fr[page_data_fr['Date'] <= end_date]
+                page_data_fr = page_data_fr[page_data_fr['Date'] >= start_date]
+
+                yes_no_period = page_data_fr[["Date", 'Yes/No']]
+                yes_no_period = yes_no_period.dropna()
+                yes_no_period = yes_no_period.sort_values(by = 'Date', ascending=False)
+                yes_no_period = yes_no_period.reset_index(drop=True)
+
+                if yes_no_period.empty:
+                    score_period = 'unavailable'
+                    yes_period = 'unavailable'
+                    no_period = 'unavailable'
+                else:
+                    total_period = yes_no_period['Yes/No'].value_counts()
+                    yes_period = total_period['Yes']
+                    no_period = total_period['No']
+                    score_period = (total_period['Yes'] / ( total_period['Yes'] +  total_period['No'])) * 100
+                    score_period = format(score_period, '.2f')
+
 
                 page_data_fr = page_data_fr.drop(columns=['Status'])
                 page_data_fr = page_data_fr.drop(columns=['Yes/No'])
@@ -494,9 +565,14 @@ def bypage():
                 page_data_fr = page_data_fr.reset_index(drop=True)
 
                 #by what's wrong reason
-                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace([False], ['None'])
+                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace([False], ['Aucun'])
                 page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["The information isn't clear"], ["The information isn’t clear"])
                 page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["I'm not in the right place"], ["I’m not in the right place"])
+                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["I’m not in the right place"], ["Je ne suis pas au bon endroit"])
+                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["Other reason"], ["Autre raison"])
+                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["The information isn’t clear"], ["L'information n'est pas claire"])
+                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["Something is broken or incorrect"], ["Quelque chose est brisé ou incorrect"])
+                page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["The answer I need is missing"], ["La réponse dont j'ai besoin n'est pas là"])
                 reasons = page_data_fr["What's wrong"].value_counts()
                 by_reason= reasons.to_frame()
                 by_reason.columns = ['Feedback count']
@@ -632,7 +708,7 @@ def bypage():
 
 
 
-                return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico)
+                return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico, yes_period = yes_period, no_period = no_period, score_period = score_period)
 
 if __name__ == '__main__':
     app.run()

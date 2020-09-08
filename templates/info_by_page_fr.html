@@ -38,7 +38,6 @@
 		<main role="main" property="mainContentOfPage" class="container">
 			<h1>Données de rétroaction pour {{ title }}</h1>
 			<a href='{{ url }}'>{{ url }}</a>
-			<h2>Rétroaction de <strong>{{ start_date }}</strong> à <strong>{{ end_date }}</strong></h2>
 			<p>Changer les dates :</p>
 			<form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
 				<input type="hidden" name="page" value={{ page }}>
@@ -69,12 +68,27 @@
 				<li><a href="#reason">Par raison</a></li>
 			</ul>
 			<h2 id="found">Trouvé leur réponse?</h2>
+      <div class="row">
+        <div class="col-md-6">
+        <h3>De {{ start_date }} à {{ end_date }} </h3>
+        <ul>
+          <li>Oui : <strong>{{ yes_period }}</strong></li>
+  				<li>Non : <strong>{{ no_period }}</strong></li>
+  				<li>Moyenne : <strong>{{ score_period }}%</strong></li>
+        </ul>
+        </div>
+        <div class="col-md-6">
+        <h3>Globalement</h3>
+        <ul>
+          <li>Oui : <strong>{{ yes }}</strong></li>
+  				<li>Non : <strong>{{ no }}</strong></li>
+  				<li>Moyenne gobale: <strong>{{ score }}%</strong></li>
+        </ul>
+        </div>
+      </div>
+
 			<img src="data:image/png;base64, {{ plot_url }}" alt="">
-			<div class="column">
-				<p><strong>Oui :</strong> {{ yes }}</p>
-				<p><strong>Non :</strong> {{ no }}</p>
-				<p>Moyenne pour la période : <strong>{{ score }}%</strong></p>
-			</div>
+
 			<h2 id="tag">Rétroaction par étiquette</h2>
 			<ul class="list-unstyled">
 				{% for tag, count, unique_tag in tags %}

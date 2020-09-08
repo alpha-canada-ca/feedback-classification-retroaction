@@ -37,7 +37,6 @@
 		<main property="mainContentOfPage" class="container">
 			<h1>Feedback data for {{ title }}</h1>
 			<a href='{{ url }}'>{{ url }}</a>
-			<h2>Feedback from <strong>{{ start_date }}</strong> to <strong>{{ end_date }}</strong></h2>
 			<p>Change the date range:</p>
 			<form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
 				<input type="hidden" name="page" value={{ page }}>
@@ -68,13 +67,29 @@
 				<li><a href="#reason">By reason</a></li>
 			</ul>
 			<h2 id="found">Found their answer?</h2>
+
+      <div class="row">
+        <div class="col-md-6">
+        <h3>From {{ start_date }} to {{ end_date }} </h3>
+        <ul>
+          <li>Yes: <strong>{{ yes_period }}</strong></li>
+  				<li>No: <strong>{{ no_period }}</strong></li>
+  				<li>Average: <strong>{{ score_period }}%</strong></li>
+        </ul>
+        </div>
+        <div class="col-md-6">
+        <h3>Overall</h3>
+        <ul>
+          <li>Yes: <strong>{{ yes }}</strong></li>
+  				<li>No: <strong>{{ no }}</strong></li>
+  				<li>Overall average: <strong>{{ score }}%</strong></li>
+        </ul>
+        </div>
+      </div>
 			<img src="data:image/png;base64, {{ plot_url }}" alt="">
-			<div class="column">
-				<p><strong>Yes:</strong> {{ yes }}</p>
-				<p><strong>No:</strong> {{ no }}</p>
-				<p>Average for the period: <strong>{{ score }}%</strong></p>
-			</div>
+
 			<h2 id="tag">By tag</h2>
+
 			<ul class="list-unstyled">
 				{% for tag, count, unique_tag in tags %}
 				<li>
