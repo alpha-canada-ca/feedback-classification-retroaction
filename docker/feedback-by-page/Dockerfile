@@ -3,7 +3,7 @@ FROM dtobtn/python-ml-base:latest
 COPY by_page.py /app/
 COPY fetch_table.py /app/
 COPY docker/feedback-by-page/entrypoint.sh /app/
-COPY ./docker/train/crontab /crontab
+COPY ./docker/feedback-by-page/crontab /crontab
 RUN chmod a+x /app/fetch_table.py
 COPY docker/feedback-by-page/entrypoint.sh /app/
 RUN chmod a+x /app/entrypoint.sh
