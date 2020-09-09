@@ -21,3 +21,5 @@ def serialize(obj, file):
 
 #save data as a pickle
 serialize(data, 'data/all_data.pickle')
+
+print('Process complete')

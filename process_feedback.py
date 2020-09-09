@@ -243,3 +243,5 @@ serialize(vects_en, 'data/vectorizer_en.pickle')
 serialize(vects_fr, 'data/vectorizer_fr.pickle')
 serialize(model_en, 'data/model_en.pickle')
 serialize(model_fr, 'data/model_fr.pickle')
+
+print('Process complete')
