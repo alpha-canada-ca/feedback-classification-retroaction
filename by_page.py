@@ -26,6 +26,7 @@ def bypage():
     import io
     import base64
     import matplotlib.ticker as plticker
+    import datetime as DT
 
     #define deserialize
     def deserialize(file):
@@ -34,10 +35,14 @@ def bypage():
 
     #import data as pickle
     data = deserialize('data/all_data.pickle')
+    today = DT.date.today()
+    week_ago = today - DT.timedelta(days=7)
+    today = today.strftime('%F')
+    week_ago = week_ago.strftime('%F')
 
     page = request.args.get('page', 'no_page')
-    start_date = request.args.get('start_date', '2020-01-01')
-    end_date = request.args.get('end_date', '2020-12-31')
+    start_date = request.args.get('start_date', week_ago)
+    end_date = request.args.get('end_date', today)
 
     if page == 'no_page':
 
