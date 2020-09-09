@@ -45,7 +45,7 @@
 				<input type="date" id="start_date" name="start_date" value={{ start_date }}><br>
 				<label for="end_date">Date de fin :</label>
 				<input type="date" id="end_date" name="end_date" value={{ end_date }}><br>
-				<input name=submit type="submit">
+				<input class="btn btn-primary" name=submit type="submit" value="Allez">
 			</form>
 			<script>
 				const form = window.document.getElementById("attributes");
@@ -78,18 +78,18 @@
         </ul>
         </div>
         <div class="col-md-6">
-        <h3>Globalement</h3>
+        <h3>Toutes les données (de {{ all_start }} à {{ all_end }})</h3>
         <ul>
           <li>Oui : <strong>{{ yes }}</strong></li>
   				<li>Non : <strong>{{ no }}</strong></li>
-  				<li>Moyenne gobale: <strong>{{ score }}%</strong></li>
+  				<li>Moyenne : <strong>{{ score }}%</strong></li>
         </ul>
         </div>
       </div>
 
 			<img src="data:image/png;base64, {{ plot_url }}" alt="">
 
-			<h2 id="tag">Rétroaction par étiquette</h2>
+			<h2 id="tag">Par étiquette (de {{ start_date }} à {{ end_date }})</h2>
 			<ul class="list-unstyled">
 				{% for tag, count, unique_tag in tags %}
 				<li>
@@ -115,7 +115,7 @@
 				</li>
 				{% endfor %}
 			</ul>
-			<h2 id="common">Mots les plus fréquents dans la rétroaction</h2>
+			<h2 id="common">Mots les plus fréquents (de {{ start_date }} à {{ end_date }})</h2>
 			<table class="wb-tables table table-striped">
 				<tr>
 					{% for col in word_column_names %}
@@ -130,7 +130,7 @@
 				</tr>
 				{% endfor %}
 			</table>
-			<h2 id="reason">Par raison</h2>
+			<h2 id="reason">Par raison (de {{ start_date }} à {{ end_date }})</h2>
 			<table class="wb-tables table table-striped">
 				<tr>
 					{% for col in reason_column_names %}

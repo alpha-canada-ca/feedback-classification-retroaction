@@ -44,7 +44,7 @@
 				<input type="date" id="start_date" name="start_date" value={{ start_date }}><br>
 				<label for="end_date">End date:</label>
 				<input type="date" id="end_date" name="end_date" value={{ end_date }}><br>
-				<input type="submit">
+				<input class="btn btn-primary" name=submit type="submit" value="Continue">
 			</form>
 			<script>
 				const form = window.document.getElementById("attributes");
@@ -78,17 +78,17 @@
         </ul>
         </div>
         <div class="col-md-6">
-        <h3>Overall</h3>
+        <h3>All data (from {{ all_start }} to {{ all_end }})</h3>
         <ul>
           <li>Yes: <strong>{{ yes }}</strong></li>
   				<li>No: <strong>{{ no }}</strong></li>
-  				<li>Overall average: <strong>{{ score }}%</strong></li>
+  				<li>Average: <strong>{{ score }}%</strong></li>
         </ul>
         </div>
       </div>
 			<img src="data:image/png;base64, {{ plot_url }}" alt="">
 
-			<h2 id="tag">By tag</h2>
+			<h2 id="tag">By tag (from {{ start_date }} to {{ end_date }})</h2>
 
 			<ul class="list-unstyled">
 				{% for tag, count, unique_tag in tags %}
@@ -115,7 +115,7 @@
 				</li>
 				{% endfor %}
 			</ul>
-			<h2 id="common">Most frequent words in feedback</h2>
+			<h2 id="common">Most frequent words (from {{ start_date }} to {{ end_date }})</h2>
 			<table class="wb-tables table table-striped">
 				<tr>
 					{% for col in word_column_names %}
@@ -130,7 +130,7 @@
 				</tr>
 				{% endfor %}
 			</table>
-			<h2 id="reason">By reason</h2>
+			<h2 id="reason">By reason (from {{ start_date }} to {{ end_date }})</h2>
 			<table class="wb-tables table table-striped">
 				<tr>
 					{% for col in reason_column_names %}

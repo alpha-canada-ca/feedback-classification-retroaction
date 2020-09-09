@@ -110,6 +110,9 @@ def bypage():
                 if end_plot > dates[-1]:
                     end_plot = dates[-1]
 
+                all_start = dates[0]
+                all_end = dates[-1]
+
                 img = io.BytesIO()
                 x = dates
                 y1 = daily_values
@@ -367,7 +370,7 @@ def bypage():
 
 
 
-                return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico, yes_period = yes_period, no_period = no_period, score_period = score_period)
+                return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end)
 
 
 
@@ -422,6 +425,9 @@ def bypage():
 
                 if end_plot > dates[-1]:
                     end_plot = dates[-1]
+
+                all_start = dates[0]
+                all_end = dates[-1]
 
                 img = io.BytesIO()
                 x = dates
@@ -708,7 +714,7 @@ def bypage():
 
 
 
-                return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico, yes_period = yes_period, no_period = no_period, score_period = score_period)
+                return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end)
 
 if __name__ == '__main__':
     app.run()
