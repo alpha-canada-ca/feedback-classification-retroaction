@@ -377,6 +377,15 @@ def bypage():
                         tag_dico[tag] = tag_dico[tag].sort_values(by = 'Date', ascending=False)
 
 
+                    over_tags = by_tag[(by_tag > 3).any(1)]
+                    under_tags = by_tag[(by_tag <= 3).any(1)]
+
+                    over_unique_tags = list(over_tags.index)
+                    under_unique_tags = list(under_tags.index)
+
+                    over_dict = { key: tag_dico[key] for key in over_unique_tags }
+                    under_dict = { key: tag_dico[key] for key in under_unique_tags }
+
                     tag_columns = ['Date', 'Comment']
 
 
@@ -384,7 +393,7 @@ def bypage():
 
 
 
-                    return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end)
+                    return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict)
 
 
 
@@ -728,6 +737,15 @@ def bypage():
                         tag_dico[tag] = tag_dico[tag].sort_values(by = 'Date', ascending=False)
 
 
+                    over_tags = by_tag[(by_tag > 3).any(1)]
+                    under_tags = by_tag[(by_tag <= 3).any(1)]
+
+                    over_unique_tags = list(over_tags.index)
+                    under_unique_tags = list(under_tags.index)
+
+                    over_dict = { key: tag_dico[key] for key in over_unique_tags }
+                    under_dict = { key: tag_dico[key] for key in under_unique_tags }
+
                     tag_columns = ['Date', 'Commentaire']
 
 
@@ -735,7 +753,7 @@ def bypage():
 
 
 
-                    return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, tags = zip(unique_tags, list(by_tag['Feedback count'].values.tolist()), unique_tags), tag_dico = tag_dico, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end)
+                    return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict)
 
 if __name__ == '__main__':
     app.run()

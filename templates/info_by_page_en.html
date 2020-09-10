@@ -88,10 +88,11 @@
       </div>
 			<img src="data:image/png;base64, {{ plot_url }}" alt="">
 
+
 			<h2 id="tag">By tag (from {{ start_date }} to {{ end_date }})</h2>
 
 			<ul class="list-unstyled">
-				{% for tag, count, unique_tag in tags %}
+				{% for tag, count, unique_tag in over_tags %}
 				<li>
 					<details>
 						<summary>{{tag}} ({{count}})</summary>
@@ -101,7 +102,7 @@
 								<th>{{col}}</th>
 								{% endfor %}
 							</tr>
-							{%for row in zip(list(tag_dico[unique_tag]['Date']), list(tag_dico[unique_tag]['Comment'])) %}
+							{%for row in zip(list(over_dict[unique_tag]['Date']), list(over_dict[unique_tag]['Comment'])) %}
 							<tr>
 								{% for col, row_ in zip(tag_columns, row) %}
 								<td>
@@ -115,6 +116,36 @@
 				</li>
 				{% endfor %}
 			</ul>
+				<h3>Other tags</h3>
+					<details>
+						<summary>Tags with 3 comments or less</summary>
+						<ul class="list-unstyled">
+							{% for tag, count, unique_tag in under_tags %}
+							<li>
+								<details>
+									<summary>{{tag}} ({{count}})</summary>
+									<table class="wb-tables table table-striped">
+										<tr>
+											{% for col in tag_columns %}
+											<th>{{col}}</th>
+											{% endfor %}
+										</tr>
+										{%for row in zip(list(under_dict[unique_tag]['Date']), list(under_dict[unique_tag]['Comment'])) %}
+										<tr>
+											{% for col, row_ in zip(tag_columns, row) %}
+											<td>
+												{{row_}}
+											</td>
+											{% endfor %}
+										</tr>
+										{% endfor %}
+									</table>
+								</details>
+							</li>
+							{% endfor %}
+						</details>
+
+
 			<h2 id="common">Most frequent words (from {{ start_date }} to {{ end_date }})</h2>
 			<table class="wb-tables table table-striped">
 				<tr>
