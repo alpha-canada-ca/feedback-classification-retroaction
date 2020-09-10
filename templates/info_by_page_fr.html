@@ -64,8 +64,8 @@
 			<ul>
 				<li><a href="#found">Trouvé leur réponse?</a</li>
 				<li><a href="#tag">Par étiquette</a></li>
-				<li><a href="#common">Mots les plus fréquents</a></li>
 				<li><a href="#reason">Par raison</a></li>
+				<li><a href="#common">Mots les plus fréquents</a></li>
 			</ul>
 			<h2 id="found">Trouvé leur réponse?</h2>
       <div class="row">
@@ -146,21 +146,7 @@
 						</ul>
 						</details>
 
-			<h2 id="common">Mots les plus fréquents (de {{ start_date }} à {{ end_date }})</h2>
-			<table class="wb-tables table table-striped">
-				<tr>
-					{% for col in word_column_names %}
-					<th>{{col}}</th>
-					{% endfor %}
-				</tr>
-				{% for row in row_data_word %}
-				<tr>
-					{% for col, row_ in zip(word_column_names, row) %}
-					<td>{{row_}}</td>
-					{% endfor %}
-				</tr>
-				{% endfor %}
-			</table>
+
 			<h2 id="reason">Par raison (de {{ start_date }} à {{ end_date }})</h2>
 			<table class="wb-tables table table-striped">
 				<tr>
@@ -171,6 +157,22 @@
 				{% for row in row_data_reason %}
 				<tr>
 					{% for col, row_ in zip(reason_column_names, row) %}
+					<td>{{row_}}</td>
+					{% endfor %}
+				</tr>
+				{% endfor %}
+			</table>
+
+			<h2 id="common">Mots les plus fréquents (de {{ start_date }} à {{ end_date }})</h2>
+			<table class="wb-tables table table-striped">
+				<tr>
+					{% for col in word_column_names %}
+					<th>{{col}}</th>
+					{% endfor %}
+				</tr>
+				{% for row in row_data_word %}
+				<tr>
+					{% for col, row_ in zip(word_column_names, row) %}
 					<td>{{row_}}</td>
 					{% endfor %}
 				</tr>
