@@ -76,11 +76,11 @@
 				<ul>
           <li>Oui : <strong>{{ yes_period }}</strong></li>
   				<li>Non : <strong>{{ no_period }}</strong></li>
-  				<li>Ratio : <strong>{{ score_period }}%</strong> ({{ delta }} comparé à toutes les données recueillies)</li>
+  				<li>Ratio : <strong>{{ score_period }}%</strong> ({{ delta }} comparé à toutes les dates)</li>
         </ul>
         </div>
         <div class="col-md-6">
-        <h3>Depuis le début de la collecte</h3>
+        <h3>Pour toutes les dates</h3>
 				<p>De {{ all_start }} à {{ all_end }} :</p>
         <ul>
           <li>Oui : <strong>{{ yes }}</strong></li>
@@ -92,7 +92,8 @@
 
 			<img src="data:image/png;base64, {{ plot_url }}" alt="">
 
-			<h2 id="tag">Par étiquette (de {{ start_date }} à {{ end_date }})</h2>
+			<h2 id="tag">Par étiquette</h2>
+			<p>De {{ start_date }} à {{ end_date }} :</p>
 			<ul class="list-unstyled">
 				{% for tag, count, unique_tag in over_tags %}
 				<li>
@@ -150,7 +151,8 @@
 						</details>
 
 
-			<h2 id="reason">Par raison (de {{ start_date }} à {{ end_date }})</h2>
+			<h2 id="reason">Par raison</h2>
+			<p>De {{ start_date }} à {{ end_date }} :</p>
 			<table class="wb-tables table table-striped">
 				<tr>
 					{% for col in reason_column_names %}
@@ -166,7 +168,8 @@
 				{% endfor %}
 			</table>
 
-			<h2 id="common">Mots les plus fréquents (de {{ start_date }} à {{ end_date }})</h2>
+			<h2 id="common">Mots les plus fréquents</h2>
+			<p>De {{ start_date }} à {{ end_date }} :</p>
 			<table class="wb-tables table table-striped">
 				<tr>
 					{% for col in word_column_names %}
