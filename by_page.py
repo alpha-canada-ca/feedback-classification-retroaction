@@ -170,13 +170,19 @@ def bypage():
                     score_period = 'unavailable'
                     yes_period = 'unavailable'
                     no_period = 'unavailable'
+                    delta = 'unavailable'
                 else:
                     total_period = yes_no_period['Yes/No'].value_counts()
                     yes_period = total_period['Yes']
                     no_period = total_period['No']
                     score_period = (total_period['Yes'] / ( total_period['Yes'] +  total_period['No'])) * 100
                     score_period = format(score_period, '.2f')
-
+                    if score_period > score:
+                        delta = '+' + format(float(score_period)-float(score), '.2f')
+                    elif score_period < score:
+                        delta =  format(float(score_period)-float(score), '.2f')
+                    else:
+                        delta = 'no change'
 
                 if page_data_en.empty:
 
@@ -393,7 +399,7 @@ def bypage():
 
 
 
-                    return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict)
+                    return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta)
 
 
 
@@ -495,13 +501,19 @@ def bypage():
                     score_period = 'unavailable'
                     yes_period = 'unavailable'
                     no_period = 'unavailable'
+                    delta = 'unavailable'
                 else:
                     total_period = yes_no_period['Yes/No'].value_counts()
                     yes_period = total_period['Yes']
                     no_period = total_period['No']
                     score_period = (total_period['Yes'] / ( total_period['Yes'] +  total_period['No'])) * 100
                     score_period = format(score_period, '.2f')
-
+                    if score_period > score:
+                        delta = '+' + format(float(score_period)-float(score), '.2f')
+                    elif score_period < score:
+                        delta =  format(float(score_period)-float(score), '.2f')
+                    else:
+                        delta = 'aucune différence'
 
                 if page_data_fr.empty:
 
@@ -753,7 +765,7 @@ def bypage():
 
 
 
-                    return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict)
+                    return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta)
 
 if __name__ == '__main__':
     app.run()
