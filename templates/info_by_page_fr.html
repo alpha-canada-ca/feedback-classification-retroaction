@@ -60,6 +60,7 @@
 					location.href = 'bypage' + queryString;
 				}
 			</script>
+			<div id='content'>
 			<h2 class='h3'>Sur cette page</h2>
 			<ul>
 				<li><a href="#found">Trouvé leur réponse?</a</li>
@@ -70,15 +71,17 @@
 			<h2 id="found">Trouvé leur réponse?</h2>
       <div class="row">
         <div class="col-md-6">
-        <h3>De {{ start_date }} à {{ end_date }} </h3>
-        <ul>
+        <h3>Pour les dates sélectionnées</h3>
+				<p>De {{ start_date }} à {{ end_date }} :</p>
+				<ul>
           <li>Oui : <strong>{{ yes_period }}</strong></li>
   				<li>Non : <strong>{{ no_period }}</strong></li>
-  				<li>Ratio : <strong>{{ score_period }}%</strong> ({{ delta }} comparé à toutes les données)</li>
+  				<li>Ratio : <strong>{{ score_period }}%</strong> ({{ delta }} comparé à toutes les données recueillies)</li>
         </ul>
         </div>
         <div class="col-md-6">
-        <h3>Toutes les données (de {{ all_start }} à {{ all_end }})</h3>
+        <h3>Depuis le début de la collecte</h3>
+				<p>De {{ all_start }} à {{ all_end }} :</p>
         <ul>
           <li>Oui : <strong>{{ yes }}</strong></li>
   				<li>Non : <strong>{{ no }}</strong></li>
@@ -179,4 +182,5 @@
 				{% endfor %}
 			</table>
 	</body>
+</div>
 </html>

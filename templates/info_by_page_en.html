@@ -59,6 +59,7 @@
 					location.href = 'bypage' + queryString;
 				}
 			</script>
+			<div id='content'>
 			<h2 class='h3'>On this page</h2>
 			<ul>
 				<li><a href="#found">Found their answer?</a< /li>
@@ -70,15 +71,17 @@
 
       <div class="row">
         <div class="col-md-6">
-        <h3>From {{ start_date }} to {{ end_date }} </h3>
+        <h3>For the selected date range</h3>
+				<p>From {{ start_date }} to {{ end_date }}: </p>
         <ul>
           <li>Yes: <strong>{{ yes_period }}</strong></li>
   				<li>No: <strong>{{ no_period }}</strong></li>
-  				<li>Ratio: <strong>{{ score_period }}%</strong> ({{ delta }} compared to all data)</li>
+  				<li>Ratio: <strong>{{ score_period }}%</strong> ({{ delta }} compared to all collected data)</li>
         </ul>
         </div>
         <div class="col-md-6">
-        <h3>All data (from {{ all_start }} to {{ all_end }})</h3>
+        <h3>Since the beginning</h3>
+				<p>From {{ all_start }} to {{ all_end }}:</p>
         <ul>
           <li>Yes: <strong>{{ yes }}</strong></li>
   				<li>No: <strong>{{ no }}</strong></li>
@@ -86,6 +89,7 @@
         </ul>
         </div>
       </div>
+
 			<img src="data:image/png;base64, {{ plot_url }}" alt="">
 
 
@@ -178,4 +182,5 @@
 			</table>
 
 	</body>
+</div>
 </html>
