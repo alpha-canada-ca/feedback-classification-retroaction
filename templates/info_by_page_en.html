@@ -91,7 +91,29 @@
         </div>
       </div>
 
-			<img src="data:image/png;base64, {{ plot_url }}" alt="">
+			<img src="data:image/png;base64, {{ plot_url }}" alt="See table below for numbers">
+
+			<details>
+				<summary>Percentage of people of who found their answer</summary>
+							<table class="wb-tables table table-striped">
+								<tr>
+									{% for col in chart_columns %}
+									<th>{{col}}</th>
+									{% endfor %}
+								</tr>
+								{% for row in zip(dates, chart_yes, chart_no, daily_perc, weekly_perc) %}
+								<tr>
+									{% for col, row_ in zip(chart_columns, row) %}
+									<td>
+										{{row_}}
+									</td>
+									{% endfor %}
+								</tr>
+								{% endfor %}
+							</table>
+						</details>
+
+				</details>
 
 
 			<h2 id="tag">By tag</h2>

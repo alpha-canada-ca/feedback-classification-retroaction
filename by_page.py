@@ -50,11 +50,13 @@ def bypage():
         tag_columns = ['Date', 'Comment']
         reason_column_names = ['Feedback count', 'Reason', 'Significant words']
         word_column_names = ['Count', 'Word']
+        chart_columns = ['Date', 'Yes', 'No', 'Daily percentage (%)', 'Weekly rolling mean (%)']
 
     if lang == 'fr':
         tag_columns = ['Date', 'Commentaire']
         reason_column_names = ['Nombre de rétroactions', 'Raison', 'Mots significatifs']
         word_column_names = ['Nombre', 'Mots']
+        chart_columns = ['Date', 'Oui', 'Non', 'Pourcentage quotidien (%)', 'Moyenne mobile sur 7 jours (%)']
 
 
     if page == 'no_page':
@@ -111,14 +113,23 @@ def bypage():
                     by_date[date]['Yes'] = 0
 
                 for date in by_date:
-                  by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
+                  by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100]
 
-                df_yes = pd.DataFrame(list(by_date.items()),columns = ['Date','Percentage'])
+
+                df_yes = pd.DataFrame(list(by_date.values()),columns = ['Yes', 'No', 'Percentage'])
+                df_yes['Date'] = list(by_date.keys())
+                df_yes = df_yes[['Date', 'Yes', 'No', 'Percentage']]
+
                 df_yes = df_yes.sort_values(by = 'Date')
-                df_yes['Rolling mean'] = df_yes.iloc[:,1].rolling(window=7).mean()
+                df_yes['Rolling mean'] = df_yes.iloc[:,3].rolling(window=7).mean()
                 dates = list(df_yes['Date'])
+                chart_yes = list(df_yes['Yes'])
+                chart_no = list(df_yes['No'])
                 daily_values = list(df_yes['Percentage'])
                 weekly_values = list(df_yes['Rolling mean'])
+                daily_perc = ["%.2f" % number for number in daily_values]
+                weekly_perc = ["%.2f" % number for number in weekly_values]
+
 
                 start_plot = start_date
                 end_plot = end_date
@@ -419,10 +430,10 @@ def bypage():
 
                     if lang == 'en':
 
-                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang)
+                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc = daily_perc, weekly_perc = weekly_perc, dates = dates, chart_yes = chart_yes, chart_no = chart_no)
 
                     if lang == 'fr':
-                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang)
+                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc = daily_perc, weekly_perc = weekly_perc, dates = dates, chart_yes = chart_yes, chart_no = chart_no)
 
             #process to follow if English
             else:
@@ -459,14 +470,22 @@ def bypage():
                     by_date[date]['Yes'] = 0
 
                 for date in by_date:
-                  by_date[date] = (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100
+                  by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100]
 
-                df_yes = pd.DataFrame(list(by_date.items()),columns = ['Date','Percentage'])
+
+                df_yes = pd.DataFrame(list(by_date.values()),columns = ['Yes', 'No', 'Percentage'])
+                df_yes['Date'] = list(by_date.keys())
+                df_yes = df_yes[['Date', 'Yes', 'No', 'Percentage']]
+
                 df_yes = df_yes.sort_values(by = 'Date')
-                df_yes['Rolling mean'] = df_yes.iloc[:,1].rolling(window=7).mean()
+                df_yes['Rolling mean'] = df_yes.iloc[:,3].rolling(window=7).mean()
                 dates = list(df_yes['Date'])
+                chart_yes = list(df_yes['Yes'])
+                chart_no = list(df_yes['No'])
                 daily_values = list(df_yes['Percentage'])
                 weekly_values = list(df_yes['Rolling mean'])
+                daily_perc = ["%.2f" % number for number in daily_values]
+                weekly_perc = ["%.2f" % number for number in weekly_values]
 
                 start_plot = start_date
                 end_plot = end_date
@@ -786,10 +805,10 @@ def bypage():
                     column_names = ['Nombre de rétroactions', 'Étiquette', 'Mots significatifs']
 
                     if lang == 'en':
-                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang)
+                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc = daily_perc, weekly_perc = weekly_perc, dates = dates, chart_yes = chart_yes, chart_no = chart_no)
 
                     if lang == 'fr':
-                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang)
+                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc = daily_perc, weekly_perc = weekly_perc, dates = dates, chart_yes = chart_yes, chart_no = chart_no)
 
 if __name__ == '__main__':
     app.run()
