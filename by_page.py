@@ -41,8 +41,21 @@ def bypage():
     week_ago = week_ago.strftime('%F')
 
     page = request.args.get('page', 'no_page')
+    lang = request.args.get('lang', 'en')
     start_date = request.args.get('start_date', week_ago)
     end_date = request.args.get('end_date', today)
+
+
+    if lang == 'en':
+        tag_columns = ['Date', 'Comment']
+        reason_column_names = ['Feedback count', 'Reason', 'Significant words']
+        word_column_names = ['Count', 'Word']
+
+    if lang == 'fr':
+        tag_columns = ['Date', 'Commentaire']
+        reason_column_names = ['Nombre de rétroactions', 'Raison', 'Mots significatifs']
+        word_column_names = ['Nombre', 'Mots']
+
 
     if page == 'no_page':
 
@@ -126,11 +139,18 @@ def bypage():
                 fig, ax = plt.subplots()
                 plt.xticks(rotation=45)
                 plt.ylim(0, 100)
-                ax.plot(x, y1, linewidth=0.5, label='Daily value')
-                ax.plot(x, y2, linewidth=3.0, label='Weekly rolling mean')
+                if lang == 'en':
+                    ax.plot(x, y1, linewidth=0.5, label='Daily value')
+                    ax.plot(x, y2, linewidth=3.0, label='Weekly rolling mean')
+                    plt.title('Percentage of people who said they found their answer')
+
+                if lang == 'fr':
+                    ax.plot(x, y1, linewidth=0.5, label='Valeur quotidienne')
+                    ax.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
+                    plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
+
                 plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                 plt.legend()
-                plt.title('Percentage of people who said they found their answer')
                 loc = plticker.MultipleLocator(base=7.0)
                 plt.gcf().subplots_adjust(bottom=0.2)
                 ax.xaxis.set_major_locator(loc)
@@ -186,7 +206,11 @@ def bypage():
 
                 if page_data_en.empty:
 
-                    return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end)
+                    if lang == 'en':
+                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang)
+
+                    if lang == 'fr':
+                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang)
 
                 else:
 
@@ -245,7 +269,6 @@ def bypage():
                     most_common = fdist1.most_common(15)
                     mc = pd.DataFrame(most_common, columns =['Word', 'Count'])
                     mc = mc[['Count', 'Word']]
-                    word_column_names = ['Count', 'Word']
 
 
                     page_data_en = page_data_en.reset_index(drop=True)
@@ -325,8 +348,6 @@ def bypage():
                     by_reason= by_reason.sort_values(by = 'Feedback count', ascending=False)
 
 
-                    reason_column_names = ['Feedback count', 'Reason', 'Significant words']
-
                     by_reason['Significant words'] = by_reason['Significant words'].apply(lambda x: ', '.join(x))
 
                     by_reason = by_reason[['Feedback count', 'index', 'Significant words']]
@@ -395,13 +416,13 @@ def bypage():
                     tag_columns = ['Date', 'Comment']
 
 
-                    column_names = ['Tag count', 'Tag', 'Significant words']
 
+                    if lang == 'en':
 
+                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang)
 
-                    return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta)
-
-
+                    if lang == 'fr':
+                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang)
 
             #process to follow if English
             else:
@@ -466,11 +487,17 @@ def bypage():
                 fig, ax = plt.subplots()
                 plt.xticks(rotation=45)
                 plt.ylim(0, 100)
-                ax.plot(x, y1, linewidth=0.5, label='Valeur quotidienne')
-                ax.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
+                if lang == 'en':
+                    ax.plot(x, y1, linewidth=0.5, label='Daily value')
+                    ax.plot(x, y2, linewidth=3.0, label='Weekly rolling mean')
+                    plt.title('Percentage of people who said they found their answer')
+
+                if lang == 'fr':
+                    ax.plot(x, y1, linewidth=0.5, label='Valeur quotidienne')
+                    ax.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
+                    plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
                 plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                 plt.legend()
-                plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
                 loc = plticker.MultipleLocator(base=7.0)
                 plt.gcf().subplots_adjust(bottom=0.2)
                 ax.xaxis.set_major_locator(loc)
@@ -607,7 +634,6 @@ def bypage():
                     most_common = fdist1.most_common(15)
                     mc = pd.DataFrame(most_common, columns =['Mots', 'Nombre'])
                     mc = mc[['Nombre', 'Mots']]
-                    word_column_names = ['Nombre', 'Mots']
 
 
                     page_data_fr = page_data_fr.reset_index(drop=True)
@@ -691,8 +717,6 @@ def bypage():
                     by_reason= by_reason.sort_values(by = 'Feedback count', ascending=False)
 
 
-                    reason_column_names = ['Nombre de rétroactions', 'Raison', 'Mots significatifs']
-
                     by_reason['Significant words'] = by_reason['Significant words'].apply(lambda x: ', '.join(x))
 
                     by_reason = by_reason[['Feedback count', 'index', 'Significant words']]
@@ -758,14 +782,14 @@ def bypage():
                     over_dict = { key: tag_dico[key] for key in over_unique_tags }
                     under_dict = { key: tag_dico[key] for key in under_unique_tags }
 
-                    tag_columns = ['Date', 'Commentaire']
-
 
                     column_names = ['Nombre de rétroactions', 'Étiquette', 'Mots significatifs']
 
+                    if lang == 'en':
+                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang)
 
-
-                    return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, column_names = column_names, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta)
+                    if lang == 'fr':
+                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_unique_tags), under_dict = under_dict, delta = delta, lang = lang)
 
 if __name__ == '__main__':
     app.run()

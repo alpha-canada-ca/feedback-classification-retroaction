@@ -36,11 +36,12 @@
 			});
 		</script>
 		<main role="main" property="mainContentOfPage" class="container">
-			<h1>Données de rétroaction pour {{ title }}</h1>
+			<h1>Données de rétroaction pour « {{ title }} »</h1>
 			<a href='{{ url }}'>{{ url }}</a>
 			<p>Changer les dates :</p>
 			<form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
 				<input type="hidden" name="page" value={{ page }}>
+				<input type="hidden" name="lang" value={{ lang }}>
 				<label for="start_date">Date de début :</label>
 				<input type="date" id="start_date" name="start_date" value={{ start_date }}><br>
 				<label for="end_date">Date de fin :</label>
