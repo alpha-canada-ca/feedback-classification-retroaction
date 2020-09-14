@@ -171,6 +171,34 @@
 						</ul>
 						</details>
 
+						<details>
+							<summary>Étiquettes non confirmées assignées automatiqument</summary>
+							<ul class="list-unstyled">
+								{% for tag, count, unique_tag in unconfirmed_tags %}
+								<li>
+									<details>
+										<summary>{{tag}} ({{count}})</summary>
+										<table class="wb-tables table table-striped">
+											<tr>
+												{% for col in tag_columns %}
+												<th>{{col}}</th>
+												{% endfor %}
+											</tr>
+											{%for row in zip(list(unconfirmed_dict[unique_tag]['Date']), list(unconfirmed_dict[unique_tag]['Comment'])) %}
+											<tr>
+												{% for col, row_ in zip(tag_columns, row) %}
+												<td>
+													{{row_}}
+												</td>
+												{% endfor %}
+											</tr>
+											{% endfor %}
+										</table>
+									</details>
+								</li>
+								{% endfor %}
+							</details>
+
 
 			<h2 id="reason">Par raison</h2>
 			<p>De {{ start_date }} à {{ end_date }} :</p>

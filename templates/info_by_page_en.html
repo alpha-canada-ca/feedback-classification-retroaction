@@ -118,6 +118,8 @@
 
 			<h2 id="tag">By tag</h2>
 			<p>From {{ start_date }} to {{ end_date }}: </p>
+
+
 			<ul class="list-unstyled">
 				{% for tag, count, unique_tag in over_tags %}
 				<li>
@@ -144,6 +146,7 @@
 				{% endfor %}
 			</ul>
 				<h3>Other tags</h3>
+
 					<details>
 						<summary>Tags with 3 comments or less</summary>
 						<ul class="list-unstyled">
@@ -171,7 +174,33 @@
 							</li>
 							{% endfor %}
 						</details>
-
+						<details>
+							<summary>Automatically assigned unconfirmed tags</summary>
+							<ul class="list-unstyled">
+								{% for tag, count, unique_tag in unconfirmed_tags %}
+								<li>
+									<details>
+										<summary>{{tag}} ({{count}})</summary>
+										<table class="wb-tables table table-striped">
+											<tr>
+												{% for col in tag_columns %}
+												<th>{{col}}</th>
+												{% endfor %}
+											</tr>
+											{%for row in zip(list(unconfirmed_dict[unique_tag]['Date']), list(unconfirmed_dict[unique_tag]['Comment'])) %}
+											<tr>
+												{% for col, row_ in zip(tag_columns, row) %}
+												<td>
+													{{row_}}
+												</td>
+												{% endfor %}
+											</tr>
+											{% endfor %}
+										</table>
+									</details>
+								</li>
+								{% endfor %}
+							</details>
 			<h2 id="reason">By reason</h2>
 			<p>From {{ start_date }} to {{ end_date }}: </p>
 			<table class="wb-tables table table-striped">
