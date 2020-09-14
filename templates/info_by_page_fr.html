@@ -6,7 +6,7 @@
 		<meta content="width=device-width,initial-scale=1" name="viewport">
 		<meta name=”robots” content=”noindex, follow”>
 		<script type="text/javascript" src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_30/cdts/compiled/soyutils.js"></script>
-		<script type="text/javascript" src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_30/cdts/compiled/wet-en.js"></script>
+		<script type="text/javascript" src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_30/cdts/compiled/wet-fr.js"></script>
 		<link href="https://test.canada.ca/covid-19-guidance/proto/css/alpha-beta-banner.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
 		<!-- Write closure template -->
@@ -22,9 +22,9 @@
 			var defTop = document.getElementById("def-top");
 			defTop.outerHTML = wet.builder.top({
 				lngLinks: [{
-					lang: "fr",
+					lang: "en",
 					href: "#",
-					text: "Français"
+					text: "Anglais"
 				}],
 				breadcrumbs: [{
 					title: "Canada.ca",
@@ -93,14 +93,14 @@
 
 			<img src="data:image/png;base64, {{ plot_url }}" alt="">
 			<details>
-				<summary>Pourcentage de gens qui ont trouvé leur réponse</summary>
+				<summary>Pourcentage de gens qui disent ont trouvé leur réponse</summary>
 							<table class="wb-tables table table-striped">
 								<tr>
 									{% for col in chart_columns %}
 									<th>{{col}}</th>
 									{% endfor %}
 								</tr>
-								{% for row in zip(dates, chart_yes, chart_no, daily_perc, weekly_perc) %}
+								{% for row in zip(dates_r, chart_yes, chart_no, daily_perc_r, weekly_perc_r) %}
 								<tr>
 									{% for col, row_ in zip(chart_columns, row) %}
 									<td>
