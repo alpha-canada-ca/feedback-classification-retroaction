@@ -209,9 +209,17 @@ def bypage():
                     delta = 'unavailable'
                 else:
                     total_period = yes_no_period['Yes/No'].value_counts()
-                    yes_period = total_period['Yes']
-                    no_period = total_period['No']
-                    score_period = (total_period['Yes'] / ( total_period['Yes'] +  total_period['No'])) * 100
+                    if 'Yes' in total_period:
+                      yes_period = total_period['Yes']
+                    else:
+                      yes_period = 0
+
+                    if 'No' in total_period:
+                      no_period = total_period['No']
+                    else:
+                      no_period = 0
+
+                    score_period = (yes_period / ( yes_period +  no_period)) * 100
                     score_period = format(score_period, '.2f')
                     if score_period > score:
                         delta = '+' + format(float(score_period)-float(score), '.2f')
@@ -220,22 +228,26 @@ def bypage():
                     else:
                         delta = 'no change'
 
+
+
+                page_data_en = page_data_en.drop(columns=['Status'])
+                page_data_en = page_data_en.drop(columns=['Yes/No'])
+                page_data_en["What's wrong"].fillna(False, inplace=True)
+                page_data_en["Tags confirmed"].fillna(False, inplace=True)
+
+                page_data_en = page_data_en.dropna()
+
                 if page_data_en.empty:
 
                     if lang == 'en':
-                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no)
+                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip)
 
                     if lang == 'fr':
-                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no)
+                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip)
 
                 else:
 
-                    page_data_en = page_data_en.drop(columns=['Status'])
-                    page_data_en = page_data_en.drop(columns=['Yes/No'])
-                    page_data_en["What's wrong"].fillna(False, inplace=True)
-                    page_data_en["Tags confirmed"].fillna(False, inplace=True)
 
-                    page_data_en = page_data_en.dropna()
 
                     #get unconfirmed tags
 
@@ -640,9 +652,17 @@ def bypage():
                     delta = 'unavailable'
                 else:
                     total_period = yes_no_period['Yes/No'].value_counts()
-                    yes_period = total_period['Yes']
-                    no_period = total_period['No']
-                    score_period = (total_period['Yes'] / ( total_period['Yes'] +  total_period['No'])) * 100
+                    if 'Yes' in total_period:
+                      yes_period = total_period['Yes']
+                    else:
+                      yes_period = 0
+
+                    if 'No' in total_period:
+                      no_period = total_period['No']
+                    else:
+                      no_period = 0
+
+                    score_period = (yes_period / ( yes_period +  no_period)) * 100
                     score_period = format(score_period, '.2f')
                     if score_period > score:
                         delta = '+' + format(float(score_period)-float(score), '.2f')
@@ -651,22 +671,24 @@ def bypage():
                     else:
                         delta = 'aucune différence'
 
+                page_data_fr = page_data_fr.drop(columns=['Status'])
+                page_data_fr = page_data_fr.drop(columns=['Yes/No'])
+                page_data_fr["What's wrong"].fillna(False, inplace=True)
+                page_data_fr["Tags confirmed"].fillna(False, inplace=True)
+
+                page_data_fr = page_data_fr.dropna()
+
                 if page_data_fr.empty:
 
                     if lang == 'en':
-                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no)
+                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip)
 
                     if lang == 'fr':
-                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no)
+                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip)
 
                 else:
 
-                    page_data_fr = page_data_fr.drop(columns=['Status'])
-                    page_data_fr = page_data_fr.drop(columns=['Yes/No'])
-                    page_data_fr["What's wrong"].fillna(False, inplace=True)
-                    page_data_fr["Tags confirmed"].fillna(False, inplace=True)
 
-                    page_data_fr = page_data_fr.dropna()
 
                     #get unconfirmed tags
 
