@@ -68,8 +68,19 @@
 				<li><a href="#reason">By reason</a></li>
 				<li><a href="#common">Most frequent words</a></li>
 			</ul>
-			<h2 id="found">Found their answer?</h2>
-
+			<h2 id="found">Said they found their answer?</h2>
+			<details>
+				<summary>How to interpret this data</summary>
+				<p>This data is <strong>not the equivalent of a task success rate</strong> or an accurate measure of the performance of the page. </p>
+				<p>Keep the following in mind:</p>
+				<ul>
+          <li>not everyone going on the page will click yes or no </li>
+  				<li>people who can't find their answer are more likely to use the widget (skewing the numbers towards no's)</li>
+  				<li>navigation pages, where people are just transiting to an answer page, are less likely to have a "yes" answer - averages on navigation pages will generaly be lower than on answer pages</li>
+					<li>the number itself is not very meaningful </li>
+					<li>look for trends: a ratio of yes vs no going up or down may be meaningful and indicate that something needs to be looked into</li>
+        </ul>
+			</details>
       <div class="row">
         <div class="col-md-6">
         <h3>For the selected date range</h3>
@@ -94,7 +105,7 @@
 			<img src="data:image/png;base64, {{ plot_url }}" alt="See table below for numbers">
 
 			<details>
-				<summary>Percentage of people of who said they found their answer</summary>
+				<summary>Table: Percentage of people of who said they found their answer</summary>
 							<table class="wb-tables table table-striped">
 								<tr>
 									{% for col in chart_columns %}
