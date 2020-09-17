@@ -64,10 +64,10 @@
             let langElem = document.getElementById("wb-lng").getElementsByTagName("a")[0];
             let toggleURL = window.location + "";
             if (document.documentElement.lang === 'en') {
-                toggleURL.replace("&lang=en", "");
+                toggleURL = toggleURL.replace("&lang=en", "");
                 toggleURL += "&lang=fr";
             } else {
-                toggleURL.replace("&lang=fr", "");
+                toggleURL = toggleURL.replace("&lang=fr", "");
                 toggleURL += "&lang=en";
             }
             langElem.setAttribute("href", toggleURL);
