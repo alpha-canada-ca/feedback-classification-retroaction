@@ -144,10 +144,14 @@
 
 
             <ul class="list-unstyled">
-                {% for tag, count, unique_tag in over_tags %}
+                {% for tag, count, plot, unique_tag in over_tags %}
                 <li>
                     <details>
                         <summary>{{tag}} ({{count}})</summary>
+                        <details>
+                            <summary>Number of comments with that tag over time</summary>
+                        <img src="data:image/png;base64, {{plot}}" alt="See table below for numbers">
+                        </details>
                         <table class="wb-tables table table-striped">
                             <tr>
                                 {% for col in tag_columns %}
@@ -164,6 +168,7 @@
                             </tr>
                             {% endfor %}
                         </table>
+
                     </details>
                 </li>
                 {% endfor %}
@@ -173,10 +178,14 @@
             <details>
                 <summary>Tags with 3 comments or less</summary>
                 <ul class="list-unstyled">
-                    {% for tag, count, unique_tag in under_tags %}
+                    {% for tag, count, plot, unique_tag in under_tags %}
                     <li>
                         <details>
                             <summary>{{tag}} ({{count}})</summary>
+                            <details>
+                                <summary>Number of comments with that tag over time</summary>
+                            <img src="data:image/png;base64, {{plot}}" alt="See table below for numbers">
+                            </details>
                             <table class="wb-tables table table-striped">
                                 <tr>
                                     {% for col in tag_columns %}
@@ -200,10 +209,14 @@
             <details>
                 <summary>Automatically assigned unconfirmed tags</summary>
                 <ul class="list-unstyled">
-                    {% for tag, count, unique_tag in unconfirmed_tags %}
+                    {% for tag, count, plot, unique_tag in unconfirmed_tags %}
                     <li>
                         <details>
                             <summary>{{tag}} ({{count}})</summary>
+                            <details>
+                                <summary>Number of comments with that tag over time</summary>
+                            <img src="data:image/png;base64, {{plot}}" alt="See table below for numbers">
+                            </details>
                             <table class="wb-tables table table-striped">
                                 <tr>
                                     {% for col in tag_columns %}
