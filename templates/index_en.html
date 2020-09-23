@@ -48,6 +48,17 @@
 			document.write(wet.builder.refTop({
 			}));
 		</script>
+
+    <style>
+		.beta-top, .alpha-top {
+			padding-top: 2px !important;
+			padding-bottom: 2px !important;
+			top: 0px;
+			background-color: #f2f2f2;
+			z-index: 100;
+			}
+		</style>
+
 	</head>
 	<body vocab="http://schema.org/" typeof="WebPage">
 			<section class="experimental alpha-top">
@@ -110,7 +121,7 @@
 						<section class="col-xs-12">
 							<!-- Add in your application name and URL below -->
 							<h2 class="wb-inv">Feedback on pages: trends and analysis</h2>
-							<a class="app-name" href="[Your application URL]">Feedback on pages: trends and analysis</a>
+							<a class="app-name" href=#>Feedback on pages: trends and analysis</a>
 						</section>
 						<!-- If you want to use the settings or sign in/out buttons
 						<nav class="col-sm-5 hidden-xs hidden-print">
@@ -150,15 +161,7 @@
 			});
 		</script>
 
-		<style>
-		.beta-top, .alpha-top {
-			padding-top: 2px !important;
-			padding-bottom: 2px !important;
-			top: 0px;
-			background-color: #f2f2f2;
-			z-index: 100;
-			}
-		</style>
+
 
     <main property="mainContentOfPage" class="container">
         <h1>Feedback by page</h1>
@@ -200,15 +203,14 @@
             <tbody>
         {% for _, row in by_page_table.iterrows() %}
             <tr>
-              <td><a href="{{ row['url_list'] }}">{{ row['Page'] }}</a></td>
+              <td><a href="{{ row['url_list'] }}">{{ row['Page'] }}</td>
               <td>{{ row['URL'] }}</a></td>
             </tr>
         {% endfor %}
         </tbody>
         </table>
 
-
+</main>
 </body>
-</div>
 
 </html>
