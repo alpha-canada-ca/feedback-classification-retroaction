@@ -188,12 +188,14 @@
                 <th>URL</th>
               </tr>
             </thead>
+            <tbody>
         {% for _, row in by_page_table_fr.iterrows() %}
             <tr>
               <td><a href="{{ row['url_list'] }}">{{ row['Page'] }}</a></td>
               <td>{{ row['URL'] }}</a></td>
             </tr>
         {% endfor %}
+      </tbody>
         </table>
 
 </body>
