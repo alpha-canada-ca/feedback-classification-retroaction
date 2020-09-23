@@ -39,6 +39,15 @@
 			"isApplication": true
 		}));
 	</script>
+  <style>
+  .beta-top, .alpha-top {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    top: 0px;
+    background-color: #f2f2f2;
+    z-index: 100;
+    }
+  </style>
 </head>
 <body vocab="http://schema.org/" typeof="WebPage">
 	<section class="experimental alpha-top">
@@ -101,7 +110,7 @@
 				<section class="col-xs-12">
 					<!-- Entrez le nom et URL de votre application ci-bas -->
 					<h2 class="wb-inv">Rétroaction sur les pages : tendances et analyse</h2>
-					<a class="app-name" href="[URL de l'application]">Rétroaction sur les pages : tendances et analyse</a>
+					<a class="app-name" href="#">Rétroaction sur les pages : tendances et analyse</a>
 				</section>
 				<!-- Si vous utilisez le bouton de connexion/déconnexion ou les paramètres du compte
 				<nav class="col-sm-5 hidden-xs hidden-print">
@@ -141,15 +150,6 @@
 		});
 	</script>
 
-	<style>
-	.beta-top, .alpha-top {
-		padding-top: 2px !important;
-		padding-bottom: 2px !important;
-		top: 0px;
-		background-color: #f2f2f2;
-		z-index: 100;
-		}
-	</style>
 
     <main role="main" property="mainContentOfPage" class="container">
         <h1>Rétroaction par page</h1>
@@ -192,13 +192,13 @@
         {% for _, row in by_page_table_fr.iterrows() %}
             <tr>
               <td><a href="{{ row['url_list'] }}">{{ row['Page'] }}</a></td>
-              <td>{{ row['URL'] }}</a></td>
+              <td>{{ row['URL'] }}</td>
             </tr>
         {% endfor %}
       </tbody>
         </table>
 
+</main>
 </body>
-</div>
 
 </html>

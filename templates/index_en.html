@@ -166,22 +166,7 @@
     <main property="mainContentOfPage" class="container">
         <h1>Feedback by page</h1>
 
-        <form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
-            <input type="hidden" name="lang" value={{ lang }}>
-        </form>
         <script>
-            const form = window.document.getElementById("attributes");
-            form.addEventListener('submit', submitRedirect);
-
-            function submitRedirect(event) {
-                event.preventDefault();
-                var formData = new FormData(form);
-                var queryString = "?";
-                for (var key of formData.keys()) {
-                    queryString = queryString + key + "=" + formData.get(key) + "&";
-                }
-                location.href = 'bypage' + queryString;
-            }
             let langElem = document.getElementById("wb-lng").getElementsByTagName("a")[0];
             let toggleURL = window.location + "";
             if (document.documentElement.lang === 'en') {
