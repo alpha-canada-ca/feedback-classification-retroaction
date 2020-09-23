@@ -2,6 +2,8 @@ FROM dtobtn/python-ml-base:latest
 
 COPY by_page.py /app/
 COPY fetch_table.py /app/
+COPY app.py /app/
+COPY index.py /app/
 COPY docker/feedback-by-page/entrypoint.sh /app/
 COPY ./docker/feedback-by-page/crontab /crontab
 RUN chmod a+x /app/fetch_table.py
@@ -11,13 +13,11 @@ RUN crontab /crontab
 COPY data/ /app/data/
 RUN mkdir /app/config
 COPY ./config/config.ini /app/config/config.ini
-COPY ./templates/info_by_page_en.html /app/templates/info_by_page_en.html
-COPY ./templates/info_by_page_fr.html /app/templates/info_by_page_fr.html
-COPY ./templates/empty.html /app/templates/empty.html
-COPY ./templates/no_page.html /app/templates/no_page.html
+COPY templates/ /app/templates/
+
 
 WORKDIR /app
 
-ENV FLASK_APP=by_page.py
+ENV FLASK_APP=app.py
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]

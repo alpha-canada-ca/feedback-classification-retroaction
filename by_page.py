@@ -1,26 +1,21 @@
-
-from flask import Flask
-from flask import request
-from flask import app, render_template
-
-
-app = Flask(__name__)
-
-@app.route('/bypage', methods=['GET', 'POST'])
-
 def bypage():
 
     #import libraries
+    from flask import Flask
+    from flask import request
+    from flask import app, render_template
     import requests
     import pandas as pd
+    import pickle
     from nltk.corpus import stopwords
     import nltk
     from nltk.stem.snowball import SnowballStemmer
     import re
     import sys
     import warnings
-    import pickle
     import matplotlib
+    from pandas.plotting import register_matplotlib_converters
+    register_matplotlib_converters()
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import io
@@ -1268,12 +1263,3 @@ def bypage():
 
                         if lang == 'fr':
                             return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict)
-
-if __name__ == '__main__':
-    app.run()
-
-
-
-    #split feedback by What's wrongfully
-
-    #get most meaningful word by what's wrong
