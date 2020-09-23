@@ -195,6 +195,36 @@
         </tbody>
         </table>
 
+        <div id="def-preFooter">
+                <!-- Write closure fall-back static file -->
+                <!-- /ROOT/app/cls/WET/gcweb/v4_0_28/cdts/static/preFooter-en.html -->
+                </div>
+              <!-- Write closure template -->
+              <script>
+                var defPreFooter = document.getElementById("def-preFooter");
+                defPreFooter.outerHTML = wet.builder.preFooter({
+                    "dateModified": "2019-03-08"
+                });
+              </script>
+            </main>
+            <div id="def-footer">
+              <!-- Write closure fall-back static file -->
+              <!-- /ROOT/app/cls/WET/gcweb/v4_0_28/cdts/static/appFooter-en.html -->
+            </div>
+            <!-- Write closure template -->
+            <script>
+              var defFooter = document.getElementById("def-footer");
+              defFooter.outerHTML = wet.builder.appFooter({
+                "showFeatures": false
+              });
+            </script>
+            <!-- Write closure template -->
+            <script>
+              document.write(wet.builder.refFooter({
+                "isApplication": true
+              }));
+        </script>
+        
 </main>
 </body>
 
