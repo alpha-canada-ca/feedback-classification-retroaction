@@ -183,108 +183,73 @@
             langElem.setAttribute("href", toggleURL);
          </script>
          <div id='content'>
-         <h2 class='h3'>Sur cette page</h2>
-         <ul>
-            <li>
-               <a href="#found">
-                  Trouvé leur réponse?</a
-            </li>
-            <li><a href="#tag">Par étiquette</a></li>
-            <li><a href="#reason">Par raison</a></li>
-            <li><a href="#common">Mots les plus fréquents</a></li>
-         </ul>
-         <h2 id="found">Disent avoir trouvé leur réponse?</h2>
-         <details>
-            <summary>Comment interpréter ces données</summary>
-            <p>Ces données <strong>ne sont pas l'équivalent d'un taux de réussite de la tâche</strong> ou une mesure précise de la performance de la page.</p>
-            <p>Gardez à l'esprit ceci :</p>
+            <h2 class='h3'>Sur cette page</h2>
             <ul>
-               <li>ce ne sont pas tous les gens qui vont sur la page qui cliqueront sur oui ou non</li>
-               <li>les personnes qui ne trouvent pas leur réponse sont plus susceptibles d'utiliser l'outil de rétroaction (les données sont ainsi biaisées vers les « non »)</li>
-               <li>les pages de navigation, où les personnes ne font que transiter vers une page de réponse, sont moins susceptibles d'avoir une réponse « oui » - les moyennes sur les pages de navigation seront généralement plus basses que sur les pages
-                  de réponse
-               </li>
-               <li>le nombre lui-même n'est pas très significatif</li>
-               <li>portez attention aux tendances : un rapport oui/non à la hausse ou à la baisse peut être significatif et indiquer que quelque chose doit être examiné</li>
+               <li><a href="#found">Trouvé leur réponse?</a></li>
+               <li><a href="#tag">Par étiquette</a></li>
+               <li><a href="#reason">Par raison</a></li>
+               <li><a href="#common">Mots les plus fréquents</a></li>
             </ul>
-         </details>
-         <div class="row">
-            <div class="col-md-6">
-               <h3>Pour les dates sélectionnées</h3>
-               <p>De {{ start_date }} à {{ end_date }} :</p>
+            <h2 id="found">Disent avoir trouvé leur réponse?</h2>
+            <details>
+               <summary>Comment interpréter ces données</summary>
+               <p>Ces données <strong>ne sont pas l'équivalent d'un taux de réussite de la tâche</strong> ou une mesure précise de la performance de la page.</p>
+               <p>Gardez à l'esprit ceci :</p>
                <ul>
-                  <li>Oui : <strong>{{ yes_period }}</strong></li>
-                  <li>Non : <strong>{{ no_period }}</strong></li>
-                  <li>Ratio : <strong>{{ score_period }}%</strong> ({{ delta }} comparé à toutes les dates)</li>
+                  <li>ce ne sont pas tous les gens qui vont sur la page qui cliqueront sur oui ou non</li>
+                  <li>les personnes qui ne trouvent pas leur réponse sont plus susceptibles d'utiliser l'outil de rétroaction (les données sont ainsi biaisées vers les « non »)</li>
+                  <li>les pages de navigation, où les personnes ne font que transiter vers une page de réponse, sont moins susceptibles d'avoir une réponse « oui » - les moyennes sur les pages de navigation seront généralement plus basses que sur les pages
+                     de réponse
+                  </li>
+                  <li>le nombre lui-même n'est pas très significatif</li>
+                  <li>portez attention aux tendances : un rapport oui/non à la hausse ou à la baisse peut être significatif et indiquer que quelque chose doit être examiné</li>
                </ul>
+            </details>
+            <div class="row">
+               <div class="col-md-6">
+                  <h3>Pour les dates sélectionnées</h3>
+                  <p>De {{ start_date }} à {{ end_date }} :</p>
+                  <ul>
+                     <li>Oui : <strong>{{ yes_period }}</strong></li>
+                     <li>Non : <strong>{{ no_period }}</strong></li>
+                     <li>Ratio : <strong>{{ score_period }}%</strong> ({{ delta }} comparé à toutes les dates)</li>
+                  </ul>
+               </div>
+               <div class="col-md-6">
+                  <h3>Pour toutes les dates</h3>
+                  <p>De {{ all_start }} à {{ all_end }} :</p>
+                  <ul>
+                     <li>Oui : <strong>{{ yes }}</strong></li>
+                     <li>Non : <strong>{{ no }}</strong></li>
+                     <li>Ratio : <strong>{{ score }}%</strong></li>
+                  </ul>
+               </div>
             </div>
-            <div class="col-md-6">
-               <h3>Pour toutes les dates</h3>
-               <p>De {{ all_start }} à {{ all_end }} :</p>
-               <ul>
-                  <li>Oui : <strong>{{ yes }}</strong></li>
-                  <li>Non : <strong>{{ no }}</strong></li>
-                  <li>Ratio : <strong>{{ score }}%</strong></li>
-               </ul>
-            </div>
-         </div>
-         <img src="data:image/png;base64, {{ plot_url }}" alt="">
-         <details>
-            <summary>Pourcentage de gens qui disent ont trouvé leur réponse</summary>
-            <table class="wb-tables table table-striped">
-               <tr>
-                  {% for col in chart_columns %}
-                  <th>{{col}}</th>
-                  {% endfor %}
-               </tr>
-               {% for row in zip(dates_r, chart_yes, chart_no, daily_perc_r, weekly_perc_r) %}
-               <tr>
-                  {% for col, row_ in zip(chart_columns, row) %}
-                  <td>
-                     {{row_}}
-                  </td>
-                  {% endfor %}
-               </tr>
-               {% endfor %}
-            </table>
-         </details>
-         </details>
-         <h2 id="tag">Par étiquette</h2>
-         <p>De {{ start_date }} à {{ end_date }} :</p>
-         <ul class="list-unstyled">
-            {% for tag, count, plot, unique_tag in over_tags %}
-            <li>
-               <details>
-                  <summary>{{tag}} ({{count}})</summary>
-                  <details>
-                     <summary>Voir les tendances des étiquettes en graphique</summary>
-                     <img src="data:image/png;base64, {{plot}}" alt="See table below for numbers">
-                  </details>
-                  <table class="wb-tables table table-striped">
-                     <tr>
-                        {% for col in tag_columns %}
-                        <th>{{col}}</th>
-                        {% endfor %}
-                     </tr>
-                     {%for row in zip(list(over_dict[unique_tag]['Date']), list(over_dict[unique_tag]['Comment'])) %}
-                     <tr>
-                        {% for col, row_ in zip(tag_columns, row) %}
-                        <td>
-                           {{row_}}
-                        </td>
-                        {% endfor %}
-                     </tr>
+            <img src="data:image/png;base64, {{ plot_url }}" alt="">
+            <details>
+               <summary>Pourcentage de gens qui disent ont trouvé leur réponse</summary>
+               <table class="wb-tables table table-striped">
+                  <tr>
+                     {% for col in chart_columns %}
+                     <th>{{col}}</th>
                      {% endfor %}
-                  </table>
-               </details>
-            </li>
-            {% endfor %}
-         </ul>
-         <h3>Autres étiquettes</h3>
-         <details>
-            <summary>Étiquettes avec 3 commentaires ou moins</summary>
+                  </tr>
+                  {% for row in zip(dates_r, chart_yes, chart_no, daily_perc_r, weekly_perc_r) %}
+                  <tr>
+                     {% for col, row_ in zip(chart_columns, row) %}
+                     <td>
+                        {{row_}}
+                     </td>
+                     {% endfor %}
+                  </tr>
+                  {% endfor %}
+               </table>
+            </details>
+            </details>
+            <h2 id="tag">Par étiquette</h2>
+            <p>De {{ start_date }} à {{ end_date }} :</p>
             <ul class="list-unstyled">
-               {% for tag, count, plot, unique_tag in under_tags %}
+               {% for tag, count, plot, unique_tag in over_tags %}
                <li>
                   <details>
                      <summary>{{tag}} ({{count}})</summary>
@@ -298,7 +263,7 @@
                            <th>{{col}}</th>
                            {% endfor %}
                         </tr>
-                        {%for row in zip(list(under_dict[unique_tag]['Date']), list(under_dict[unique_tag]['Comment'])) %}
+                        {%for row in zip(list(over_dict[unique_tag]['Date']), list(over_dict[unique_tag]['Comment'])) %}
                         <tr>
                            {% for col, row_ in zip(tag_columns, row) %}
                            <td>
@@ -312,70 +277,104 @@
                </li>
                {% endfor %}
             </ul>
-         </details>
-         <details>
-            <summary>Étiquettes non confirmées assignées automatiqument</summary>
-            <ul class="list-unstyled">
-            {% for tag, count, plot, unique_tag in unconfirmed_tags %}
-            <li>
-               <details>
-                  <summary>{{tag}} ({{count}})</summary>
-                  <details>
-                     <summary>Voir les tendances des étiquettes en graphique</summary>
-                     <img src="data:image/png;base64, {{plot}}" alt="See table below for numbers">
-                  </details>
-                  <table class="wb-tables table table-striped">
-                     <tr>
-                        {% for col in tag_columns %}
-                        <th>{{col}}</th>
-                        {% endfor %}
-                     </tr>
-                     {%for row in zip(list(unconfirmed_dict[unique_tag]['Date']), list(unconfirmed_dict[unique_tag]['Comment'])) %}
-                     <tr>
-                        {% for col, row_ in zip(tag_columns, row) %}
-                        <td>
-                           {{row_}}
-                        </td>
-                        {% endfor %}
-                     </tr>
-                     {% endfor %}
-                  </table>
-               </details>
-            </li>
-            {% endfor %}
-         </details>
-         <h2 id="reason">Par raison</h2>
-         <p>De {{ start_date }} à {{ end_date }} :</p>
-         <table class="wb-tables table table-striped">
-            <tr>
-               {% for col in reason_column_names %}
-               <th>{{col}}</th>
+            <h3>Autres étiquettes</h3>
+            <details>
+               <summary>Étiquettes avec 3 commentaires ou moins</summary>
+               <ul class="list-unstyled">
+                  {% for tag, count, plot, unique_tag in under_tags %}
+                  <li>
+                     <details>
+                        <summary>{{tag}} ({{count}})</summary>
+                        <details>
+                           <summary>Voir les tendances des étiquettes en graphique</summary>
+                           <img src="data:image/png;base64, {{plot}}" alt="See table below for numbers">
+                        </details>
+                        <table class="wb-tables table table-striped">
+                           <tr>
+                              {% for col in tag_columns %}
+                              <th>{{col}}</th>
+                              {% endfor %}
+                           </tr>
+                           {%for row in zip(list(under_dict[unique_tag]['Date']), list(under_dict[unique_tag]['Comment'])) %}
+                           <tr>
+                              {% for col, row_ in zip(tag_columns, row) %}
+                              <td>
+                                 {{row_}}
+                              </td>
+                              {% endfor %}
+                           </tr>
+                           {% endfor %}
+                        </table>
+                     </details>
+                  </li>
+                  {% endfor %}
+               </ul>
+            </details>
+            <details>
+               <summary>Étiquettes non confirmées assignées automatiqument</summary>
+               <ul class="list-unstyled">
+                  {% for tag, count, plot, unique_tag in unconfirmed_tags %}
+                  <li>
+                     <details>
+                        <summary>{{tag}} ({{count}})</summary>
+                        <details>
+                           <summary>Voir les tendances des étiquettes en graphique</summary>
+                           <img src="data:image/png;base64, {{plot}}" alt="See table below for numbers">
+                        </details>
+                        <table class="wb-tables table table-striped">
+                           <tr>
+                              {% for col in tag_columns %}
+                              <th>{{col}}</th>
+                              {% endfor %}
+                           </tr>
+                           {%for row in zip(list(unconfirmed_dict[unique_tag]['Date']), list(unconfirmed_dict[unique_tag]['Comment'])) %}
+                           <tr>
+                              {% for col, row_ in zip(tag_columns, row) %}
+                              <td>
+                                 {{row_}}
+                              </td>
+                              {% endfor %}
+                           </tr>
+                           {% endfor %}
+                        </table>
+                     </details>
+                  </li>
+                  {% endfor %}
+               </ul>
+            </details>
+            <h2 id="reason">Par raison</h2>
+            <p>De {{ start_date }} à {{ end_date }} :</p>
+            <table class="wb-tables table table-striped">
+               <tr>
+                  {% for col in reason_column_names %}
+                  <th>{{col}}</th>
+                  {% endfor %}
+               </tr>
+               {% for row in row_data_reason %}
+               <tr>
+                  {% for col, row_ in zip(reason_column_names, row) %}
+                  <td>{{row_}}</td>
+                  {% endfor %}
+               </tr>
                {% endfor %}
-            </tr>
-            {% for row in row_data_reason %}
-            <tr>
-               {% for col, row_ in zip(reason_column_names, row) %}
-               <td>{{row_}}</td>
+            </table>
+            <h2 id="common">Mots les plus fréquents</h2>
+            <p>De {{ start_date }} à {{ end_date }} :</p>
+            <table class="wb-tables table table-striped">
+               <tr>
+                  {% for col in word_column_names %}
+                  <th>{{col}}</th>
+                  {% endfor %}
+               </tr>
+               {% for row in row_data_word %}
+               <tr>
+                  {% for col, row_ in zip(word_column_names, row) %}
+                  <td>{{row_}}</td>
+                  {% endfor %}
+               </tr>
                {% endfor %}
-            </tr>
-            {% endfor %}
-         </table>
-         <h2 id="common">Mots les plus fréquents</h2>
-         <p>De {{ start_date }} à {{ end_date }} :</p>
-         <table class="wb-tables table table-striped">
-            <tr>
-               {% for col in word_column_names %}
-               <th>{{col}}</th>
-               {% endfor %}
-            </tr>
-            {% for row in row_data_word %}
-            <tr>
-               {% for col, row_ in zip(word_column_names, row) %}
-               <td>{{row_}}</td>
-               {% endfor %}
-            </tr>
-            {% endfor %}
-         </table>
+            </table>
+         </div>
          <div id="def-preFooter">
             <!-- Write closure fall-back static file -->
             <!-- /ROOT/app/cls/WET/gcweb/v4_0_28/cdts/static/preFooter-en.html -->
