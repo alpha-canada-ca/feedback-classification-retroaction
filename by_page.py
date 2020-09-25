@@ -273,6 +273,9 @@ def bypage():
                   dates = list(tag_dates[tag]['Date'])
                   daily_values =  list(tag_dates[tag]['Count'])
                   weekly_values = list(tag_dates[tag]['Rolling mean'])
+                  column = tag_dates[tag]['Count']
+                  high_y = column.max()
+                  max_y = high_y + 5
                   start_plot = start_date
                   end_plot = end_date
                   all_start = dates[0]
@@ -294,6 +297,7 @@ def bypage():
 
                   plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                   plt.legend()
+                  plt.ylim(0, max_y)
                   loc = plticker.MultipleLocator(base=7.0)
                   plt.gcf().subplots_adjust(bottom=0.2)
                   fig.autofmt_xdate()
@@ -715,7 +719,9 @@ def bypage():
                 weekly_perc = ["%.2f" % number for number in weekly_values]
                 daily_perc_r = daily_perc[::-1]
                 weekly_perc_r = weekly_perc[::-1]
-
+                column = tag_dates[tag]['Count']
+                high_y = column.max()
+                max_y = high_y + 5
                 start_plot = start_date
                 end_plot = end_date
 
@@ -745,6 +751,7 @@ def bypage():
                     ax.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
                     plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
                 plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
+                plt.ylim(0, max_y)
                 plt.legend()
                 loc = plticker.MultipleLocator(base=7.0)
                 plt.gcf().subplots_adjust(bottom=0.2)
