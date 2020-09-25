@@ -719,9 +719,6 @@ def bypage():
                 weekly_perc = ["%.2f" % number for number in weekly_values]
                 daily_perc_r = daily_perc[::-1]
                 weekly_perc_r = weekly_perc[::-1]
-                column = tag_dates[tag]['Count']
-                high_y = column.max()
-                max_y = high_y + 5
                 start_plot = start_date
                 end_plot = end_date
 
@@ -751,7 +748,6 @@ def bypage():
                     ax.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
                     plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
                 plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
-                plt.ylim(0, max_y)
                 plt.legend()
                 loc = plticker.MultipleLocator(base=7.0)
                 plt.gcf().subplots_adjust(bottom=0.2)
@@ -869,6 +865,9 @@ def bypage():
                   x = dates
                   y1 = daily_values
                   y2 = weekly_values
+                  column = tag_dates[tag]['Count']
+                  high_y = column.max()
+                  max_y = high_y + 5
                   fig, ax = plt.subplots()
                   if lang == 'en':
                       ax.bar(x, y1, color=(0.2, 0.4, 0.6, 0.6), linewidth=0.5, label='Daily value')
@@ -882,6 +881,7 @@ def bypage():
 
                   plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                   plt.legend()
+                  plt.ylim(0, max_y)
                   loc = plticker.MultipleLocator(base=7.0)
                   plt.gcf().subplots_adjust(bottom=0.2)
                   fig.autofmt_xdate()
