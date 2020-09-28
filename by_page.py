@@ -293,7 +293,7 @@ def bypage():
                   if lang == 'fr':
                       ax.bar(x, y1, color=(0.2, 0.4, 0.6, 0.6), linewidth=0.5, label='Valeur quotidienne')
                       ax.plot(x, y2, color='black', linewidth=3.0, label='Moyenne mobile sur 7 jours')
-                      plt.title(tag + '\n' + 'Nombre de commentaires par jour')
+                      plt.title(tag + '\n' + 'Nombre de commentaires par jour   ')
 
                   plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                   plt.legend()
@@ -872,12 +872,12 @@ def bypage():
                   if lang == 'en':
                       ax.bar(x, y1, color=(0.2, 0.4, 0.6, 0.6), linewidth=0.5, label='Daily value')
                       ax.plot(x, y2, color='black', linewidth=3.0, label='Weekly rolling mean')
-                      plt.title(tag)
+                      plt.title(tag + '\n' + 'Number of commments per day')
 
                   if lang == 'fr':
                       ax.bar(x, y1, color=(0.2, 0.4, 0.6, 0.6), linewidth=0.5, label='Valeur quotidienne')
                       ax.plot(x, y2, color='black', linewidth=3.0, label='Moyenne mobile sur 7 jours')
-                      plt.title(tag)
+                      plt.title(tag + '\n' + 'Nombre de commentaires par jour')
 
                   plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                   plt.legend()
