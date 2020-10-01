@@ -62,6 +62,7 @@ def bypage():
 
         data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
         data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
+        data['URL'] = data['URL'].str.replace('https://https://', 'https://')
         page_data = data.loc[data['URL'] == page]
         page_data = page_data.reset_index(drop=True)
 

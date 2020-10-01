@@ -4,6 +4,8 @@ from flask import request
 from flask import app, render_template
 import index
 import by_page
+import by_group
+import group_index
 
 app = Flask(__name__)
 
@@ -17,6 +19,14 @@ def homepage():
 def bypage():
     return by_page.bypage()
 
+@app.route('/bygroup', methods=['GET', 'POST'])
+def bygroup():
+    return by_group.bygroup()
+
+
+@app.route('/group_index', methods=['GET', 'POST'])
+def groupindex():
+    return group_index.groupindex()
 
 if __name__ == '__main__':
     app.run()

@@ -1,9 +1,11 @@
 FROM dtobtn/python-ml-base:latest
 
+COPY by_group.py /app/
 COPY by_page.py /app/
 COPY fetch_table.py /app/
 COPY app.py /app/
 COPY index.py /app/
+COPY group_index.py /app/
 COPY docker/feedback-by-page/entrypoint.sh /app/
 COPY ./docker/feedback-by-page/crontab /crontab
 RUN chmod a+x /app/fetch_table.py

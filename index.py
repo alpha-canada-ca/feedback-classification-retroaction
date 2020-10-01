@@ -19,6 +19,7 @@ def index():
 
     data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
     data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
+    data['URL'] = data['URL'].str.replace('https://https://', 'https://')
 
     data = data[["URL", 'Lookup_page_title', 'Status']]
     data = data[data.Status != 'Spam']
