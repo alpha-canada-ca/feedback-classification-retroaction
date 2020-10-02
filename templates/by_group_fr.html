@@ -341,7 +341,23 @@
                </ul>
             </details>
             <h2 id="pages">Page dans ce groupe</h2>
-            <p>**** Placeholder pour faire une liste des pages dans ce groupe</p>
+            <table class="wb-tables table table-striped table-hover" data-page-length='20'>
+               <thead>
+                  <tr>
+                     <th>Page</th>
+                     <th>URL</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {% for _, row in urls.iterrows() %}
+                  <tr>
+                     <td><a href="/bypage?page={{ row['URL'] }}">{{ row['Lookup_page_title'] }}</a></td>
+                     <td>{{ row['URL'] }}
+                     </td>
+                  </tr>
+                  {% endfor %}
+               </tbody>
+            </table>
          </div>
          <div id="def-preFooter">
             <!-- Write closure fall-back static file -->

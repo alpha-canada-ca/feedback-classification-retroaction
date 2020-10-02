@@ -343,7 +343,23 @@
                </ul>
             </details>
             <h2 id="pages">Pages in this group</h2>
-            <p>*** Placeholder to add page names ***</p>
+            <table class="wb-tables table table-striped table-hover" data-page-length='20'>
+               <thead>
+                  <tr>
+                     <th>Page</th>
+                     <th>URL</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {% for _, row in urls.iterrows() %}
+                  <tr>
+                     <td><a href="/bypage?page={{ row['URL'] }}">{{ row['Lookup_page_title'] }}</a></td>
+                     <td>{{ row['URL'] }}
+                     </td>
+                  </tr>
+                  {% endfor %}
+               </tbody>
+            </table>
 
          </div>
          <div id="def-preFooter">
