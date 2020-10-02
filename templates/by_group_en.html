@@ -151,10 +151,10 @@
          });
       </script>
       <main property="mainContentOfPage" class="container">
-         <h1>Feedback data group of pages: "{{ group_name}}"</h1>
+         <h1>Feedback data for group of pages: "{{ group_name}}"</h1>
          <p>Change the date range:</p>
          <form id="attributes" name="attributes" action="{{ url_for('bypage') }}" method="post">
-            <input type="hidden" name="page" value={{ page }}>
+            <input type="hidden" name="group" value={{ group }}>
             <input type="hidden" name="lang" value={{ lang }}>
             <label for="start_date">Start date:</label>
             <input type="date" id="start_date" name="start_date" value={{ start_date }}><br>
@@ -173,7 +173,7 @@
                 for (var key of formData.keys()) {
                     queryString = queryString + key + "=" + formData.get(key) + "&";
                 }
-                location.href = 'bypage' + queryString;
+                location.href = 'bygroup' + queryString;
             }
             let langElem = document.getElementById("wb-lng").getElementsByTagName("a")[0];
             let toggleURL = window.location + "";
