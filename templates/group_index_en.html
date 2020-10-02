@@ -175,7 +175,10 @@
                {% for _, row in by_group_table.iterrows() %}
                <tr>
                   <td><a href="{{ row['group_list'] }}">{{ row['Group'] }}</a></td>
-                  <td>{{ row['Pages'] }}</td>
+                  <td>{% for your_list_element in row['Pages'] %}
+                        <p>{{ your_list_element }} </p>
+                      {% endfor %}
+                  </td>
                </tr>
                {% endfor %}
             </tbody>
