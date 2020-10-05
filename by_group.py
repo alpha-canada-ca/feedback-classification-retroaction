@@ -60,7 +60,9 @@ def bygroup():
         data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
         data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
         data['URL'] = data['URL'].str.replace('https://https://', 'https://')
-        group_data = data.loc[data['Main section'] == group]
+        data['Lookup_group_EN'].fillna("None", inplace=True)
+        data['Lookup_group_EN'] = [','.join(map(str, l)) for l in data['Lookup_group_EN']]
+        group_data = data.loc[data['Lookup_group_EN'] == group]
         group_data = group_data.reset_index(drop=True)
 
         if group_data.empty:
