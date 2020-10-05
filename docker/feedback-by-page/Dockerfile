@@ -6,6 +6,7 @@ COPY fetch_table.py /app/
 COPY app.py /app/
 COPY index.py /app/
 COPY group_index.py /app/
+COPY page_index.py /app/
 COPY docker/feedback-by-page/entrypoint.sh /app/
 COPY ./docker/feedback-by-page/crontab /crontab
 RUN chmod a+x /app/fetch_table.py

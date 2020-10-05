@@ -146,7 +146,7 @@
          });
       </script>
       <main property="mainContentOfPage" class="container">
-         <h1>Rétroaction par page</h1>
+         <h1>Rétroaction sur les pages : tendances et analyse</h1>
          <script>
             let langElem = document.getElementById("wb-lng").getElementsByTagName("a")[0];
             let toggleURL = window.location + "";
@@ -159,22 +159,26 @@
             }
             langElem.setAttribute("href", toggleURL);
          </script>
-         <table class="wb-tables table table-striped table-hover" data-page-length='50'>
-            <thead>
-               <tr>
-                  <th>Page</th>
-                  <th>URL</th>
-               </tr>
-            </thead>
-            <tbody>
-               {% for _, row in by_page_table_fr.iterrows() %}
-               <tr>
-                  <td><a href="{{ row['url_list'] }}">{{ row['Page'] }}</a></td>
-                  <td>{{ row['URL'] }}</td>
-               </tr>
-               {% endfor %}
-            </tbody>
-         </table>
+         <div class="container">
+           <div class="row">
+
+             <!-- showing the basic doormat pattern - refer to the Services and information documentation for options -->
+             <section class="gc-srvinfo col-md-12">
+               <h2 class="wb-inv">Options</h2>
+               <div class="wb-eqht row">
+                 <div class="col-lg-4 col-md-6">
+                   <h3><a href="/page_index?lang=fr">Page page individuelle</a></h3>
+                   <p>Données de rétroaction par page individuelle sur Canada.ca</p>
+                 </div>
+                 <div class="col-lg-4 col-md-6">
+                   <h3><a href="/group_index?lang=fr">Par groupe de pages</a></h3>
+                   <p>Données de rétroaction par group de pages sur Canada.ca</p>
+                 </div>
+               </div>
+             </section>
+           </div>
+         </div>
+
          <div id="def-preFooter">
             <!-- Write closure fall-back static file -->
             <!-- /ROOT/app/cls/WET/gcweb/v4_0_28/cdts/static/preFooter-en.html -->

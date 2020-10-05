@@ -238,7 +238,10 @@ def bygroup():
                 elif score_period < score:
                     delta =  format(float(score_period)-float(score), '.2f')
                 else:
-                    delta = 'no change'
+                    if lang == 'en':
+                        delta = 'no change'
+                    if lang == 'fr':
+                        delta = 'aucun changement'
 
 
             # only keep commments
