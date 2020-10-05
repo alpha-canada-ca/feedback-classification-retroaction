@@ -17,9 +17,10 @@ def groupindex():
     data = deserialize('data/all_data.pickle')
     lang = request.args.get('lang', 'en')
 
-    data = data[["Lookup_group_EN", 'URL', 'Status']]
+    data = data[["Lookup_group_EN", 'URL', 'Status', "Lookup_group_FR"]]
     data = data.dropna()
     data['Lookup_group_EN'] = [','.join(map(str, l)) for l in data['Lookup_group_EN']]
+    data['Lookup_group_FR'] = [','.join(map(str, l)) for l in data['Lookup_group_FR']]
     data = data[data.Status != 'Spam']
     data = data[data.Status != 'Ignore']
     data = data[data.Status != 'Duplicate']
@@ -31,19 +32,36 @@ def groupindex():
     data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
     data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
     data['URL'] = data['URL'].str.replace('https://https://', 'https://')
-    sections = list(data['Lookup_group_EN'].unique())
+    groups_fr = list(data['Lookup_group_FR'].unique())
 
     group_dict = {}
 
     group_dict = {k: g["URL"].tolist() for k,g in data.groupby("Lookup_group_EN")}
 
+    group_names = data.copy()
+    group_names  = group_names .drop(columns=['URL'])
+    group_names = group_names.drop_duplicates()
+    group_names = group_names.reset_index(drop=True)
+
     groups = list(group_dict.keys())
     pages_list = list(group_dict.values())
 
-    group_list = ["bygroup?group=" + group for group in groups]
-    group_list_fr = ["bygroup?group=" + group + "&lang=fr" for group in groups]
+    groups_fr = []
+    for group in groups:
+      group_look = group_names[group_names["Lookup_group_EN"] == group]
+      fr = list(group_look['Lookup_group_FR'])
+      fr = fr[0]
+      groups_fr.append(fr)
 
-    by_group_dict = {'Group':groups,'Pages':pages_list}
+
+    group_list = ["bygroup?group=" + group for group in groups]
+    group_list_fr = ["bygroup?group=" + group+ "&lang=fr" for group in groups]
+
+    if lang == 'en':
+        by_group_dict = {'Group':groups,'Pages':pages_list}
+
+    if lang == 'fr':
+        by_group_dict = {'Group':groups_fr,'Pages':pages_list}
 
     by_group_table = pd.DataFrame(by_group_dict)
 

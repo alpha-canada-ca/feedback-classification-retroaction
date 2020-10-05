@@ -71,17 +71,23 @@ def bygroup():
 
         else:
 
-            group_data = group_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title', 'URL', 'Lookup_FR_tag' ]]
+            group_data = group_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title', 'URL', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR" ]]
             group_data = group_data[group_data.Status != 'Spam']
             group_data = group_data[group_data.Status != 'Ignore']
             group_data = group_data[group_data.Status != 'Duplicate']
             group_data = group_data.reset_index(drop=True)
 
             group_data['Lookup_page_title'] = [','.join(map(str, l)) for l in group_data['Lookup_page_title']]
+            group_data['Lookup_group_FR'] = [','.join(map(str, l)) for l in group_data['Lookup_group_FR']]
 
             urls = group_data[['URL', 'Lookup_page_title']]
             urls = urls.drop_duplicates()
-            group_name = group
+
+            if lang == "en":
+                group_name = group_data['Lookup_group_EN'][0]
+
+            if lang == "fr":
+                group_name = group_data['Lookup_group_FR'][0]
 
             #yes_no for all period
 
