@@ -189,14 +189,11 @@
          </script>
          <div id='content'>
             <h2 class='h3'>On this page</h2>
-            <ul>
-               <li>
-                  <a href="#found">
-                  Found their answer?</a>
-               </li>
+            <ul><a href="#found">Found their answer?</a></li>
                <li><a href="#tag">By tag</a></li>
                <li><a href="#reason">By reason</a></li>
                <li><a href="#common">Most frequent words</a></li>
+               <li><a href="#group">Feedback by group of pages</a></li>
             </ul>
             <h2 id="found">Said they found their answer?</h2>
             <details>
@@ -379,6 +376,9 @@
                </tr>
                {% endfor %}
             </table>
+            <h2 id="group">Feedback by group of pages</h2>
+            <p><a href="https://feedback-by-page.tbs.alpha.canada.ca/bygroup?group={{ group_link }}">{{ group_name }}</a></p>
+
          </div>
          <div id="def-preFooter">
             <!-- Write closure fall-back static file -->

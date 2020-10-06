@@ -189,6 +189,7 @@
                <li><a href="#tag">Par étiquette</a></li>
                <li><a href="#reason">Par raison</a></li>
                <li><a href="#common">Mots les plus fréquents</a></li>
+               <li><a href="#group">Rétroaction par groupe de pages</a></li>
             </ul>
             <h2 id="found">Disent avoir trouvé leur réponse?</h2>
             <details>
@@ -374,6 +375,8 @@
                </tr>
                {% endfor %}
             </table>
+            <h2 id="group">Rétroaction par groupe de pages</h2>
+            <p><a href="https://feedback-by-page.tbs.alpha.canada.ca/bygroup?group={{ group_link }}&lang=fr">{{ group_name }}</a></p>
          </div>
          <div id="def-preFooter">
             <!-- Write closure fall-back static file -->
