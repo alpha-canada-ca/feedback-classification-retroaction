@@ -32,8 +32,10 @@ def bypage():
     data = deserialize('data/all_data.pickle')
     today = DT.date.today()
     week_ago = today - DT.timedelta(days=7)
+    earliest = today - DT.timedelta(days=90)
     today = today.strftime('%F')
     week_ago = week_ago.strftime('%F')
+    earliest = earliest.strftime('%F')
 
     page = request.args.get('page', 'no_page')
     lang = request.args.get('lang', 'en')
@@ -65,6 +67,7 @@ def bypage():
         data['URL'] = data['URL'].str.replace('https://https://', 'https://')
         page_data = data.loc[data['URL'] == page]
         page_data = page_data.reset_index(drop=True)
+        page_data = page_data[page_data['Date'] >= earliest]
 
         if page_data.empty:
 

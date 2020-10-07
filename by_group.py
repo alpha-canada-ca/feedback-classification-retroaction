@@ -32,8 +32,10 @@ def bygroup():
     data = deserialize('data/all_data.pickle')
     today = DT.date.today()
     week_ago = today - DT.timedelta(days=7)
+    earliest = today - DT.timedelta(days=90)
     today = today.strftime('%F')
     week_ago = week_ago.strftime('%F')
+    earliest = earliest.strftime('%F')
 
     group = request.args.get('group', 'no_group')
     lang = request.args.get('lang', 'en')
@@ -64,6 +66,7 @@ def bygroup():
         data['Lookup_group_EN'] = [','.join(map(str, l)) for l in data['Lookup_group_EN']]
         group_data = data.loc[data['Lookup_group_EN'] == group]
         group_data = group_data.reset_index(drop=True)
+        group_data = group_data[group_data['Date'] >= earliest]
 
         if group_data.empty:
 
