@@ -17,7 +17,7 @@ def groupindex():
     data = deserialize('data/all_data.pickle')
     lang = request.args.get('lang', 'en')
 
-    data = data[["Lookup_group_EN", 'URL', 'Status', "Lookup_group_FR"]]
+    data = data[["Lookup_group_EN", 'URL_function', 'Status', "Lookup_group_FR"]]
     data = data.dropna()
     data['Lookup_group_EN'] = [','.join(map(str, l)) for l in data['Lookup_group_EN']]
     data['Lookup_group_FR'] = [','.join(map(str, l)) for l in data['Lookup_group_FR']]
@@ -29,17 +29,17 @@ def groupindex():
     data = data.reset_index(drop=True)
     data = data.drop_duplicates()
     data = data.reset_index(drop=True)
-    data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
-    data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
-    data['URL'] = data['URL'].str.replace('https://https://', 'https://')
+    data['URL_function'] = data['URL_function'].str.replace('/content/canadasite', 'www.canada.ca')
+    data['URL_function'] = data['URL_function'].str.replace('www.canada.ca', 'https://www.canada.ca')
+    data['URL_function'] = data['URL_function'].str.replace('https://https://', 'https://')
     groups_fr = list(data['Lookup_group_FR'].unique())
 
     group_dict = {}
 
-    group_dict = {k: g["URL"].tolist() for k,g in data.groupby("Lookup_group_EN")}
+    group_dict = {k: g['URL_function'].tolist() for k,g in data.groupby("Lookup_group_EN")}
 
     group_names = data.copy()
-    group_names  = group_names .drop(columns=['URL'])
+    group_names  = group_names .drop(columns=['URL_function'])
     group_names = group_names.drop_duplicates()
     group_names = group_names.reset_index(drop=True)
 

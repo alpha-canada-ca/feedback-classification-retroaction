@@ -59,9 +59,9 @@ def bygroup():
 
     else:
 
-        data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
-        data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
-        data['URL'] = data['URL'].str.replace('https://https://', 'https://')
+        data['URL_function'] = data['URL_function'].str.replace('/content/canadasite', 'www.canada.ca')
+        data['URL_function'] = data['URL_function'].str.replace('www.canada.ca', 'https://www.canada.ca')
+        data['URL_function'] = data['URL_function'].str.replace('https://https://', 'https://')
         data['Lookup_group_EN'].fillna("None", inplace=True)
         data['Lookup_group_EN'] = [','.join(map(str, l)) for l in data['Lookup_group_EN']]
         group_data = data.loc[data['Lookup_group_EN'] == group]
@@ -74,7 +74,7 @@ def bygroup():
 
         else:
 
-            group_data = group_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title', 'URL', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR" ]]
+            group_data = group_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title', 'URL_function', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR" ]]
             group_data = group_data[group_data.Status != 'Spam']
             group_data = group_data[group_data.Status != 'Ignore']
             group_data = group_data[group_data.Status != 'Duplicate']
@@ -83,7 +83,7 @@ def bygroup():
             group_data['Lookup_page_title'] = [','.join(map(str, l)) for l in group_data['Lookup_page_title']]
             group_data['Lookup_group_FR'] = [','.join(map(str, l)) for l in group_data['Lookup_group_FR']]
 
-            urls = group_data[['URL', 'Lookup_page_title']]
+            urls = group_data[['URL_function', 'Lookup_page_title']]
             urls = urls.drop_duplicates()
 
             if lang == "en":
@@ -294,28 +294,28 @@ def bygroup():
 
                 tag_dico = {}
 
-                tag_dico_columns = ['Date', 'Comment', 'URL']
+                tag_dico_columns = ['Date', 'Comment', 'URL_function']
 
                 for tag in unique_tags:
                   tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
 
                 for tag, topic_df in all_data.groupby(0):
-                  tag_dico[tag] = topic_df[['Date', 'Comment', 'URL']]
+                  tag_dico[tag] = topic_df[['Date', 'Comment', 'URL_function']]
 
 
                 if 1 in all_data.columns:
                     for tag, topic_dfn in all_data.groupby(1):
                         if tag_dico[tag].empty:
-                            tag_dico[tag] = topic_df[['Date', 'Comment', 'URL']]
+                            tag_dico[tag] = topic_df[['Date', 'Comment', 'URL_function']]
                         else:
-                            tag_dico[tag] = tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL']])
+                            tag_dico[tag] = tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL_function']])
 
                 if 2 in all_data.columns:
                     for tag, topic_df in all_data.groupby(2):
                         if tag_dico[tag].empty:
-                            tag_dico[tag] = topic_df[['Date', 'Comment', 'URL']]
+                            tag_dico[tag] = topic_df[['Date', 'Comment', 'URL_function']]
                         else:
-                            tag_dico[tag] = tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL']])
+                            tag_dico[tag] = tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL_function']])
 
 
                 for tag in tag_dico:
@@ -460,28 +460,28 @@ def bygroup():
 
                     tag_dico = {}
 
-                    tag_dico_columns = ['Date', 'Comment', 'URL']
+                    tag_dico_columns = ['Date', 'Comment', 'URL_function']
 
                     for tag in unique_tags:
                       tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
 
                     for tag, topic_df in group_data.groupby(0):
-                      tag_dico[tag] = topic_df[['Date', 'Comment', 'URL']]
+                      tag_dico[tag] = topic_df[['Date', 'Comment', 'URL_function']]
 
 
                     if 1 in group_data.columns:
                         for tag, topic_df in group_data.groupby(1):
                             if tag_dico[tag].empty:
-                                tag_dico[tag] = topic_df[['Date', 'Comment', 'URL']]
+                                tag_dico[tag] = topic_df[['Date', 'Comment', 'URL_function']]
                             else:
-                                tag_dico[tag] = tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL']])
+                                tag_dico[tag] = tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL_function']])
 
                     if 2 in group_data.columns:
                         for tag, topic_df in group_data.groupby(2):
                             if tag_dico[tag].empty:
-                                tag_dico[tag] = topic_df[['Date', 'Comment', 'URL']]
+                                tag_dico[tag] = topic_df[['Date', 'Comment', 'URL_function']]
                             else:
-                                tag_dico[tag] = tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL']])
+                                tag_dico[tag] = tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL_function']])
 
 
                     for tag in tag_dico:
@@ -497,7 +497,7 @@ def bygroup():
                     over_dict = { key: tag_dico[key] for key in over_unique_tags }
                     under_dict = { key: tag_dico[key] for key in under_unique_tags }
 
-                    tag_columns = ['Date', 'Comment', 'URL']
+                    tag_columns = ['Date', 'Comment', 'URL_function']
 
 
                     over_tag_plots = { tag: tag_plots[tag] for tag in over_unique_tags }
@@ -552,28 +552,28 @@ def bygroup():
                         unconfirmed_unique_tags = list(unconfirmed_by_tag.index)
                         unconfirmed_tag_dico = {}
 
-                        tag_dico_columns = ['Date', 'Comment', 'URL']
+                        tag_dico_columns = ['Date', 'Comment', 'URL_function']
 
                         for tag in unconfirmed_unique_tags:
                           unconfirmed_tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
 
                         for tag, topic_df in unconfirmed.groupby(0):
-                          unconfirmed_tag_dico[tag] = topic_df[['Date', 'Comment', 'URL']]
+                          unconfirmed_tag_dico[tag] = topic_df[['Date', 'Comment', 'URL_function']]
 
 
                         if 1 in unconfirmed.columns:
                             for tag, topic_df in unconfirmed.groupby(1):
                                 if unconfirmed_tag_dico[tag].empty:
-                                    unconfirmed_tag_dico[tag] = topic_df[['Date', 'Comment', 'URL']]
+                                    unconfirmed_tag_dico[tag] = topic_df[['Date', 'Comment', 'URL_function']]
                                 else:
-                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL']])
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL_function']])
 
                         if 2 in unconfirmed.columns:
                             for tag, topic_df in unconfirmed.groupby(2):
                                 if unconfirmed_tag_dico[tag].empty:
-                                    unconfirmed_tag_dico[tag] = topic_df[['Date', 'Comment', 'URL']]
+                                    unconfirmed_tag_dico[tag] = topic_df[['Date', 'Comment', 'URL_function']]
                                 else:
-                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL']])
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df[['Date', 'Comment', 'URL_function']])
 
 
                         for tag in unconfirmed_tag_dico:
@@ -582,7 +582,7 @@ def bygroup():
 
                         unconfirmed_dict = { key: unconfirmed_tag_dico[key] for key in unconfirmed_unique_tags }
 
-                        tag_columns = ['Date', 'Comment', 'URL']
+                        tag_columns = ['Date', 'Comment', 'URL_function']
 
                         unconfirmed_tag_plots = { tag: tag_plots[tag] for tag in unconfirmed_unique_tags }
                         unconfirmed_plots = list(unconfirmed_tag_plots.values())

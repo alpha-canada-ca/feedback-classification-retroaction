@@ -351,8 +351,8 @@
                <tbody>
                   {% for _, row in urls.iterrows() %}
                   <tr>
-                     <td><a href="/bypage?page={{ row['URL'] }}">{{ row['Lookup_page_title'] }}</a></td>
-                     <td>{{ row['URL'] }}
+                     <td><a href="/bypage?page={{ row['URL_function'] }}">{{ row['Lookup_page_title'] }}</a></td>
+                     <td>{{ row['URL_function'] }}
                      </td>
                   </tr>
                   {% endfor %}

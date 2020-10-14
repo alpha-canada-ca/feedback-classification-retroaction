@@ -62,10 +62,10 @@ def bypage():
 
     else:
 
-        data['URL'] = data['URL'].str.replace('/content/canadasite', 'www.canada.ca')
-        data['URL'] = data['URL'].str.replace('www.canada.ca', 'https://www.canada.ca')
-        data['URL'] = data['URL'].str.replace('https://https://', 'https://')
-        page_data = data.loc[data['URL'] == page]
+        data['URL_function'] = data['URL_function'].str.replace('/content/canadasite', 'www.canada.ca')
+        data['URL_function'] = data['URL_function'].str.replace('www.canada.ca', 'https://www.canada.ca')
+        data['URL_function'] = data['URL_function'].str.replace('https://https://', 'https://')
+        page_data = data.loc[data['URL_function'] == page]
         page_data = page_data.reset_index(drop=True)
         page_data = page_data[page_data['Date'] >= earliest]
 
@@ -75,7 +75,7 @@ def bypage():
 
         else:
 
-            url = page_data['URL'][0]
+            url = page_data['URL_function'][0]
 
             if page_data['Lang'][0] == 'EN':
 

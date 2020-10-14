@@ -263,7 +263,7 @@
                            <th>{{col}}</th>
                            {% endfor %}
                         </tr>
-                        {%for row in zip(list(over_dict[unique_tag]['Date']), list(over_dict[unique_tag]['Comment']), list(over_dict[unique_tag]['URL'])) %}
+                        {%for row in zip(list(over_dict[unique_tag]['Date']), list(over_dict[unique_tag]['Comment']), list(over_dict[unique_tag]['URL_function'])) %}
                         <tr>
                            {% for col, row_ in zip(tag_columns, row) %}
                            <td>
@@ -295,7 +295,7 @@
                               <th>{{col}}</th>
                               {% endfor %}
                            </tr>
-                           {%for row in zip(list(under_dict[unique_tag]['Date']), list(under_dict[unique_tag]['Comment']), list(under_dict[unique_tag]['URL'])) %}
+                           {%for row in zip(list(under_dict[unique_tag]['Date']), list(under_dict[unique_tag]['Comment']), list(under_dict[unique_tag]['URL_function'])) %}
                            <tr>
                               {% for col, row_ in zip(tag_columns, row) %}
                               <td>
@@ -327,7 +327,7 @@
                               <th>{{col}}</th>
                               {% endfor %}
                            </tr>
-                           {%for row in zip(list(unconfirmed_dict[unique_tag]['Date']), list(unconfirmed_dict[unique_tag]['Comment']), list(unconfirmed_dict[unique_tag]['URL'])) %}
+                           {%for row in zip(list(unconfirmed_dict[unique_tag]['Date']), list(unconfirmed_dict[unique_tag]['Comment']), list(unconfirmed_dict[unique_tag]['URL_function'])) %}
                            <tr>
                               {% for col, row_ in zip(tag_columns, row) %}
                               <td>
@@ -353,8 +353,8 @@
                <tbody>
                   {% for _, row in urls.iterrows() %}
                   <tr>
-                     <td><a href="/bypage?page={{ row['URL'] }}">{{ row['Lookup_page_title'] }}</a></td>
-                     <td>{{ row['URL'] }}
+                     <td><a href="/bypage?page={{ row['URL_function'] }}">{{ row['Lookup_page_title'] }}</a></td>
+                     <td>{{ row['URL_function'] }}
                      </td>
                   </tr>
                   {% endfor %}
