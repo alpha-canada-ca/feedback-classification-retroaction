@@ -129,11 +129,11 @@ def suggest():
 			#get first tag
 			tags.append(preds_fr[0][0])
 
-			#get any other tag that's over 0.05 probablity - may need to tweak this figure
-			rest = preds_fr[1:]
-			other_tags = rest.loc[rest[1] >= .05]
-			for tag in other_tags[0]:
-				tags.append(tag)
+			#get any other tag that's over 0.05 probablity - removing for now
+			#rest = preds_fr[1:]
+			#other_tags = rest.loc[rest[1] >= .05]
+			#for tag in other_tags[0]:
+				#tags.append(tag)
 
 			#convert tags to a string, split by a comma
 			tag_str = ', '.join(tags)
@@ -242,11 +242,12 @@ def suggest():
 			#get first tag
 			tags.append(preds_en[0][0])
 
-			#get any other tag that's over 0.05 probablity - may need to tweak this figure
-			rest = preds_en[1:]
-			other_tags = rest.loc[rest[1] >= .05]
-			for tag in other_tags[0]:
-				tags.append(tag)
+
+			#get any other tag that's over 0.05 probablity - removing it for now
+			#rest = preds_en[1:]
+			#other_tags = rest.loc[rest[1] >= .05]
+			#for tag in other_tags[0]:
+				#tags.append(tag)
 
 			#convert tags to a string, split by a comma
 			tag_str = ', '.join(tags)
