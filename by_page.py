@@ -85,17 +85,20 @@ def bypage():
                 page_data_en = page_data_en[page_data_en.Status != 'Duplicate']
                 page_data_en = page_data_en.reset_index(drop=True)
 
+                page_data_en['Lookup_group_EN'].fillna('[None]', inplace=True)
                 page_data_en['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_en['Lookup_page_title']]
-                page_data_en['Lookup_group_EN'] = [','.join(map(str, l)) for l in page_data_en['Lookup_group_EN']]
-                page_data_en['Lookup_group_FR'] = [','.join(map(str, l)) for l in page_data_en['Lookup_group_FR']]
 
-                group_link = page_data_en['Lookup_group_EN'][0]
+
+                group_link = (page_data_en['Lookup_group_EN'][0])
+                group_link = ' '.join(map(str, group_link))
 
                 if lang == 'en':
                     group_name = page_data_en['Lookup_group_EN'][0]
+                    group_name = ' '.join(map(str, group_name))
 
                 if lang == 'fr':
                     group_name = page_data_en['Lookup_group_FR'][0]
+                    group_name = ' '.join(map(str, group_name))
 
                 title = page_data_en['Lookup_page_title'][0]
 
