@@ -18,6 +18,7 @@ RUN pip3 install -U nltk
 RUN pip3 install -U requests
 RUN pip3 install -U pandas
 RUN pip3 install -U datetime
+RUN pip3 install -U pymongo
 RUN pip3 install -U scikit-learn
 RUN pip3 install airtable-python-wrapper
 RUN python3 -mpip install matplotlib

@@ -30,6 +30,7 @@ def bypage():
 
     #import data as pickle
     data = deserialize('data/all_data.pickle')
+    yes_no_db = deserialize('data/yes_no_db.pickle')
     today = DT.date.today()
     week_ago = today - DT.timedelta(days=7)
     earliest = today - DT.timedelta(days=90)
@@ -104,7 +105,18 @@ def bypage():
 
                 #yes_no for all period
 
-                yes_no = page_data_en[["Date", 'Yes/No']]
+                yes_no_db = yes_no_db[["url", "yesno", "problemDate"]]
+                yes_no_db['url'] = yes_no_db['url'].str.replace('/content/canadasite', 'www.canada.ca')
+                yes_no_db['url'] = yes_no_db['url'].str.replace('www.canada.ca', 'https://www.canada.ca')
+                yes_no_db['url'] = yes_no_db['url'].str.replace('https://https://', 'https://')
+                yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
+                yes_no_db = yes_no_db.loc[yes_no_db['url'] == page]
+                yes_no = yes_no_db.reset_index(drop=True)
+                yes_no = yes_no[yes_no['problemDate'] >= earliest]
+                yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
+
+                yes_no = yes_no[['problemDate', 'yesno']]
+                yes_no = yes_no.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
                 yes_no = yes_no.dropna()
                 yes_no = yes_no.sort_values(by = 'Date', ascending=False)
                 yes_no = yes_no.reset_index(drop=True)
@@ -148,24 +160,24 @@ def bypage():
                 weekly_perc_r = weekly_perc[::-1]
 
 
+
                 start_plot = start_date
                 end_plot = end_date
 
-                if start_plot < dates[0]:
-                    start_plot = dates[0]
+                if start_plot < dates[0].strftime('%F'):
+                    start_plot = dates[0].strftime('%F')
 
-                if end_plot > dates[-1]:
-                    end_plot = dates[-1]
+                if end_plot > dates[-1].strftime('%F'):
+                    end_plot = dates[-1].strftime('%F')
 
-                all_start = dates[0]
-                all_end = dates[-1]
+                all_start = dates[0].strftime('%F')
+                all_end = dates[-1].strftime('%F')
 
                 img = io.BytesIO()
                 x = dates
                 y1 = daily_values
                 y2 = weekly_values
                 fig, ax = plt.subplots()
-                plt.xticks(rotation=45)
                 plt.ylim(0, 100)
                 if lang == 'en':
                     ax.plot(x, y1, linewidth=0.5, label='Daily value')
@@ -179,6 +191,7 @@ def bypage():
 
                 plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                 plt.legend()
+                fig.autofmt_xdate()
                 loc = plticker.MultipleLocator(base=7.0)
                 plt.gcf().subplots_adjust(bottom=0.2)
                 ax.xaxis.set_major_locator(loc)
@@ -221,11 +234,15 @@ def bypage():
                 page_data_en = page_data_en[page_data_en['Date'] <= end_date]
                 page_data_en = page_data_en[page_data_en['Date'] >= start_date]
 
+                yes_no_period = yes_no_db[yes_no_db['problemDate'] <= end_date]
+                yes_no_period = yes_no_db[yes_no_db['problemDate'] >= start_date]
 
-                yes_no_period = page_data_en[["Date", 'Yes/No']]
+                yes_no_period = yes_no_period[['problemDate', 'yesno']]
+                yes_no_period = yes_no_period.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
                 yes_no_period = yes_no_period.dropna()
                 yes_no_period = yes_no_period.sort_values(by = 'Date', ascending=False)
                 yes_no_period = yes_no_period.reset_index(drop=True)
+
 
                 if yes_no_period.empty:
                     score_period = 'unavailable'
