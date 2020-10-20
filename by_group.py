@@ -43,6 +43,7 @@ def bygroup():
     end_date = request.args.get('end_date', today)
 
 
+
     if lang == 'en':
         tag_columns = ['Date', 'Comment']
         chart_columns = ['Date', 'Yes', 'No', 'Daily percentage (%)', 'Weekly rolling mean (%)']
