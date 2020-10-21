@@ -48,13 +48,13 @@ def bypage():
         tag_columns = ['Date', 'Comment']
         reason_column_names = ['Feedback count', 'Reason', 'Significant words']
         word_column_names = ['Count', 'Word']
-        chart_columns = ['Date', 'Yes', 'No', 'Daily percentage (%)', 'Weekly rolling mean (%)']
+        chart_columns = ['Date', 'Yes', 'No', 'Daily ratio', 'Weekly rolling mean']
 
     if lang == 'fr':
         tag_columns = ['Date', 'Commentaire']
         reason_column_names = ['Nombre de rétroactions', 'Raison', 'Mots significatifs']
         word_column_names = ['Nombre', 'Mots']
-        chart_columns = ['Date', 'Oui', 'Non', 'Pourcentage quotidien (%)', 'Moyenne mobile sur 7 jours (%)']
+        chart_columns = ['Date', 'Oui', 'Non', 'Proportion quotidienne', 'Moyenne mobile sur 7 jours']
 
 
     if page == 'no_page':
@@ -268,7 +268,10 @@ def bypage():
                     elif score_period < score:
                         delta =  format(float(score_period)-float(score), '.2f')
                     else:
-                        delta = 'no change'
+                        if lang == 'en':
+                            delta = 'no change'
+                        if lang == 'fr':
+                            delta = 'aucun changement'
 
 
                 # only keep commments

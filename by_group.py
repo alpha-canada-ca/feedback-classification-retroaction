@@ -30,6 +30,8 @@ def bygroup():
 
     #import data as pickle
     data = deserialize('data/all_data.pickle')
+    yes_no_db = deserialize('data/yes_no_db.pickle')
+
     today = DT.date.today()
     week_ago = today - DT.timedelta(days=7)
     earliest = today - DT.timedelta(days=90)
@@ -43,15 +45,14 @@ def bygroup():
     end_date = request.args.get('end_date', today)
 
 
-
     if lang == 'en':
         tag_columns = ['Date', 'Comment']
-        chart_columns = ['Date', 'Yes', 'No', 'Daily percentage (%)', 'Weekly rolling mean (%)']
+        chart_columns = ['Date', 'Yes', 'No', 'Daily ratio', 'Weekly rolling mean']
 
     if lang == 'fr':
         tag_columns = ['Date', 'Commentaire']
         reason_column_names = ['Nombre de rétroactions', 'Raison', 'Mots significatifs']
-        chart_columns = ['Date', 'Oui', 'Non', 'Pourcentage quotidien (%)', 'Moyenne mobile sur 7 jours (%)']
+        chart_columns = ['Date', 'Oui', 'Non', 'Proportion quotidienne (%)', 'Moyenne mobile sur 7 jours']
 
 
     if group == 'no_group':
@@ -95,7 +96,21 @@ def bygroup():
 
             #yes_no for all period
 
-            yes_no = group_data[["Date", 'Yes/No']]
+            yes_no_db = yes_no_db[["url", "yesno", "problemDate"]]
+            yes_no_db['url'] = yes_no_db['url'].str.replace('/content/canadasite', 'www.canada.ca')
+            yes_no_db['url'] = yes_no_db['url'].str.replace('www.canada.ca', 'https://www.canada.ca')
+            yes_no_db['url'] = yes_no_db['url'].str.replace('https://https://', 'https://')
+            yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
+            yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
+            yes_no_db = yes_no_db[yes_no_db['url'].isin(list(urls['URL_function']))]
+            yes_no = yes_no_db.reset_index(drop=True)
+            yes_no = yes_no[yes_no['problemDate'] >= earliest]
+
+
+
+
+            yes_no = yes_no[['problemDate', 'yesno']]
+            yes_no = yes_no.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
             yes_no = yes_no.dropna()
             yes_no = yes_no.sort_values(by = 'Date', ascending=False)
             yes_no = yes_no.reset_index(drop=True)
@@ -116,7 +131,7 @@ def bygroup():
                 by_date[date]['Yes'] = 0
 
             for date in by_date:
-              by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100]
+              by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No']))]
 
 
             df_yes = pd.DataFrame(list(by_date.values()),columns = ['Yes', 'No', 'Percentage'])
@@ -139,6 +154,7 @@ def bygroup():
             weekly_perc_r = weekly_perc[::-1]
 
 
+
             start_plot = start_date
             end_plot = end_date
 
@@ -156,20 +172,20 @@ def bygroup():
             y1 = daily_values
             y2 = weekly_values
             fig, ax = plt.subplots()
-            plt.xticks(rotation=45)
-            plt.ylim(0, 100)
+            plt.ylim(0, 1)
             if lang == 'en':
                 ax.plot(x, y1, linewidth=0.5, label='Daily value')
                 ax.plot(x, y2, linewidth=3.0, label='Weekly rolling mean')
-                plt.title('Percentage of people who said they found their answer')
+                plt.title('Ratio of people who said they found their answer')
 
             if lang == 'fr':
                 ax.plot(x, y1, linewidth=0.5, label='Valeur quotidienne')
                 ax.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
-                plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
+                plt.title('Proportion de gens qui disent avoir trouver leur réponse')
 
             plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
             plt.legend()
+            fig.autofmt_xdate()
             loc = plticker.MultipleLocator(base=7.0)
             plt.gcf().subplots_adjust(bottom=0.2)
             ax.xaxis.set_major_locator(loc)
@@ -194,7 +210,7 @@ def bygroup():
                   no= total['No']
                 else:
                   no = 0
-                score = (yes/ ( yes +  no)) * 100
+                score = (yes/ ( yes +  no))
                 score = format(score, '.2f')
 
 
@@ -213,10 +229,15 @@ def bygroup():
             group_data = group_data[group_data['Date'] >= start_date]
 
 
-            yes_no_period = group_data[["Date", 'Yes/No']]
+            yes_no_period = yes_no_db[yes_no_db['problemDate'] <= end_date]
+            yes_no_period = yes_no_db[yes_no_db['problemDate'] >= start_date]
+
+            yes_no_period = yes_no_period[['problemDate', 'yesno']]
+            yes_no_period = yes_no_period.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
             yes_no_period = yes_no_period.dropna()
             yes_no_period = yes_no_period.sort_values(by = 'Date', ascending=False)
             yes_no_period = yes_no_period.reset_index(drop=True)
+
 
             if yes_no_period.empty:
                 score_period = 'unavailable'
@@ -235,7 +256,7 @@ def bygroup():
                 else:
                   no_period = 0
 
-                score_period = (yes_period / ( yes_period +  no_period)) * 100
+                score_period = (yes_period / ( yes_period +  no_period))
                 score_period = format(score_period, '.2f')
                 if score_period > score:
                     delta = '+' + format(float(score_period)-float(score), '.2f')

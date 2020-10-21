@@ -195,8 +195,7 @@
             </ul>
             <h2 id="found">Said they found their answer?</h2>
 
-            <p>Data about the percentage of people who found their answer is not available at this time.</p>
-            <!--
+            <!--<p>Data about the percentage of people who found their answer is not available at this time.</p>-->
             <details>
                <summary>How to interpret this data</summary>
                <p>This data is <strong>not the equivalent of a task success rate</strong> or an accurate measure of the performance of the page. </p>
@@ -216,7 +215,7 @@
                   <ul>
                      <li>Yes: <strong>{{ yes_period }}</strong></li>
                      <li>No: <strong>{{ no_period }}</strong></li>
-                     <li>Ratio: <strong>{{ score_period }}%</strong> ({{ delta }} compared to last 90 days)</li>
+                     <li>Ratio: <strong>{{ score_period }}</strong> ({{ delta }} compared to last 90 days)</li>
                   </ul>
                </div>
                <div class="col-md-6">
@@ -225,7 +224,7 @@
                   <ul>
                      <li>Yes: <strong>{{ yes }}</strong></li>
                      <li>No: <strong>{{ no }}</strong></li>
-                     <li>Ratio: <strong>{{ score }}%</strong></li>
+                     <li>Ratio: <strong>{{ score }}</strong></li>
                   </ul>
                </div>
             </div>
@@ -249,7 +248,7 @@
                   {% endfor %}
                </table>
             </details>
-            -->
+
             <h2 id="tag">By tag</h2>
             <p>From {{ start_date }} to {{ end_date }}: </p>
             <ul class="list-unstyled">
