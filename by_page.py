@@ -105,17 +105,18 @@ def bypage():
 
                 #yes_no for all period
 
-                yes_no_db = yes_no_db[["url", "yesno", "problemDate"]]
+                yes_no_db = yes_no_db[["url", "yesno", "problemDate", "problem"]]
                 yes_no_db['url'] = yes_no_db['url'].str.replace('/content/canadasite', 'www.canada.ca')
                 yes_no_db['url'] = yes_no_db['url'].str.replace('www.canada.ca', 'https://www.canada.ca')
                 yes_no_db['url'] = yes_no_db['url'].str.replace('https://https://', 'https://')
-                yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
                 yes_no_db = yes_no_db.loc[yes_no_db['url'] == page]
-                yes_no = yes_no_db.reset_index(drop=True)
-                yes_no = yes_no[yes_no['problemDate'] >= earliest]
+                yes_no_db = yes_no_db.reset_index(drop=True)
+                yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
                 yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
+                yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
 
-                yes_no = yes_no[['problemDate', 'yesno']]
+                reasons = yes_no_db[['problem']]
+                yes_no = yes_no_db[['problemDate', 'yesno']]
                 yes_no = yes_no.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
                 yes_no = yes_no.dropna()
                 yes_no = yes_no.sort_values(by = 'Date', ascending=False)
@@ -164,14 +165,14 @@ def bypage():
                 start_plot = start_date
                 end_plot = end_date
 
-                if start_plot < dates[0].strftime('%F'):
-                    start_plot = dates[0].strftime('%F')
+                if start_plot < dates[0]:
+                    start_plot = dates[0]
 
-                if end_plot > dates[-1].strftime('%F'):
-                    end_plot = dates[-1].strftime('%F')
+                if end_plot > dates[-1]:
+                    end_plot = dates[-1]
 
-                all_start = dates[0].strftime('%F')
-                all_end = dates[-1].strftime('%F')
+                all_start = dates[0]
+                all_end = dates[-1]
 
                 img = io.BytesIO()
                 x = dates
@@ -453,6 +454,8 @@ def bypage():
                         tags_en = page_data_en["tags"].str.split(",", n = 3, expand = True)
                         page_data_en = page_data_en.join(tags_en)
                         page_data_en = page_data_en.drop(columns=['tags'])
+
+
 
                         #get most frequent words for all of page
                         #get all words in a list

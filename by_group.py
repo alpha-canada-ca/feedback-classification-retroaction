@@ -96,20 +96,20 @@ def bygroup():
 
             #yes_no for all period
 
-            yes_no_db = yes_no_db[["url", "yesno", "problemDate"]]
+            yes_no_db = yes_no_db[["url", "yesno", "problemDate", "problem"]]
             yes_no_db['url'] = yes_no_db['url'].str.replace('/content/canadasite', 'www.canada.ca')
             yes_no_db['url'] = yes_no_db['url'].str.replace('www.canada.ca', 'https://www.canada.ca')
             yes_no_db['url'] = yes_no_db['url'].str.replace('https://https://', 'https://')
+            yes_no_db = yes_no_db[yes_no_db['url'].isin(list(urls['URL_function']))]
+            yes_no_db = yes_no_db.reset_index(drop=True)
             yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
             yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
-            yes_no_db = yes_no_db[yes_no_db['url'].isin(list(urls['URL_function']))]
-            yes_no = yes_no_db.reset_index(drop=True)
             yes_no = yes_no[yes_no['problemDate'] >= earliest]
 
+            reasons = yes_no_db[['problem']]
 
 
-
-            yes_no = yes_no[['problemDate', 'yesno']]
+            yes_no = yes_no_db[['problemDate', 'yesno']]
             yes_no = yes_no.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
             yes_no = yes_no.dropna()
             yes_no = yes_no.sort_values(by = 'Date', ascending=False)
