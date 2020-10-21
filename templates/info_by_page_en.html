@@ -217,7 +217,7 @@
                   <ul>
                      <li>Yes: <strong>{{ yes_period }}</strong></li>
                      <li>No: <strong>{{ no_period }}</strong></li>
-                     <li>Ratio: <strong>{{ score_period }}%</strong> ({{ delta }} compared to last 90 days)</li>
+                     <li>Ratio: <strong>{{ score_period }}</strong> ({{ delta }} compared to last 90 days)</li>
                   </ul>
                </div>
                <div class="col-md-6">
@@ -226,13 +226,13 @@
                   <ul>
                      <li>Yes: <strong>{{ yes }}</strong></li>
                      <li>No: <strong>{{ no }}</strong></li>
-                     <li>Ratio: <strong>{{ score }}%</strong></li>
+                     <li>Ratio: <strong>{{ score }}</strong></li>
                   </ul>
                </div>
             </div>
             <img src="data:image/png;base64,{{ plot_url }}" alt="See table below for numbers">
             <details>
-               <summary>Table: Percentage of people of who said they found their answer</summary>
+               <summary>Table: Proportion of people of who said they found their answer</summary>
                <table class="wb-tables table table-striped">
                   <tr>
                      {% for col in chart_columns %}
@@ -348,7 +348,7 @@
                </ul>
             </details>
             <h2 id="reason">By reason</h2>
-            <p>Data about the number of comments by reason is not available at the moment.</p>  
+            <p>Data about the number of comments by reason is not available at the moment.</p>
             <!--
             <p>From {{ start_date }} to {{ end_date }}: </p>
             <table class="wb-tables table table-striped">

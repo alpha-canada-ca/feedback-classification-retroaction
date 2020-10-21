@@ -137,7 +137,7 @@ def bypage():
                     by_date[date]['Yes'] = 0
 
                 for date in by_date:
-                  by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100]
+                  by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No']))]
 
 
                 df_yes = pd.DataFrame(list(by_date.values()),columns = ['Yes', 'No', 'Percentage'])
@@ -178,16 +178,16 @@ def bypage():
                 y1 = daily_values
                 y2 = weekly_values
                 fig, ax = plt.subplots()
-                plt.ylim(0, 100)
+                plt.ylim(0, 1)
                 if lang == 'en':
                     ax.plot(x, y1, linewidth=0.5, label='Daily value')
                     ax.plot(x, y2, linewidth=3.0, label='Weekly rolling mean')
-                    plt.title('Percentage of people who said they found their answer')
+                    plt.title('Ratio of people who said they found their answer')
 
                 if lang == 'fr':
                     ax.plot(x, y1, linewidth=0.5, label='Valeur quotidienne')
                     ax.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
-                    plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
+                    plt.title('Proportion de gens qui disent avoir trouver leur réponse')
 
                 plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                 plt.legend()
@@ -216,7 +216,7 @@ def bypage():
                       no= total['No']
                     else:
                       no = 0
-                    score = (yes/ ( yes +  no)) * 100
+                    score = (yes/ ( yes +  no))
                     score = format(score, '.2f')
 
 
@@ -261,7 +261,7 @@ def bypage():
                     else:
                       no_period = 0
 
-                    score_period = (yes_period / ( yes_period +  no_period)) * 100
+                    score_period = (yes_period / ( yes_period +  no_period))
                     score_period = format(score_period, '.2f')
                     if score_period > score:
                         delta = '+' + format(float(score_period)-float(score), '.2f')
