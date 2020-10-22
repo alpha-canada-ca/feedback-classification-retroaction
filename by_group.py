@@ -108,7 +108,12 @@ def bygroup():
             yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
             yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
 
+
+            yes_no_period = yes_no_db[yes_no_db['problemDate'] <= end_date]
+            yes_no_period = yes_no_db[yes_no_db['problemDate'] >= start_date]
+
             reasons = yes_no_db[['problem']]
+            reasons_period = yes_no_period[['problem']]
 
 
             yes_no = yes_no_db[['problemDate', 'yesno']]
@@ -216,26 +221,7 @@ def bygroup():
                 score = format(score, '.2f')
 
 
-            #by what's wrong reason
 
-            if lang == "fr":
-                reasons[["problem"]] = reasons[["problem"]].replace([''], ['Aucun'])
-                reasons[["problem"]] = reasons[["problem"]].replace(["I'm not in the right place"], ["Je ne suis pas au bon endroit"])
-                reasons[["problem"]] = reasons[["problem"]].replace(["I’m not in the right place"], ["Je ne suis pas au bon endroit"])
-                reasons[["problem"]] = reasons[["problem"]].replace(["Other reason"], ["Autre raison"])
-                reasons[["problem"]] = reasons[["problem"]].replace(["The information isn't clear"], ["L'information n'est pas claire"])
-                reasons[["problem"]] = reasons[["problem"]].replace(["The information isn’t clear"], ["L'information n'est pas claire"])
-                reasons[["problem"]] = reasons[["problem"]].replace(["Something is broken or incorrect"], ["Quelque chose est brisé ou incorrect"])
-                reasons[["problem"]] = reasons[["problem"]].replace(["The answer I need is missing"], ["La réponse dont j'ai besoin n'est pas là"])
-
-            if lang == 'en':
-                reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
-
-            reasons_db = reasons["problem"].value_counts()
-            by_reason = reasons_db.to_frame()
-            by_reason.columns = ['Feedback count']
-            by_reason.reset_index(level=0, inplace=True)
-            by_reason = by_reason[['Feedback count', 'index']]
 
 
             group_data["What's wrong"].fillna(False, inplace=True)
@@ -252,8 +238,6 @@ def bygroup():
             group_data = group_data[group_data['Date'] >= start_date]
 
 
-            yes_no_period = yes_no_db[yes_no_db['problemDate'] <= end_date]
-            yes_no_period = yes_no_db[yes_no_db['problemDate'] >= start_date]
 
             yes_no_period = yes_no_period[['problemDate', 'yesno']]
             yes_no_period = yes_no_period.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
@@ -292,6 +276,50 @@ def bygroup():
                         delta = 'aucun changement'
 
 
+            #by what's wrong reason
+
+            if lang == "fr":
+                reasons[["problem"]] = reasons[["problem"]].replace([''], ['Aucune'])
+                reasons[["problem"]] = reasons[["problem"]].replace(["I'm not in the right place"], ["Je ne suis pas au bon endroit"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["I’m not in the right place"], ["Je ne suis pas au bon endroit"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["Other reason"], ["Autre raison"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["The information isn't clear"], ["L'information n'est pas claire"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["The information isn’t clear"], ["L'information n'est pas claire"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["Something is broken or incorrect"], ["Quelque chose est brisé ou incorrect"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["The answer I need is missing"], ["La réponse dont j'ai besoin n'est pas là"])
+
+            if lang == 'en':
+                reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
+
+            reasons_db = reasons["problem"].value_counts()
+            by_reason = reasons_db.to_frame()
+            by_reason.columns = ['Feedback count']
+            by_reason.reset_index(level=0, inplace=True)
+            by_reason = by_reason[['Feedback count', 'index']]
+
+
+
+            if lang == "fr":
+                reasons_period[["problem"]] = reasons_period[["problem"]].replace([''], ['Aucune'])
+                reasons_period[["problem"]] = reasons_period[["problem"]].replace(["I'm not in the right place"], ["Je ne suis pas au bon endroit"])
+                reasons_period[["problem"]] = reasons_period[["problem"]].replace(["I’m not in the right place"], ["Je ne suis pas au bon endroit"])
+                reasons_period[["problem"]] = reasons_period[["problem"]].replace(["Other reason"], ["Autre raison"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["The information isn't clear"], ["L'information n'est pas claire"])
+                reasons_period[["problem"]] = reasons_period[["problem"]].replace(["The information isn’t clear"], ["L'information n'est pas claire"])
+                reasons_period[["problem"]] = reasons_period[["problem"]].replace(["Something is broken or incorrect"], ["Quelque chose est brisé ou incorrect"])
+                reasons_period[["problem"]] = reasons_period[["problem"]].replace(["The answer I need is missing"], ["La réponse dont j'ai besoin n'est pas là"])
+
+            if lang == 'en':
+                reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
+
+            reasons_period[["problem"]] = reasons_period[["problem"]].replace([''], ['None'])
+            reasons_period_db = reasons_period["problem"].value_counts()
+            by_reason_period = reasons_period_db.to_frame()
+            by_reason_period.columns = ['Feedback count']
+            by_reason_period.reset_index(level=0, inplace=True)
+            by_reason_period = by_reason_period[['Feedback count', 'index']]
+
+
             # only keep commments
 
             all_data = all_data.drop(columns=['Yes/No'])
@@ -300,10 +328,10 @@ def bygroup():
             if all_data.empty:
 
                 if lang == 'en':
-                    return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+                    return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
                 if lang == 'fr':
-                    return render_template("by_group_fr.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+                    return render_template("by_group_fr.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
             else:
 
@@ -449,10 +477,10 @@ def bygroup():
                 if group_data.empty:
 
                     if lang == 'en':
-                        return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+                        return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
                     if lang == 'fr':
-                        return render_template("by_group_fr.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+                        return render_template("by_group_fr.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
                 else:
 
@@ -558,10 +586,10 @@ def bygroup():
 
                         if lang == 'en':
 
-                            return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, zip = zip, page = page, list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+                            return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, zip = zip, page = page, list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
                         if lang == 'fr':
-                            return render_template("info_by_page_fr.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score,  list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+                            return render_template("info_by_page_fr.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score,  list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
                     else:
 
@@ -634,7 +662,7 @@ def bygroup():
 
                         if lang == 'en':
 
-                            return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags,  list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+                            return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags,  list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
                         if lang == 'fr':
-                            return render_template("by_group_fr.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
+                            return render_template("by_group_fr.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))

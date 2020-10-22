@@ -347,21 +347,47 @@
             <h2 id="reason">Par raison</h2>
             <!--<p>Les données sur le nombre de rétroactions par raison ne sont pas disponibles pour le moment.</p>-->
 
-            <p>De {{ start_date }} à {{ end_date }} :</p>
-            <table class="wb-tables table table-striped">
-               <tr>
-                  {% for col in reason_column_names %}
-                  <th>{{col}}</th>
-                  {% endfor %}
-               </tr>
-               {% for row in row_data_reason %}
-               <tr>
-                  {% for col, row_ in zip(reason_column_names, row) %}
-                  <td>{{row_}}</td>
-                  {% endfor %}
-               </tr>
-               {% endfor %}
-            </table>
+            <div class="row">
+               <div class="col-md-6">
+                  <h3>Pour les dates sélectionnées</h3>
+                  <p>De {{ start_date }} à {{ end_date }} :</p>
+                  <table class="wb-tables table table-striped">
+                     <tr>
+                        {% for col in reason_column_names %}
+                        <th>{{col}}</th>
+                        {% endfor %}
+                     </tr>
+                     {% for row in row_data_reason_period %}
+                     <tr>
+                        {% for col, row_ in zip(reason_column_names, row) %}
+                        <td>{{row_}}</td>
+                        {% endfor %}
+                     </tr>
+                     {% endfor %}
+                  </table>
+
+               </div>
+               <div class="col-md-6">
+                  <h3>Pour les derniers 90 jours</h3>
+                  <p>De {{ all_start }} à {{ all_end }} :</p>
+                  <table class="wb-tables table table-striped">
+                     <tr>
+                        {% for col in reason_column_names %}
+                        <th>{{col}}</th>
+                        {% endfor %}
+                     </tr>
+                     {% for row in row_data_reason %}
+                     <tr>
+                        {% for col, row_ in zip(reason_column_names, row) %}
+                        <td>{{row_}}</td>
+                        {% endfor %}
+                     </tr>
+                     {% endfor %}
+                  </table>
+
+               </div>
+            </div>
+            
             <h2 id="pages">Page dans le groupe « {{ group_name }} »</h2>
             <table class="wb-tables table table-striped table-hover" data-page-length='20'>
                <thead>

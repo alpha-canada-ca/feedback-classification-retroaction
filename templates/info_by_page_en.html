@@ -351,21 +351,46 @@
             <h2 id="reason">By reason</h2>
             <!--<p>Data about the number of comments by reason is not available at the moment.</p>-->
 
-            <p>From {{ start_date }} to {{ end_date }}: </p>
-            <table class="wb-tables table table-striped">
-               <tr>
-                  {% for col in reason_column_names %}
-                  <th>{{col}}</th>
-                  {% endfor %}
-               </tr>
-               {% for row in row_data_reason %}
-               <tr>
-                  {% for col, row_ in zip(reason_column_names, row) %}
-                  <td>{{row_}}</td>
-                  {% endfor %}
-               </tr>
-               {% endfor %}
-            </table>
+            <div class="row">
+               <div class="col-md-6">
+                  <h3>For the selected date range</h3>
+                  <p>From {{ start_date }} to {{ end_date }}: </p>
+                  <table class="wb-tables table table-striped">
+                     <tr>
+                        {% for col in reason_column_names %}
+                        <th>{{col}}</th>
+                        {% endfor %}
+                     </tr>
+                     {% for row in row_data_reason_period %}
+                     <tr>
+                        {% for col, row_ in zip(reason_column_names, row) %}
+                        <td>{{row_}}</td>
+                        {% endfor %}
+                     </tr>
+                     {% endfor %}
+                  </table>
+               </div>
+               <div class="col-md-6">
+                  <h3>For the last 90 days</h3>
+                  <p>From {{ all_start }} to {{ all_end }}:</p>
+                  <table class="wb-tables table table-striped">
+                     <tr>
+                        {% for col in reason_column_names %}
+                        <th>{{col}}</th>
+                        {% endfor %}
+                     </tr>
+                     {% for row in row_data_reason %}
+                     <tr>
+                        {% for col, row_ in zip(reason_column_names, row) %}
+                        <td>{{row_}}</td>
+                        {% endfor %}
+                     </tr>
+                     {% endfor %}
+                  </table>
+               </div>
+            </div>
+
+
 
             <h2 id="common">Most frequent words</h2>
             <p>From {{ start_date }} to {{ end_date }}: </p>
