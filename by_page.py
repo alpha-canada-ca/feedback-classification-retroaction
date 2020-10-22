@@ -115,6 +115,7 @@ def bypage():
                 yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
                 yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
 
+
                 reasons = yes_no_db[['problem']]
                 yes_no = yes_no_db[['problemDate', 'yesno']]
                 yes_no = yes_no.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
@@ -282,6 +283,7 @@ def bypage():
                 by_reason = reasons_db.to_frame()
                 by_reason.columns = ['Feedback count']
                 by_reason.reset_index(level=0, inplace=True)
+                by_reason = by_reason[['Feedback count', 'index']]
 
                 all_data_en = all_data_en.dropna()
 
@@ -835,7 +837,7 @@ def bypage():
 
 
                 #by what's wrong reason
-                reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
+                reasons[["problem"]] = reasons[["problem"]].replace([''], ['Aucun'])
                 reasons[["problem"]] = reasons[["problem"]].replace(["I'm not in the right place"], ["Je ne suis pas au bon endroit"])
                 reasons[["problem"]] = reasons[["problem"]].replace(["Other reason"], ["Autre raison"])
                 reasons[["problem"]] = reasons[["problem"]].replace(["The information isn't clear"], ["L'information n'est pas claire"])
@@ -846,6 +848,7 @@ def bypage():
                 by_reason = reasons_db.to_frame()
                 by_reason.columns = ['Feedback count']
                 by_reason.reset_index(level=0, inplace=True)
+                by_reason = by_reason[['Feedback count', 'index']]
 
 
                 all_data_fr = all_data_fr.dropna()
