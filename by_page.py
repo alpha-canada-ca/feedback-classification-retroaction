@@ -275,18 +275,23 @@ def bypage():
                             delta = 'aucun changement'
 
 
-                # only keep commments
+                #by what's wrong reason
 
+                reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
+                reasons_db = reasons["problem"].value_counts()
+                by_reason = reasons_db.to_frame()
+                by_reason.columns = ['Feedback count']
+                by_reason.reset_index(level=0, inplace=True)
 
                 all_data_en = all_data_en.dropna()
 
                 if all_data_en.empty:
 
                     if lang == 'en':
-                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name)
+                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
                     if lang == 'fr':
-                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name)
+                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
                 else:
 
@@ -327,14 +332,14 @@ def bypage():
                       tag_dico[tag] = topic_df_en[['Date', 'Comment']]
 
 
-                    if 1 in page_data_en.columns:
+                    if 1 in all_data_en.columns:
                         for tag, topic_df_en in all_data_en.groupby(1):
                             if tag_dico[tag].empty:
                                 tag_dico[tag] = topic_df_en[['Date', 'Comment']]
                             else:
                                 tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
 
-                    if 2 in page_data_en.columns:
+                    if 2 in all_data_en.columns:
                         for tag, topic_df_en in all_data_en.groupby(2):
                             if tag_dico[tag].empty:
                                 tag_dico[tag] = topic_df_en[['Date', 'Comment']]
@@ -428,14 +433,12 @@ def bypage():
                     if page_data_en.empty:
 
                         if lang == 'en':
-                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name)
+                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
                         if lang == 'fr':
-                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name)
+                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
                     else:
-
-
 
 
 
@@ -488,15 +491,6 @@ def bypage():
 
 
                         page_data_en = page_data_en.reset_index(drop=True)
-
-
-                        #by what's wrong reason
-
-                        reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
-                        reasons_db = reasons["problem"].value_counts()
-                        by_reason = reasons_db.to_frame()
-                        by_reason.columns = ['Feedback count']
-                        by_reason.reset_index(level=0, inplace=True)
 
 
 
@@ -660,7 +654,7 @@ def bypage():
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Spam']
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Ignore']
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Duplicate']
-                page_data_en = page_data_fr.reset_index(drop=True)
+                page_data_fr = page_data_fr.reset_index(drop=True)
 
                 page_data_fr['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_page_title']]
                 page_data_fr['Lookup_group_EN'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_group_EN']]
@@ -676,7 +670,19 @@ def bypage():
 
                 title = page_data_fr['Lookup_page_title'][0]
 
-                yes_no = page_data_fr[["Date", 'Yes/No']]
+                yes_no_db = yes_no_db[["url", "yesno", "problemDate", "problem"]]
+                yes_no_db['url'] = yes_no_db['url'].str.replace('/content/canadasite', 'www.canada.ca')
+                yes_no_db['url'] = yes_no_db['url'].str.replace('www.canada.ca', 'https://www.canada.ca')
+                yes_no_db['url'] = yes_no_db['url'].str.replace('https://https://', 'https://')
+                yes_no_db = yes_no_db.loc[yes_no_db['url'] == page]
+                yes_no_db = yes_no_db.reset_index(drop=True)
+                yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
+                yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
+                yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
+
+                reasons = yes_no_db[['problem']]
+                yes_no = yes_no_db[['problemDate', 'yesno']]
+                yes_no = yes_no.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
                 yes_no = yes_no.dropna()
                 yes_no = yes_no.sort_values(by = 'Date', ascending=False)
                 yes_no = yes_no.reset_index(drop=True)
@@ -697,7 +703,7 @@ def bypage():
                     by_date[date]['Yes'] = 0
 
                 for date in by_date:
-                  by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No'])) * 100]
+                  by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No']))]
 
 
                 df_yes = pd.DataFrame(list(by_date.values()),columns = ['Yes', 'No', 'Percentage'])
@@ -718,6 +724,9 @@ def bypage():
                 weekly_perc = ["%.2f" % number for number in weekly_values]
                 daily_perc_r = daily_perc[::-1]
                 weekly_perc_r = weekly_perc[::-1]
+
+
+
                 start_plot = start_date
                 end_plot = end_date
 
@@ -735,23 +744,24 @@ def bypage():
                 y1 = daily_values
                 y2 = weekly_values
                 fig, ax = plt.subplots()
-                plt.xticks(rotation=45)
-                plt.ylim(0, 100)
+                plt.ylim(0, 1)
                 if lang == 'en':
                     ax.plot(x, y1, linewidth=0.5, label='Daily value')
                     ax.plot(x, y2, linewidth=3.0, label='Weekly rolling mean')
-                    plt.title('Percentage of people who said they found their answer')
+                    plt.title('Ratio of people who said they found their answer')
 
                 if lang == 'fr':
                     ax.plot(x, y1, linewidth=0.5, label='Valeur quotidienne')
                     ax.plot(x, y2, linewidth=3.0, label='Moyenne mobile sur 7 jours')
-                    plt.title('Pourcentage de gens qui disent avoir trouver leur réponse')
+                    plt.title('Proportion de gens qui disent avoir trouver leur réponse')
+
                 plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                 plt.legend()
+                fig.autofmt_xdate()
                 loc = plticker.MultipleLocator(base=7.0)
                 plt.gcf().subplots_adjust(bottom=0.2)
                 ax.xaxis.set_major_locator(loc)
-                plt.savefig(img, format='png')
+                fig.savefig(img, format='png')
                 plt.close()
                 img.seek(0)
 
@@ -759,6 +769,8 @@ def bypage():
 
                 if yes_no.empty:
                     score = 'unavailable'
+                    yes = 'unavailable'
+                    no = 'unavailable'
                 else:
                     total = yes_no['Yes/No'].value_counts()
                     if 'Yes' in total:
@@ -770,7 +782,7 @@ def bypage():
                       no= total['No']
                     else:
                       no = 0
-                    score = (yes/ ( yes +  no)) * 100
+                    score = (yes/ ( yes +  no))
                     score = format(score, '.2f')
 
                 page_data_fr["What's wrong"].fillna(False, inplace=True)
@@ -782,10 +794,15 @@ def bypage():
                 page_data_fr = page_data_fr[page_data_fr['Date'] <= end_date]
                 page_data_fr = page_data_fr[page_data_fr['Date'] >= start_date]
 
-                yes_no_period = page_data_fr[["Date", 'Yes/No']]
+                yes_no_period = yes_no_db[yes_no_db['problemDate'] <= end_date]
+                yes_no_period = yes_no_db[yes_no_db['problemDate'] >= start_date]
+
+                yes_no_period = yes_no_period[['problemDate', 'yesno']]
+                yes_no_period = yes_no_period.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
                 yes_no_period = yes_no_period.dropna()
                 yes_no_period = yes_no_period.sort_values(by = 'Date', ascending=False)
                 yes_no_period = yes_no_period.reset_index(drop=True)
+
 
                 if yes_no_period.empty:
                     score_period = 'unavailable'
@@ -804,15 +821,31 @@ def bypage():
                     else:
                       no_period = 0
 
-                    score_period = (yes_period / ( yes_period +  no_period)) * 100
+                    score_period = (yes_period / ( yes_period +  no_period))
                     score_period = format(score_period, '.2f')
                     if score_period > score:
                         delta = '+' + format(float(score_period)-float(score), '.2f')
                     elif score_period < score:
                         delta =  format(float(score_period)-float(score), '.2f')
                     else:
-                        delta = 'aucune différence'
+                        if lang == 'en':
+                            delta = 'no change'
+                        if lang == 'fr':
+                            delta = 'aucun changement'
 
+
+                #by what's wrong reason
+                reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
+                reasons[["problem"]] = reasons[["problem"]].replace(["I’m not in the right place"], ["Je ne suis pas au bon endroit"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["Other reason"], ["Autre raison"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["The information isn’t clear"], ["L'information n'est pas claire"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["Something is broken or incorrect"], ["Quelque chose est brisé ou incorrect"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["The answer I need is missing"], ["La réponse dont j'ai besoin n'est pas là"])
+
+                reasons_db = reasons["problem"].value_counts()
+                by_reason = reasons_db.to_frame()
+                by_reason.columns = ['Feedback count']
+                by_reason.reset_index(level=0, inplace=True)
 
 
                 all_data_fr = all_data_fr.dropna()
@@ -820,10 +853,10 @@ def bypage():
                 if all_data_fr.empty:
 
                     if lang == 'en':
-                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name)
+                        return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
                     if lang == 'fr':
-                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name)
+                        return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
                 else:
 
@@ -865,14 +898,14 @@ def bypage():
                       tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
 
 
-                    if 1 in page_data_fr.columns:
+                    if 1 in all_data_fr.columns:
                         for tag, topic_df_fr in all_data_fr.groupby(1):
                             if tag_dico[tag].empty:
                                 tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
                             else:
                                 tag_dico[tag] = tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
 
-                    if 2 in page_data_fr.columns:
+                    if 2 in all_data_fr.columns:
                         for tag, topic_df_fr in all_data_fr.groupby(2):
                             if tag_dico[tag].empty:
                                 tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
@@ -947,9 +980,6 @@ def bypage():
 
                     plots = list(tag_plots.values())
 
-
-
-
                     page_data_fr = page_data_fr.drop(columns=['Status'])
                     page_data_fr = page_data_fr.drop(columns=['Yes/No'])
                     page_data_fr["What's wrong"].fillna(False, inplace=True)
@@ -957,33 +987,25 @@ def bypage():
 
                     page_data_fr = page_data_fr.dropna()
 
+                    #get unconfirmed tags
+
+                    unconfirmed_fr = page_data_fr.loc[page_data_fr['Tags confirmed'] == False]
+
+
+                    page_data_fr = page_data_fr.loc[page_data_fr['Tags confirmed'] == True]
+
+
                     if page_data_fr.empty:
 
                         if lang == 'en':
-                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name)
+                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
                         if lang == 'fr':
-                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name)
+                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()))
 
                     else:
 
 
-
-                        #get unconfirmed tags
-
-                        unconfirmed_fr = page_data_fr.loc[page_data_fr['Tags confirmed'] == False]
-
-                        #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
-                        page_data_fr = page_data_fr.loc[page_data_fr['Tags confirmed'] == True]
-
-                        #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
-                        page_data_fr['tags'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_FR_tag']]
-
-                        #remove the Lookup_FR_tag column (it's not needed anymore)
-                        page_data_fr = page_data_fr.drop(columns=['Lookup_FR_tag'])
-
-
-                        #remove the Lookup_page_title column (it's not needed anymore)
                         page_data_fr = page_data_fr.drop(columns=['Tags confirmed'])
 
                         #resets the index for each row - needed for further processing
@@ -994,9 +1016,12 @@ def bypage():
                         #get data for specific page
 
                         #split tags and expand
+                        page_data_fr['tags'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_tag_FR']]
                         tags_fr = page_data_fr["tags"].str.split(",", n = 3, expand = True)
                         page_data_fr = page_data_fr.join(tags_fr)
                         page_data_fr = page_data_fr.drop(columns=['tags'])
+
+
 
                         #get most frequent words for all of page
                         #get all words in a list
@@ -1060,89 +1085,6 @@ def bypage():
 
 
                         page_data_fr = page_data_fr.reset_index(drop=True)
-
-                        #by what's wrong reason
-                        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace([False], ['Aucun'])
-                        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["The information isn't clear"], ["The information isn’t clear"])
-                        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["I'm not in the right place"], ["I’m not in the right place"])
-                        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["I’m not in the right place"], ["Je ne suis pas au bon endroit"])
-                        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["Other reason"], ["Autre raison"])
-                        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["The information isn’t clear"], ["L'information n'est pas claire"])
-                        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["Something is broken or incorrect"], ["Quelque chose est brisé ou incorrect"])
-                        page_data_fr[["What's wrong"]] = page_data_fr[["What's wrong"]].replace(["The answer I need is missing"], ["La réponse dont j'ai besoin n'est pas là"])
-                        reasons = page_data_fr["What's wrong"].value_counts()
-                        by_reason= reasons.to_frame()
-                        by_reason.columns = ['Feedback count']
-
-                        reason_dict = {}
-
-                        for reason, topic_df_fr in page_data_fr.groupby("What's wrong"):
-                            reason_dict[reason] = ' '.join(topic_df_fr['Comment'].tolist())
-
-
-                        tokenizer = nltk.RegexpTokenizer(r"\w+")
-
-                        for value in reason_dict:
-                            reason_dict[value] = tokenizer.tokenize(reason_dict[value])
-
-
-                        reason_list_fr= []
-                        for keys in reason_dict.keys():
-                            reason_list_fr.append(keys)
-
-
-                        reason_words_fr = []
-                        for values in reason_dict.values():
-                            reason_words_fr.append(values)
-
-
-                        nltk.download('wordnet')
-                        from nltk.stem import WordNetLemmatizer
-
-                        lemmatizer = WordNetLemmatizer()
-                        from nltk.corpus import stopwords
-
-                        reason_words_fr = [[word.lower() for word in value] for value in reason_words_fr]
-                        reason_words_fr = [[lemmatizer.lemmatize(word) for word in value] for value in reason_words_fr]
-                        reason_words_fr = [[word for word in value if word not in sw] for value in reason_words_fr]
-                        reason_words_fr = [[word for word in value if word.isalpha()] for value in reason_words_fr]
-
-                        from gensim.corpora.dictionary import Dictionary
-
-                        reason_dictionary_fr = Dictionary(reason_words_fr)
-
-                        reason_corpus_fr = [reason_dictionary_fr.doc2bow(reason) for reason in reason_words_fr]
-
-                        from gensim.models.tfidfmodel import TfidfModel
-
-                        reason_tfidf_fr = TfidfModel(reason_corpus_fr)
-
-                        reason_tfidf_weights_fr = [sorted(reason_tfidf_fr[doc], key=lambda w: w[1], reverse=True) for doc in reason_corpus_fr]
-
-                        reason_weighted_words_fr = [[(reason_dictionary_fr.get(id), weight) for id, weight in ar] for ar in reason_tfidf_weights_fr]
-
-                        reason_imp_words_fr = pd.DataFrame({'Reason': reason_list_fr, 'FR_words':  reason_weighted_words_fr})
-
-                        reason_imp_words_fr = reason_imp_words_fr.sort_values(by = 'Reason')
-
-                        reason_imp_words_fr = reason_imp_words_fr.reset_index(drop=True)
-
-                        reason_imp_words_fr['FR_words'] = reason_imp_words_fr['FR_words'].apply(lambda x: list(x))
-
-                        reason_imp_words_fr['FR_words'] = reason_imp_words_fr['FR_words'].apply(lambda x: x[:15])
-
-                        reason_imp_words_fr['FR_words'] = reason_imp_words_fr['FR_words'].apply(lambda x: [y[0] for y in x])
-
-                        by_reason = by_reason.reset_index()
-
-                        by_reason['Significant words'] = reason_imp_words_fr['FR_words']
-
-                        by_reason= by_reason.sort_values(by = 'Feedback count', ascending=False)
-
-
-                        by_reason['Significant words'] = by_reason['Significant words'].apply(lambda x: ', '.join(x))
-
-                        by_reason = by_reason[['Feedback count', 'index', 'Significant words']]
 
 
 
