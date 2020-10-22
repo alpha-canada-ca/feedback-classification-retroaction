@@ -435,12 +435,45 @@ def bypage():
 
                     page_data_en = page_data_en.dropna()
 
+
+                    #get most frequent words for all of page
+                    #get all words in a list
+                    word_list_en = page_data_en["Comment"].tolist()
+                    word_list_en = [str(i) for i in word_list_en]
+                    all_words_en = ' '.join([str(elem) for elem in word_list_en])
+
+                    #tokenize words
+                    tokenizer = nltk.RegexpTokenizer(r"\w+")
+                    tokens_en = tokenizer.tokenize(all_words_en)
+                    words_en = []
+                    for word in tokens_en:
+                            words_en.append(word.lower())
+
+                    #remove English stop words to get most frequent words
+                    nltk.download('stopwords')
+                    sw = nltk.corpus.stopwords.words('english')
+                    sw.append('covid')
+                    sw.append('19')
+                    words_ns_en = []
+                    for word in words_en:
+                            if word not in sw and word.isalpha():
+                                words_ns_en.append(word)
+                    #get most common words
+                    from nltk import FreqDist
+                    fdist1 = FreqDist(words_ns_en)
+                    most_common = fdist1.most_common(15)
+                    mc = pd.DataFrame(most_common, columns =['Word', 'Count'])
+                    mc = mc[['Count', 'Word']]
+
+
                     unconfirmed_en = page_data_en.loc[page_data_en['Tags confirmed'] == False]
 
                     #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
-                    page_data_en = page_data_en.loc[page_data_en['Tags confirmed'] == True]
+                    confirmed_en = page_data_en.loc[page_data_en['Tags confirmed'] == True]
 
-                    if page_data_en.empty:
+
+                    if confirmed_en.empty and unconfirmed_en.empty :
+
 
                         if lang == 'en':
                             return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
@@ -448,59 +481,101 @@ def bypage():
                         if lang == 'fr':
                             return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
-                    else:
 
+                    elif confirmed_en.empty:
+
+                        unconfirmed_en = unconfirmed_en.reset_index(drop=True)
+                        unconfirmed_en['tags'] = [','.join(map(str, l)) for l in unconfirmed_en['Lookup_tags']]
+                        unconfirmed_en = unconfirmed_en.drop(columns=['Lookup_tags'])
+                        unconfirmed_en = unconfirmed_en.drop(columns=['Tags confirmed'])
+                        unconfirmed_en = unconfirmed_en.reset_index(drop=True)
+                        unconfirmed_tags_en = unconfirmed_en["tags"].str.split(",", n = 3, expand = True)
+                        unconfirmed_en = unconfirmed_en.join(unconfirmed_tags_en)
+                        unconfirmed_en = unconfirmed_en.drop(columns=['tags'])
+
+                        unconfirmed_tag_count = unconfirmed_tags_en.apply(pd.Series.value_counts)
+                        unconfirmed_tag_count = unconfirmed_tag_count.fillna(0)
+                        unconfirmed_tag_count = unconfirmed_tag_count.astype(int)
+                        if 2 in unconfirmed_tag_count.columns:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1] + unconfirmed_tag_count[2]
+                        elif 1 in unconfirmed_tag_count.columns:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1]
+                        else:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0]
+                        unconfirmed_tag_count = unconfirmed_tag_count.sort_values(ascending = False)
+                        unconfirmed_by_tag = unconfirmed_tag_count.to_frame()
+                        unconfirmed_by_tag = unconfirmed_by_tag.sort_index(axis=0, level=None, ascending=True)
+                        unconfirmed_by_tag.columns = ['Feedback count']
+
+                        unconfirmed_by_tag = unconfirmed_by_tag.sort_values(by = 'Feedback count', ascending=False)
+                        unconfirmed_unique_tags = list(unconfirmed_by_tag.index)
+                        unconfirmed_tag_dico = {}
+
+                        tag_dico_columns = ['Date', 'Comment']
+
+                        for tag in unconfirmed_unique_tags:
+                          unconfirmed_tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
+
+                        for tag, topic_df_en in unconfirmed_en.groupby(0):
+                          unconfirmed_tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+
+
+                        if 1 in unconfirmed_en.columns:
+                            for tag, topic_df_en in unconfirmed_en.groupby(1):
+                                if unconfirmed_tag_dico[tag].empty:
+                                    unconfirmed_tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+                                else:
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
+
+                        if 2 in unconfirmed_en.columns:
+                            for tag, topic_df_en in unconfirmed_en.groupby(2):
+                                if unconfirmed_tag_dico[tag].empty:
+                                    unconfirmed_tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+                                else:
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
+
+
+                        for tag in unconfirmed_tag_dico:
+                            unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].sort_values(by = 'Date', ascending=False)
+
+
+                        unconfirmed_dict = { key: unconfirmed_tag_dico[key] for key in unconfirmed_unique_tags }
+
+                        tag_columns = ['Date', 'Comment']
+
+                        unconfirmed_tag_plots = { tag: tag_plots[tag] for tag in unconfirmed_unique_tags }
+                        unconfirmed_plots = list(unconfirmed_tag_plots.values())
+
+                        if lang == 'en':
+
+                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+
+                        if lang == 'fr':
+                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+
+
+                    elif unconfirmed_en.empty:
 
 
                         #remove the Lookup_page_title column (it's not needed anymore)
-                        page_data_en = page_data_en.drop(columns=['Tags confirmed'])
+                        confirmed_en = confirmed_en.drop(columns=['Tags confirmed'])
 
                         #resets the index for each row - needed for further processing
-                        page_data_en = page_data_en.reset_index(drop=True)
+                        confirmed_en = confirmed_en.reset_index(drop=True)
 
                         #split dataframe for French comments - same comments as above for each line
 
                         #get data for specific page
 
                         #split tags and expand
-                        page_data_en['tags'] = [','.join(map(str, l)) for l in page_data_en['Lookup_tags']]
-                        tags_en = page_data_en["tags"].str.split(",", n = 3, expand = True)
-                        page_data_en = page_data_en.join(tags_en)
-                        page_data_en = page_data_en.drop(columns=['tags'])
+                        confirmed_en['tags'] = [','.join(map(str, l)) for l in confirmed_en['Lookup_tags']]
+                        tags_en = confirmed_en["tags"].str.split(",", n = 3, expand = True)
+                        confirmed_en = confirmed_en.join(tags_en)
+                        confirmed_en = confirmed_en.drop(columns=['tags'])
 
 
 
-                        #get most frequent words for all of page
-                        #get all words in a list
-                        word_list_en = page_data_en["Comment"].tolist()
-                        word_list_en = [str(i) for i in word_list_en]
-                        all_words_en = ' '.join([str(elem) for elem in word_list_en])
-
-                        #tokenize words
-                        tokenizer = nltk.RegexpTokenizer(r"\w+")
-                        tokens_en = tokenizer.tokenize(all_words_en)
-                        words_en = []
-                        for word in tokens_en:
-                                words_en.append(word.lower())
-
-                        #remove English stop words to get most frequent words
-                        nltk.download('stopwords')
-                        sw = nltk.corpus.stopwords.words('english')
-                        sw.append('covid')
-                        sw.append('19')
-                        words_ns_en = []
-                        for word in words_en:
-                                if word not in sw and word.isalpha():
-                                    words_ns_en.append(word)
-                        #get most common words
-                        from nltk import FreqDist
-                        fdist1 = FreqDist(words_ns_en)
-                        most_common = fdist1.most_common(15)
-                        mc = pd.DataFrame(most_common, columns =['Word', 'Count'])
-                        mc = mc[['Count', 'Word']]
-
-
-                        page_data_en = page_data_en.reset_index(drop=True)
+                        confirmed_en = confirmed_en.reset_index(drop=True)
 
 
 
@@ -531,18 +606,18 @@ def bypage():
                         for tag in unique_tags:
                           tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
 
-                        for tag, topic_df_en in page_data_en.groupby(0):
+                        for tag, topic_df_en in confirmed_en.groupby(0):
                           tag_dico[tag] = topic_df_en[['Date', 'Comment']]
 
 
-                        if 1 in page_data_en.columns:
-                            for tag, topic_df_en in page_data_en.groupby(1):
+                        if 1 in confirmed_en.columns:
+                            for tag, topic_df_en in confirmed_en.groupby(1):
                                 if tag_dico[tag].empty:
                                     tag_dico[tag] = topic_df_en[['Date', 'Comment']]
                                 else:
                                     tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
 
-                        if 2 in page_data_en.columns:
+                        if 2 in confirmed_en.columns:
                             for tag, topic_df_en in page_data_en.groupby(2):
                                 if tag_dico[tag].empty:
                                     tag_dico[tag] = topic_df_en[['Date', 'Comment']]
@@ -575,85 +650,178 @@ def bypage():
 
                         #split feedback by tag
 
-                        if unconfirmed_en.empty:
+                        if lang == 'en':
 
-                            if lang == 'en':
+                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
 
-                                return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+                        if lang == 'fr':
+                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
 
-                            if lang == 'fr':
-                                return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
 
+                    else:
+
+                        confirmed_en = confirmed_en.drop(columns=['Tags confirmed'])
+
+                        #resets the index for each row - needed for further processing
+                        confirmed_en = confirmed_en.reset_index(drop=True)
+
+                        #split dataframe for French comments - same comments as above for each line
+
+                        #get data for specific page
+
+                        #split tags and expand
+                        confirmed_en['tags'] = [','.join(map(str, l)) for l in confirmed_en['Lookup_tags']]
+                        tags_en = confirmed_en["tags"].str.split(",", n = 3, expand = True)
+                        confirmed_en = confirmed_en.join(tags_en)
+                        confirmed_en = confirmed_en.drop(columns=['tags'])
+
+
+
+
+
+
+                        confirmed_en = confirmed_en.reset_index(drop=True)
+
+
+
+                        #count the number for each tag
+                        tag_count = tags_en.apply(pd.Series.value_counts)
+                        tag_count = tag_count.fillna(0)
+                        tag_count = tag_count.astype(int)
+                        if 2 in tag_count.columns:
+                            tag_count = tag_count[0] + tag_count[1] + tag_count[2]
+                        elif 1 in tag_count.columns:
+                            tag_count = tag_count[0] + tag_count[1]
                         else:
+                            tag_count = tag_count[0]
+                        tag_count = tag_count.sort_values(ascending = False)
+                        by_tag = tag_count.to_frame()
+                        by_tag = by_tag.sort_index(axis=0, level=None, ascending=True)
+                        by_tag.columns = ['Feedback count']
 
-                            unconfirmed_en = unconfirmed_en.reset_index(drop=True)
-                            unconfirmed_en['tags'] = [','.join(map(str, l)) for l in unconfirmed_en['Lookup_tags']]
-                            unconfirmed_en = unconfirmed_en.drop(columns=['Lookup_tags'])
-                            unconfirmed_en = unconfirmed_en.drop(columns=['Tags confirmed'])
-                            unconfirmed_en = unconfirmed_en.reset_index(drop=True)
-                            unconfirmed_tags_en = unconfirmed_en["tags"].str.split(",", n = 3, expand = True)
-                            unconfirmed_en = unconfirmed_en.join(unconfirmed_tags_en)
-                            unconfirmed_en = unconfirmed_en.drop(columns=['tags'])
+                        by_tag = by_tag.sort_values(by = 'Feedback count', ascending=False)
+                        unique_tags = list(by_tag.index)
 
-                            unconfirmed_tag_count = unconfirmed_tags_en.apply(pd.Series.value_counts)
-                            unconfirmed_tag_count = unconfirmed_tag_count.fillna(0)
-                            unconfirmed_tag_count = unconfirmed_tag_count.astype(int)
-                            if 2 in unconfirmed_tag_count.columns:
-                                unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1] + unconfirmed_tag_count[2]
-                            elif 1 in unconfirmed_tag_count.columns:
-                                unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1]
-                            else:
-                                unconfirmed_tag_count = unconfirmed_tag_count[0]
-                            unconfirmed_tag_count = unconfirmed_tag_count.sort_values(ascending = False)
-                            unconfirmed_by_tag = unconfirmed_tag_count.to_frame()
-                            unconfirmed_by_tag = unconfirmed_by_tag.sort_index(axis=0, level=None, ascending=True)
-                            unconfirmed_by_tag.columns = ['Feedback count']
+                        #split feedback by tag
 
-                            unconfirmed_by_tag = unconfirmed_by_tag.sort_values(by = 'Feedback count', ascending=False)
-                            unconfirmed_unique_tags = list(unconfirmed_by_tag.index)
-                            unconfirmed_tag_dico = {}
+                        tag_dico = {}
 
-                            tag_dico_columns = ['Date', 'Comment']
+                        tag_dico_columns = ['Date', 'Comment']
 
-                            for tag in unconfirmed_unique_tags:
-                              unconfirmed_tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
+                        for tag in unique_tags:
+                          tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
 
-                            for tag, topic_df_en in unconfirmed_en.groupby(0):
-                              unconfirmed_tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+                        for tag, topic_df_en in confirmed_en.groupby(0):
+                          tag_dico[tag] = topic_df_en[['Date', 'Comment']]
 
 
-                            if 1 in unconfirmed_en.columns:
-                                for tag, topic_df_en in unconfirmed_en.groupby(1):
-                                    if unconfirmed_tag_dico[tag].empty:
-                                        unconfirmed_tag_dico[tag] = topic_df_en[['Date', 'Comment']]
-                                    else:
-                                        unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
+                        if 1 in confirmed_en.columns:
+                            for tag, topic_df_en in confirmed_en.groupby(1):
+                                if tag_dico[tag].empty:
+                                    tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+                                else:
+                                    tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
 
-                            if 2 in unconfirmed_en.columns:
-                                for tag, topic_df_en in unconfirmed_en.groupby(2):
-                                    if unconfirmed_tag_dico[tag].empty:
-                                        unconfirmed_tag_dico[tag] = topic_df_en[['Date', 'Comment']]
-                                    else:
-                                        unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
-
-
-                            for tag in unconfirmed_tag_dico:
-                                unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].sort_values(by = 'Date', ascending=False)
+                        if 2 in confirmed_en.columns:
+                            for tag, topic_df_en in page_data_en.groupby(2):
+                                if tag_dico[tag].empty:
+                                    tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+                                else:
+                                    tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
 
 
-                            unconfirmed_dict = { key: unconfirmed_tag_dico[key] for key in unconfirmed_unique_tags }
+                        for tag in tag_dico:
+                            tag_dico[tag] = tag_dico[tag].sort_values(by = 'Date', ascending=False)
 
-                            tag_columns = ['Date', 'Comment']
 
-                            unconfirmed_tag_plots = { tag: tag_plots[tag] for tag in unconfirmed_unique_tags }
-                            unconfirmed_plots = list(unconfirmed_tag_plots.values())
+                        over_tags = by_tag[(by_tag > 3).any(1)]
+                        under_tags = by_tag[(by_tag <= 3).any(1)]
 
-                            if lang == 'en':
+                        over_unique_tags = list(over_tags.index)
+                        under_unique_tags = list(under_tags.index)
 
-                                return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags,  list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+                        over_dict = { key: tag_dico[key] for key in over_unique_tags }
+                        under_dict = { key: tag_dico[key] for key in under_unique_tags }
 
-                            if lang == 'fr':
-                                return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+                        tag_columns = ['Date', 'Comment']
+
+
+                        over_tag_plots = { tag: tag_plots[tag] for tag in over_unique_tags }
+                        over_plots = list(over_tag_plots.values())
+
+
+                        under_tag_plots = { tag: tag_plots[tag] for tag in under_unique_tags }
+                        under_plots = list(under_tag_plots.values())
+
+
+                        unconfirmed_en = unconfirmed_en.reset_index(drop=True)
+                        unconfirmed_en['tags'] = [','.join(map(str, l)) for l in unconfirmed_en['Lookup_tags']]
+                        unconfirmed_en = unconfirmed_en.drop(columns=['Lookup_tags'])
+                        unconfirmed_en = unconfirmed_en.drop(columns=['Tags confirmed'])
+                        unconfirmed_en = unconfirmed_en.reset_index(drop=True)
+                        unconfirmed_tags_en = unconfirmed_en["tags"].str.split(",", n = 3, expand = True)
+                        unconfirmed_en = unconfirmed_en.join(unconfirmed_tags_en)
+                        unconfirmed_en = unconfirmed_en.drop(columns=['tags'])
+
+                        unconfirmed_tag_count = unconfirmed_tags_en.apply(pd.Series.value_counts)
+                        unconfirmed_tag_count = unconfirmed_tag_count.fillna(0)
+                        unconfirmed_tag_count = unconfirmed_tag_count.astype(int)
+                        if 2 in unconfirmed_tag_count.columns:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1] + unconfirmed_tag_count[2]
+                        elif 1 in unconfirmed_tag_count.columns:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1]
+                        else:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0]
+                        unconfirmed_tag_count = unconfirmed_tag_count.sort_values(ascending = False)
+                        unconfirmed_by_tag = unconfirmed_tag_count.to_frame()
+                        unconfirmed_by_tag = unconfirmed_by_tag.sort_index(axis=0, level=None, ascending=True)
+                        unconfirmed_by_tag.columns = ['Feedback count']
+
+                        unconfirmed_by_tag = unconfirmed_by_tag.sort_values(by = 'Feedback count', ascending=False)
+                        unconfirmed_unique_tags = list(unconfirmed_by_tag.index)
+                        unconfirmed_tag_dico = {}
+
+                        tag_dico_columns = ['Date', 'Comment']
+
+                        for tag in unconfirmed_unique_tags:
+                          unconfirmed_tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
+
+                        for tag, topic_df_en in unconfirmed_en.groupby(0):
+                          unconfirmed_tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+
+
+                        if 1 in unconfirmed_en.columns:
+                            for tag, topic_df_en in unconfirmed_en.groupby(1):
+                                if unconfirmed_tag_dico[tag].empty:
+                                    unconfirmed_tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+                                else:
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
+
+                        if 2 in unconfirmed_en.columns:
+                            for tag, topic_df_en in unconfirmed_en.groupby(2):
+                                if unconfirmed_tag_dico[tag].empty:
+                                    unconfirmed_tag_dico[tag] = topic_df_en[['Date', 'Comment']]
+                                else:
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
+
+
+                        for tag in unconfirmed_tag_dico:
+                            unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].sort_values(by = 'Date', ascending=False)
+
+
+                        unconfirmed_dict = { key: unconfirmed_tag_dico[key] for key in unconfirmed_unique_tags }
+
+                        tag_columns = ['Date', 'Comment']
+
+                        unconfirmed_tag_plots = { tag: tag_plots[tag] for tag in unconfirmed_unique_tags }
+                        unconfirmed_plots = list(unconfirmed_tag_plots.values())
+
+                        if lang == 'en':
+
+                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags,  list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+
+                        if lang == 'fr':
+                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
 
 
             #process to follow if French
@@ -1014,15 +1182,78 @@ def bypage():
 
                     page_data_fr = page_data_fr.dropna()
 
+
+                    #get most frequent words for all of page
+                    #get all words in a list
+                    word_list_fr = page_data_fr["Comment"].tolist()
+                    word_list_fr = [str(i) for i in word_list_fr]
+                    all_words_fr = ' '.join([str(elem) for elem in word_list_fr])
+
+                    #tokenize words
+                    tokenizer = nltk.RegexpTokenizer(r"\w+")
+                    tokens_fr = tokenizer.tokenize(all_words_fr)
+                    words_fr = []
+                    for word in tokens_fr:
+                            words_fr.append(word.lower())
+
+
+                    #remove English stop words to get most frequent words
+                    nltk.download('stopwords')
+                    sw = nltk.corpus.stopwords.words('french')
+                    sw.append('covid')
+                    sw.append('19')
+                    sw.append('a')
+                    sw.append('si')
+                    sw.append('avoir')
+                    sw.append('savoir')
+                    sw.append('combien')
+                    sw.append('être')
+                    sw.append('où')
+                    sw.append('comment')
+                    sw.append('puis')
+                    sw.append('peuvent')
+                    sw.append('fait')
+                    sw.append('aucun')
+                    sw.append('bonjour')
+                    sw.append('depuis')
+                    sw.append('chez')
+                    sw.append('faire')
+                    sw.append('peut')
+                    sw.append('plus')
+                    sw.append('veux')
+                    sw.append('dois')
+                    sw.append('doit')
+                    sw.append('dit')
+                    sw.append('merci')
+                    sw.append('cela')
+                    sw.append('pouvons')
+                    sw.append('pouvaient')
+                    sw.append('vers')
+
+                    words_ns_fr = []
+                    for word in words_fr:
+                            if word not in sw and word.isalpha():
+                                words_ns_fr.append(word)
+
+
+                    #get most common words
+                    from nltk import FreqDist
+                    fdist1 = FreqDist(words_ns_fr)
+                    most_common = fdist1.most_common(15)
+                    mc = pd.DataFrame(most_common, columns =['Mots', 'Nombre'])
+                    mc = mc[['Nombre', 'Mots']]
+
+
                     #get unconfirmed tags
 
                     unconfirmed_fr = page_data_fr.loc[page_data_fr['Tags confirmed'] == False]
 
 
-                    page_data_fr = page_data_fr.loc[page_data_fr['Tags confirmed'] == True]
+                    confirmed_fr = page_data_fr.loc[page_data_fr['Tags confirmed'] == True]
 
 
-                    if page_data_fr.empty:
+
+                    if confirmed_fr.empty and unconfirmed_fr.empty :
 
                         if lang == 'en':
                             return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
@@ -1030,88 +1261,100 @@ def bypage():
                         if lang == 'fr':
                             return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
-                    else:
+                    elif confirmed_fr.empty:
+
+                        unconfirmed_fr = unconfirmed_fr.reset_index(drop=True)
+                        unconfirmed_fr['tags'] = [','.join(map(str, l)) for l in unconfirmed_fr['Lookup_FR_tag']]
+                        unconfirmed_fr = unconfirmed_fr.drop(columns=['Lookup_FR_tag'])
+                        unconfirmed_fr = unconfirmed_fr.drop(columns=['Tags confirmed'])
+                        unconfirmed_fr = unconfirmed_fr.reset_index(drop=True)
+                        unconfirmed_tags_fr = unconfirmed_fr["tags"].str.split(",", n = 3, expand = True)
+                        unconfirmed_fr = unconfirmed_fr.join(unconfirmed_tags_fr)
+                        unconfirmed_fr = unconfirmed_fr.drop(columns=['tags'])
+
+                        unconfirmed_tag_count = unconfirmed_tags_fr.apply(pd.Series.value_counts)
+                        unconfirmed_tag_count = unconfirmed_tag_count.fillna(0)
+                        unconfirmed_tag_count = unconfirmed_tag_count.astype(int)
+                        if 2 in unconfirmed_tag_count.columns:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1] + unconfirmed_tag_count[2]
+                        elif 1 in unconfirmed_tag_count.columns:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1]
+                        else:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0]
+                        unconfirmed_tag_count = unconfirmed_tag_count.sort_values(ascending = False)
+                        unconfirmed_by_tag = unconfirmed_tag_count.to_frame()
+                        unconfirmed_by_tag = unconfirmed_by_tag.sort_index(axis=0, level=None, ascending=True)
+                        unconfirmed_by_tag.columns = ['Feedback count']
+
+                        unconfirmed_by_tag = unconfirmed_by_tag.sort_values(by = 'Feedback count', ascending=False)
+                        unconfirmed_unique_tags = list(unconfirmed_by_tag.index)
+                        unconfirmed_tag_dico = {}
+
+                        tag_dico_columns = ['Date', 'Comment']
+
+                        for tag in unconfirmed_unique_tags:
+                          unconfirmed_tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
+
+                        for tag, topic_df_fr in unconfirmed_fr.groupby(0):
+                          unconfirmed_tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
 
 
-                        page_data_fr = page_data_fr.drop(columns=['Tags confirmed'])
+                        if 1 in unconfirmed_fr.columns:
+                            for tag, topic_df_fr in unconfirmed_fr.groupby(1):
+                                if unconfirmed_tag_dico[tag].empty:
+                                    unconfirmed_tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                                else:
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
+
+                        if 2 in unconfirmed_fr.columns:
+                            for tag, topic_df_fr in unconfirmed_fr.groupby(2):
+                                if unconfirmed_tag_dico[tag].empty:
+                                    unconfirmed_tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                                else:
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
+
+
+                        for tag in unconfirmed_tag_dico:
+                            unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].sort_values(by = 'Date', ascending=False)
+
+
+                        unconfirmed_dict = { key: unconfirmed_tag_dico[key] for key in unconfirmed_unique_tags }
+
+                        tag_columns = ['Date', 'Comment']
+
+                        unconfirmed_tag_plots = { tag: tag_plots[tag] for tag in unconfirmed_unique_tags }
+                        unconfirmed_plots = list(unconfirmed_tag_plots.values())
+
+                        if lang == 'en':
+
+                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+
+                        if lang == 'fr':
+                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+
+
+                    elif unconfirmed_fr.empty:
+
+
+                        confirmed_fr = confirmed_fr.drop(columns=['Tags confirmed'])
 
                         #resets the index for each row - needed for further processing
-                        page_data_fr = page_data_fr.reset_index(drop=True)
+                        confirmed_fr = confirmed_fr.reset_index(drop=True)
 
                         #split dataframe for French comments - same comments as above for each line
 
                         #get data for specific page
 
                         #split tags and expand
-                        page_data_fr['tags'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_tag_FR']]
-                        tags_fr = page_data_fr["tags"].str.split(",", n = 3, expand = True)
-                        page_data_fr = page_data_fr.join(tags_fr)
-                        page_data_fr = page_data_fr.drop(columns=['tags'])
+                        confirmed_fr['tags'] = [','.join(map(str, l)) for l in confirmed_fr['Lookup_FR_tag']]
+                        tags_fr = confirmed_fr["tags"].str.split(",", n = 3, expand = True)
+                        confirmed_fr = confirmed_fr.join(tags_fr)
+                        confirmed_fr = confirmed_fr.drop(columns=['tags'])
 
 
 
-                        #get most frequent words for all of page
-                        #get all words in a list
-                        word_list_fr = page_data_fr["Comment"].tolist()
-                        word_list_fr = [str(i) for i in word_list_fr]
-                        all_words_fr = ' '.join([str(elem) for elem in word_list_fr])
 
-                        #tokenize words
-                        tokenizer = nltk.RegexpTokenizer(r"\w+")
-                        tokens_fr = tokenizer.tokenize(all_words_fr)
-                        words_fr = []
-                        for word in tokens_fr:
-                                words_fr.append(word.lower())
-
-
-                        #remove English stop words to get most frequent words
-                        nltk.download('stopwords')
-                        sw = nltk.corpus.stopwords.words('french')
-                        sw.append('covid')
-                        sw.append('19')
-                        sw.append('a')
-                        sw.append('si')
-                        sw.append('avoir')
-                        sw.append('savoir')
-                        sw.append('combien')
-                        sw.append('être')
-                        sw.append('où')
-                        sw.append('comment')
-                        sw.append('puis')
-                        sw.append('peuvent')
-                        sw.append('fait')
-                        sw.append('aucun')
-                        sw.append('bonjour')
-                        sw.append('depuis')
-                        sw.append('chez')
-                        sw.append('faire')
-                        sw.append('peut')
-                        sw.append('plus')
-                        sw.append('veux')
-                        sw.append('dois')
-                        sw.append('doit')
-                        sw.append('dit')
-                        sw.append('merci')
-                        sw.append('cela')
-                        sw.append('pouvons')
-                        sw.append('pouvaient')
-                        sw.append('vers')
-
-                        words_ns_fr = []
-                        for word in words_fr:
-                                if word not in sw and word.isalpha():
-                                    words_ns_fr.append(word)
-
-
-                        #get most common words
-                        from nltk import FreqDist
-                        fdist1 = FreqDist(words_ns_fr)
-                        most_common = fdist1.most_common(15)
-                        mc = pd.DataFrame(most_common, columns =['Mots', 'Nombre'])
-                        mc = mc[['Nombre', 'Mots']]
-
-
-                        page_data_fr = page_data_fr.reset_index(drop=True)
+                        confirmed_fr = confirmed_fr.reset_index(drop=True)
 
 
 
@@ -1142,19 +1385,19 @@ def bypage():
                         for tag in unique_tags:
                           tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
 
-                        for tag, topic_df_fr in page_data_fr.groupby(0):
+                        for tag, topic_df_fr in confirmed_fr.groupby(0):
                           tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
 
 
                         if 1 in page_data_fr.columns:
-                            for tag, topic_df_fr in page_data_fr.groupby(1):
+                            for tag, topic_df_fr in confirmed_fr.groupby(1):
                                 if tag_dico[tag].empty:
                                     tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
                                 else:
                                     tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
 
                         if 2 in page_data_fr.columns:
-                            for tag, topic_df_fr in page_data_fr.groupby(2):
+                            for tag, topic_df_fr in confirmed_fr.groupby(2):
                                 if tag_dico[tag].empty:
                                     tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
                                 else:
@@ -1181,82 +1424,176 @@ def bypage():
                         under_plots = list(under_tag_plots.values())
                         column_names = ['Nombre de rétroactions', 'Étiquette', 'Mots significatifs']
 
-                        if unconfirmed_fr.empty:
+                        if lang == 'en':
 
-                            if lang == 'en':
+                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
 
-                                return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+                        if lang == 'fr':
+                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
 
-                            if lang == 'fr':
-                                return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
 
+                    else:
+
+
+
+                        #split dataframe for French comments - same comments as above for each line
+
+                        #get data for specific page
+
+                        #split tags and expand
+
+                        confirmed_fr = confirmed_fr.drop(columns=['Tags confirmed'])
+
+                        #resets the index for each row - needed for further processing
+                        confirmed_fr = confirmed_fr.reset_index(drop=True)
+
+                        #split dataframe for French comments - same comments as above for each line
+
+                        #get data for specific page
+
+                        #split tags and expand
+                        confirmed_fr['tags'] = [','.join(map(str, l)) for l in confirmed_fr['Lookup_FR_tag']]
+                        tags_fr = confirmed_fr["tags"].str.split(",", n = 3, expand = True)
+                        confirmed_fr = confirmed_fr.join(tags_fr)
+                        confirmed_fr = confirmed_fr.drop(columns=['tags'])
+
+
+                        confirmed_fr = confirmed_fr.reset_index(drop=True)
+
+
+
+                        #count the number for each tag
+                        tag_count = tags_fr.apply(pd.Series.value_counts)
+                        tag_count = tag_count.fillna(0)
+                        tag_count = tag_count.astype(int)
+                        if 2 in tag_count.columns:
+                            tag_count = tag_count[0] + tag_count[1] + tag_count[2]
+                        elif 1 in tag_count.columns:
+                            tag_count = tag_count[0] + tag_count[1]
                         else:
+                            tag_count = tag_count[0]
+                        tag_count = tag_count.sort_values(ascending = False)
+                        by_tag = tag_count.to_frame()
+                        by_tag = by_tag.sort_index(axis=0, level=None, ascending=True)
+                        by_tag.columns = ['Feedback count']
 
-                            unconfirmed_fr = unconfirmed_fr.reset_index(drop=True)
-                            unconfirmed_fr['tags'] = [','.join(map(str, l)) for l in unconfirmed_fr['Lookup_FR_tag']]
-                            unconfirmed_fr = unconfirmed_fr.drop(columns=['Lookup_FR_tag'])
-                            unconfirmed_fr = unconfirmed_fr.drop(columns=['Tags confirmed'])
-                            unconfirmed_fr = unconfirmed_fr.reset_index(drop=True)
-                            unconfirmed_tags_fr = unconfirmed_fr["tags"].str.split(",", n = 3, expand = True)
-                            unconfirmed_fr = unconfirmed_fr.join(unconfirmed_tags_fr)
-                            unconfirmed_fr = unconfirmed_fr.drop(columns=['tags'])
+                        by_tag = by_tag.sort_values(by = 'Feedback count', ascending=False)
+                        unique_tags = list(by_tag.index)
 
-                            unconfirmed_tag_count = unconfirmed_tags_fr.apply(pd.Series.value_counts)
-                            unconfirmed_tag_count = unconfirmed_tag_count.fillna(0)
-                            unconfirmed_tag_count = unconfirmed_tag_count.astype(int)
-                            if 2 in unconfirmed_tag_count.columns:
-                                unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1] + unconfirmed_tag_count[2]
-                            elif 1 in unconfirmed_tag_count.columns:
-                                unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1]
-                            else:
-                                unconfirmed_tag_count = unconfirmed_tag_count[0]
-                            unconfirmed_tag_count = unconfirmed_tag_count.sort_values(ascending = False)
-                            unconfirmed_by_tag = unconfirmed_tag_count.to_frame()
-                            unconfirmed_by_tag = unconfirmed_by_tag.sort_index(axis=0, level=None, ascending=True)
-                            unconfirmed_by_tag.columns = ['Feedback count']
+                        #split feedback by tag
 
-                            unconfirmed_by_tag = unconfirmed_by_tag.sort_values(by = 'Feedback count', ascending=False)
-                            unconfirmed_unique_tags = list(unconfirmed_by_tag.index)
-                            unconfirmed_tag_dico = {}
+                        tag_dico = {}
 
-                            tag_dico_columns = ['Date', 'Comment']
+                        tag_dico_columns = ['Date', 'Commentaire']
 
-                            for tag in unconfirmed_unique_tags:
-                              unconfirmed_tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
+                        for tag in unique_tags:
+                          tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
 
-                            for tag, topic_df_fr in unconfirmed_fr.groupby(0):
-                              unconfirmed_tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                        for tag, topic_df_fr in confirmed_fr.groupby(0):
+                          tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
 
 
-                            if 1 in unconfirmed_fr.columns:
-                                for tag, topic_df_fr in unconfirmed_fr.groupby(1):
-                                    if unconfirmed_tag_dico[tag].empty:
-                                        unconfirmed_tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
-                                    else:
-                                        unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
+                        if 1 in page_data_fr.columns:
+                            for tag, topic_df_fr in confirmed_fr.groupby(1):
+                                if tag_dico[tag].empty:
+                                    tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                                else:
+                                    tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
 
-                            if 2 in unconfirmed_fr.columns:
-                                for tag, topic_df_fr in unconfirmed_fr.groupby(2):
-                                    if unconfirmed_tag_dico[tag].empty:
-                                        unconfirmed_tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
-                                    else:
-                                        unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
-
-
-                            for tag in unconfirmed_tag_dico:
-                                unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].sort_values(by = 'Date', ascending=False)
+                        if 2 in page_data_fr.columns:
+                            for tag, topic_df_fr in confirmed_fr.groupby(2):
+                                if tag_dico[tag].empty:
+                                    tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                                else:
+                                    tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
 
 
-                            unconfirmed_dict = { key: unconfirmed_tag_dico[key] for key in unconfirmed_unique_tags }
+                        for tag in tag_dico:
+                            tag_dico[tag] = tag_dico[tag].sort_values(by = 'Date', ascending=False)
 
-                            tag_columns = ['Date', 'Comment']
 
-                            unconfirmed_tag_plots = { tag: tag_plots[tag] for tag in unconfirmed_unique_tags }
-                            unconfirmed_plots = list(unconfirmed_tag_plots.values())
+                        over_tags = by_tag[(by_tag > 3).any(1)]
+                        under_tags = by_tag[(by_tag <= 3).any(1)]
 
-                            if lang == 'en':
+                        over_unique_tags = list(over_tags.index)
+                        under_unique_tags = list(under_tags.index)
 
-                                return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+                        over_dict = { key: tag_dico[key] for key in over_unique_tags }
+                        under_dict = { key: tag_dico[key] for key in under_unique_tags }
 
-                            if lang == 'fr':
-                                return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+                        over_tag_plots = { tag: tag_plots[tag] for tag in over_unique_tags }
+                        over_plots = list(over_tag_plots.values())
+
+                        under_tag_plots = { tag: tag_plots[tag] for tag in under_unique_tags }
+                        under_plots = list(under_tag_plots.values())
+                        column_names = ['Nombre de rétroactions', 'Étiquette', 'Mots significatifs']
+
+
+                        unconfirmed_fr = unconfirmed_fr.reset_index(drop=True)
+                        unconfirmed_fr['tags'] = [','.join(map(str, l)) for l in unconfirmed_fr['Lookup_FR_tag']]
+                        unconfirmed_fr = unconfirmed_fr.drop(columns=['Lookup_FR_tag'])
+                        unconfirmed_fr = unconfirmed_fr.drop(columns=['Tags confirmed'])
+                        unconfirmed_fr = unconfirmed_fr.reset_index(drop=True)
+                        unconfirmed_tags_fr = unconfirmed_fr["tags"].str.split(",", n = 3, expand = True)
+                        unconfirmed_fr = unconfirmed_fr.join(unconfirmed_tags_fr)
+                        unconfirmed_fr = unconfirmed_fr.drop(columns=['tags'])
+
+                        unconfirmed_tag_count = unconfirmed_tags_fr.apply(pd.Series.value_counts)
+                        unconfirmed_tag_count = unconfirmed_tag_count.fillna(0)
+                        unconfirmed_tag_count = unconfirmed_tag_count.astype(int)
+                        if 2 in unconfirmed_tag_count.columns:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1] + unconfirmed_tag_count[2]
+                        elif 1 in unconfirmed_tag_count.columns:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0] + unconfirmed_tag_count[1]
+                        else:
+                            unconfirmed_tag_count = unconfirmed_tag_count[0]
+                        unconfirmed_tag_count = unconfirmed_tag_count.sort_values(ascending = False)
+                        unconfirmed_by_tag = unconfirmed_tag_count.to_frame()
+                        unconfirmed_by_tag = unconfirmed_by_tag.sort_index(axis=0, level=None, ascending=True)
+                        unconfirmed_by_tag.columns = ['Feedback count']
+
+                        unconfirmed_by_tag = unconfirmed_by_tag.sort_values(by = 'Feedback count', ascending=False)
+                        unconfirmed_unique_tags = list(unconfirmed_by_tag.index)
+                        unconfirmed_tag_dico = {}
+
+                        tag_dico_columns = ['Date', 'Comment']
+
+                        for tag in unconfirmed_unique_tags:
+                          unconfirmed_tag_dico[tag] = pd.DataFrame(columns = tag_dico_columns)
+
+                        for tag, topic_df_fr in unconfirmed_fr.groupby(0):
+                          unconfirmed_tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+
+
+                        if 1 in unconfirmed_fr.columns:
+                            for tag, topic_df_fr in unconfirmed_fr.groupby(1):
+                                if unconfirmed_tag_dico[tag].empty:
+                                    unconfirmed_tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                                else:
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
+
+                        if 2 in unconfirmed_fr.columns:
+                            for tag, topic_df_fr in unconfirmed_fr.groupby(2):
+                                if unconfirmed_tag_dico[tag].empty:
+                                    unconfirmed_tag_dico[tag] = topic_df_fr[['Date', 'Comment']]
+                                else:
+                                    unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].append(topic_df_fr[['Date', 'Comment']])
+
+
+                        for tag in unconfirmed_tag_dico:
+                            unconfirmed_tag_dico[tag] = unconfirmed_tag_dico[tag].sort_values(by = 'Date', ascending=False)
+
+
+                        unconfirmed_dict = { key: unconfirmed_tag_dico[key] for key in unconfirmed_unique_tags }
+
+                        tag_columns = ['Date', 'Comment']
+
+                        unconfirmed_tag_plots = { tag: tag_plots[tag] for tag in unconfirmed_unique_tags }
+                        unconfirmed_plots = list(unconfirmed_tag_plots.values())
+
+                        if lang == 'en':
+
+                            return render_template("info_by_page_en.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common,  zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
+
+                        if lang == 'fr':
+                            return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, most_common = most_common, row_data = list(by_tag.values.tolist()), zip = zip, page = page, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), word_column_names = word_column_names, row_data_word = list(mc.values.tolist()), list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, unconfirmed_tags = zip(unconfirmed_unique_tags, list(unconfirmed_by_tag['Feedback count'].values.tolist()), unconfirmed_plots, unconfirmed_unique_tags), unconfirmed_dict = unconfirmed_dict, group_link = group_link, group_name = group_name, row_data_reason_period = list(by_reason_period.values.tolist()))
