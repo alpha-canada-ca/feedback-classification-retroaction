@@ -104,7 +104,7 @@ def bygroup():
             yes_no_db = yes_no_db.reset_index(drop=True)
             yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
             yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
-            yes_no = yes_no[yes_no['problemDate'] >= earliest]
+            yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
 
             reasons = yes_no_db[['problem']]
 

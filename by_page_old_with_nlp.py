@@ -46,13 +46,13 @@ def bypage():
 
     if lang == 'en':
         tag_columns = ['Date', 'Comment']
-        reason_column_names = ['Feedback count', 'Reason']
+        reason_column_names = ['Feedback count', 'Reason', 'Significant words']
         word_column_names = ['Count', 'Word']
         chart_columns = ['Date', 'Yes', 'No', 'Daily ratio', 'Weekly rolling mean']
 
     if lang == 'fr':
         tag_columns = ['Date', 'Commentaire']
-        reason_column_names = ['Nombre de rétroactions', 'Raison']
+        reason_column_names = ['Nombre de rétroactions', 'Raison', 'Mots significatifs']
         word_column_names = ['Nombre', 'Mots']
         chart_columns = ['Date', 'Oui', 'Non', 'Proportion quotidienne', 'Moyenne mobile sur 7 jours']
 
@@ -491,12 +491,82 @@ def bypage():
 
 
                         #by what's wrong reason
-
-                        reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
-                        reasons_db = reasons["problem"].value_counts()
-                        by_reason = reasons_db.to_frame()
+                        page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace([False], ['None'])
+                        page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace(["The information isn't clear"], ["The information isn’t clear"])
+                        page_data_en[["What's wrong"]] = page_data_en[["What's wrong"]].replace(["I'm not in the right place"], ["I’m not in the right place"])
+                        reasons = page_data_en["What's wrong"].value_counts()
+                        by_reason= reasons.to_frame()
                         by_reason.columns = ['Feedback count']
-                        by_reason.reset_index(level=0, inplace=True)
+
+                        reason_dict = {}
+
+                        for reason, topic_df_en in page_data_en.groupby("What's wrong"):
+                            reason_dict[reason] = ' '.join(topic_df_en['Comment'].tolist())
+
+
+                        tokenizer = nltk.RegexpTokenizer(r"\w+")
+
+                        for value in reason_dict:
+                            reason_dict[value] = tokenizer.tokenize(reason_dict[value])
+
+
+                        reason_list_en= []
+                        for keys in reason_dict.keys():
+                            reason_list_en.append(keys)
+
+
+                        reason_words_en = []
+                        for values in reason_dict.values():
+                            reason_words_en.append(values)
+
+
+                        nltk.download('wordnet')
+                        from nltk.stem import WordNetLemmatizer
+
+                        lemmatizer = WordNetLemmatizer()
+                        from nltk.corpus import stopwords
+
+                        reason_words_en = [[word.lower() for word in value] for value in reason_words_en]
+                        reason_words_en = [[lemmatizer.lemmatize(word) for word in value] for value in reason_words_en]
+                        reason_words_en = [[word for word in value if word not in sw] for value in reason_words_en]
+                        reason_words_en = [[word for word in value if word.isalpha()] for value in reason_words_en]
+
+                        from gensim.corpora.dictionary import Dictionary
+
+                        reason_dictionary_en = Dictionary(reason_words_en)
+
+                        reason_corpus_en = [reason_dictionary_en.doc2bow(reason) for reason in reason_words_en]
+
+                        from gensim.models.tfidfmodel import TfidfModel
+
+                        reason_tfidf_en = TfidfModel(reason_corpus_en)
+
+                        reason_tfidf_weights_en = [sorted(reason_tfidf_en[doc], key=lambda w: w[1], reverse=True) for doc in reason_corpus_en]
+
+                        reason_weighted_words_en = [[(reason_dictionary_en.get(id), weight) for id, weight in ar] for ar in reason_tfidf_weights_en]
+
+                        reason_imp_words_en = pd.DataFrame({'Reason': reason_list_en, 'EN_words':  reason_weighted_words_en})
+
+                        reason_imp_words_en = reason_imp_words_en.sort_values(by = 'Reason')
+
+                        reason_imp_words_en = reason_imp_words_en.reset_index(drop=True)
+
+                        reason_imp_words_en['EN_words'] = reason_imp_words_en['EN_words'].apply(lambda x: list(x))
+
+                        reason_imp_words_en['EN_words'] = reason_imp_words_en['EN_words'].apply(lambda x: x[:15])
+
+                        reason_imp_words_en['EN_words'] = reason_imp_words_en['EN_words'].apply(lambda x: [y[0] for y in x])
+
+                        by_reason = by_reason.reset_index()
+
+                        by_reason['Significant words'] = reason_imp_words_en['EN_words']
+
+                        by_reason= by_reason.sort_values(by = 'Feedback count', ascending=False)
+
+
+                        by_reason['Significant words'] = by_reason['Significant words'].apply(lambda x: ', '.join(x))
+
+                        by_reason = by_reason[['Feedback count', 'index', 'Significant words']]
 
 
 
