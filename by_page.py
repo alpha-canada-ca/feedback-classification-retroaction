@@ -836,9 +836,9 @@ def bypage():
 
                 #by what's wrong reason
                 reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
-                reasons[["problem"]] = reasons[["problem"]].replace(["I’m not in the right place"], ["Je ne suis pas au bon endroit"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["I'm not in the right place"], ["Je ne suis pas au bon endroit"])
                 reasons[["problem"]] = reasons[["problem"]].replace(["Other reason"], ["Autre raison"])
-                reasons[["problem"]] = reasons[["problem"]].replace(["The information isn’t clear"], ["L'information n'est pas claire"])
+                reasons[["problem"]] = reasons[["problem"]].replace(["The information isn't clear"], ["L'information n'est pas claire"])
                 reasons[["problem"]] = reasons[["problem"]].replace(["Something is broken or incorrect"], ["Quelque chose est brisé ou incorrect"])
                 reasons[["problem"]] = reasons[["problem"]].replace(["The answer I need is missing"], ["La réponse dont j'ai besoin n'est pas là"])
 
