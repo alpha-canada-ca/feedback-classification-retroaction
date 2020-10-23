@@ -394,20 +394,24 @@
 
             <h2 id="common">Most frequent words</h2>
             <p>From {{ start_date }} to {{ end_date }}: </p>
-            <table class="wb-tables table table-striped">
-               <tr>
-                  {% for col in word_column_names %}
-                  <th>{{col}}</th>
-                  {% endfor %}
-               </tr>
-               {% for row in row_data_word %}
-               <tr>
-                  {% for col, row_ in zip(word_column_names, row) %}
-                  <td>{{row_}}</td>
-                  {% endfor %}
-               </tr>
-               {% endfor %}
-            </table>
+            <details>
+               <summary>Number of occurences of most frequent words</summary>
+                <table class="wb-tables table table-striped">
+                   <tr>
+                      {% for col in word_column_names %}
+                      <th>{{col}}</th>
+                      {% endfor %}
+                   </tr>
+                   {% for row in row_data_word %}
+                   <tr>
+                      {% for col, row_ in zip(word_column_names, row) %}
+                      <td>{{row_}}</td>
+                      {% endfor %}
+                   </tr>
+                   {% endfor %}
+                  </table>
+              </details>
+            <p><img src="data:image/png;base64,{{ cloud_url }}" alt="See table for numbers"></p>
             <h2 id="group">Feedback by group of pages</h2>
             <p><a href="https://feedback-by-page.tbs.alpha.canada.ca/bygroup?group={{ group_link }}">{{ group_name }}</a></p>
 
