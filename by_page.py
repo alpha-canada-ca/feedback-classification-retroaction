@@ -474,7 +474,7 @@ def bypage():
                     else:
                         cloud_words = " ".join(words_ns_en)
                         img = io.BytesIO()
-                        wordcloud = WordCloud(background_color='white', max_font_size = 75, width=600, height=300).generate(cloud_words)
+                        wordcloud = WordCloud(background_color='white', max_font_size = 100, width=600, height=300).generate(cloud_words)
                         plt.figure(figsize=(10,5))
                         plt.imshow(wordcloud, interpolation='bilinear')
                         plt.axis("off")
@@ -1272,7 +1272,7 @@ def bypage():
                     else:
                         cloud_words = " ".join(words_ns_fr)
                         img = io.BytesIO()
-                        wordcloud = WordCloud(background_color='white', max_font_size = 75, width=600, height=300).generate(cloud_words)
+                        wordcloud = WordCloud(background_color='white', max_font_size = 100, width=600, height=300).generate(cloud_words)
                         plt.figure(figsize=(10,5))
                         plt.imshow(wordcloud, interpolation='bilinear')
                         plt.axis("off")
