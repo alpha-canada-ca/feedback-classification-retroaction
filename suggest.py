@@ -1,22 +1,58 @@
 #import libraries
 from flask import Flask
 from flask import request
+import requests
+import pandas as pd
+import nltk
+from nltk.stem.snowball import SnowballStemmer
+import re
+import sys
+import warnings
+import pickle
+#import alogrithms
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+from sklearn.multiclass import OneVsRestClassifier
+
+#function to import pickle file
+def deserialize(file):
+	with open(file, 'rb') as f:
+		return pickle.load(f)
+
+#function to clean the word of any punctuation or special characters
+def cleanPunc(sentence):
+	cleaned = re.sub(r'[?|!|\'|"|#]',r'',sentence)
+	cleaned = re.sub(r'[.|,|)|(|\|/]',r' ',cleaned)
+	cleaned = cleaned.strip()
+	cleaned = cleaned.replace("\n"," ")
+	return cleaned
+
+#function to put everything in lower case
+def keepAlpha(sentence):
+	alpha_sent = ""
+	for word in sentence.split():
+		alpha_word = re.sub('[^a-z A-Z]+', ' ', word)
+		alpha_sent += alpha_word
+		alpha_sent += " "
+	alpha_sent = alpha_sent.strip()
+	return alpha_sent
+
+#function to stem feedback
+def stemming(sentence, lang):
+	stemSentence = ""
+	for word in sentence.split():
+		stem = lang.stem(word)
+		stemSentence += stem
+		stemSentence += " "
+	stemSentence = stemSentence.strip()
+	return stemSentence
+
 
 app = Flask(__name__)
 
 @app.route('/suggestCategory')
 
 def suggest():
-	#import libraries
-	import requests
-	import pandas as pd
-	import nltk
-	from nltk.stem.snowball import SnowballStemmer
-	import re
-	import sys
-	import warnings
-	import pickle
-
 
 	#get language to use
 	lang = request.args.get('lang')
@@ -26,11 +62,6 @@ def suggest():
 
 	#process to follow if French
 	if lang == 'fr':
-
-		#function to import pickle file
-		def deserialize(file):
-			with open(file, 'rb') as f:
-				return pickle.load(f)
 
 		#import French training model
 		model_fr = deserialize('data/model_fr.pickle')
@@ -47,34 +78,9 @@ def suggest():
 			if not sys.warnoptions:
 				warnings.simplefilter("ignore")
 
-			#function to clean the word of any punctuation or special characters
-			def cleanPunc(sentence):
-				cleaned = re.sub(r'[?|!|\'|"|#]',r'',sentence)
-				cleaned = re.sub(r'[.|,|)|(|\|/]',r' ',cleaned)
-				cleaned = cleaned.strip()
-				cleaned = cleaned.replace("\n"," ")
-				return cleaned
 
-			#function to put everything in lower case
-			def keepAlpha(sentence):
-				alpha_sent = ""
-				for word in sentence.split():
-					alpha_word = re.sub('[^a-z A-Z]+', ' ', word)
-					alpha_sent += alpha_word
-					alpha_sent += " "
-				alpha_sent = alpha_sent.strip()
-				return alpha_sent
-
-			#function to stem feedback
+			#language
 			stemmer_fr = SnowballStemmer("french")
-			def stemming_fr(sentence):
-				stemSentence = ""
-				for word in sentence.split():
-					stem = stemmer_fr.stem(word)
-					stemSentence += stem
-					stemSentence += " "
-				stemSentence = stemSentence.strip()
-				return stemSentence
 
 			#apply pre-processing to feedback
 			sen_fr = sen_fr.lower()
@@ -82,7 +88,7 @@ def suggest():
 			sen_fr = keepAlpha(sen_fr)
 
 
-			sen_fr  = stemming_fr(sen_fr)
+			sen_fr  = stemming(sen_fr, stemmer_fr)
 
 			#make feedback a list - needed for further processing
 			sen_fr = [sen_fr]
@@ -92,11 +98,6 @@ def suggest():
 
 			#use the vectorizer for the right model
 			vectorizer_fr = vectorizer_fr[section]
-
-			#import alogrithms
-			from sklearn.naive_bayes import MultinomialNB
-			from sklearn.pipeline import Pipeline
-			from sklearn.multiclass import OneVsRestClassifier
 
 
 			#vectorize feedback
@@ -140,10 +141,6 @@ def suggest():
 
 	#process to follow if English
 	else:
-		#function to import pickle file
-		def deserialize(file):
-			with open(file, 'rb') as f:
-				return pickle.load(f)
 
 		#import English training model
 		model_en = deserialize('data/model_en.pickle')
@@ -162,41 +159,14 @@ def suggest():
 			if not sys.warnoptions:
 				warnings.simplefilter("ignore")
 
-			#function to clean the word of any punctuation or special characters
-			def cleanPunc(sentence):
-				cleaned = re.sub(r'[?|!|\'|"|#]',r'',sentence)
-				cleaned = re.sub(r'[.|,|)|(|\|/]',r' ',cleaned)
-				cleaned = cleaned.strip()
-				cleaned = cleaned.replace("\n"," ")
-				return cleaned
-
-			#function to put everything in lower case
-			def keepAlpha(sentence):
-				alpha_sent = ""
-				for word in sentence.split():
-					alpha_word = re.sub('[^a-z A-Z]+', ' ', word)
-					alpha_sent += alpha_word
-					alpha_sent += " "
-				alpha_sent = alpha_sent.strip()
-				return alpha_sent
-
-			#function to stem feedback
+			#language
 			stemmer_en = SnowballStemmer("english")
-			def stemming_en(sentence):
-				stemSentence = ""
-				for word in sentence.split():
-					stem = stemmer_en.stem(word)
-					stemSentence += stem
-					stemSentence += " "
-				stemSentence = stemSentence.strip()
-				return stemSentence
 
 			#apply pre-processing to feedback
 			sen_en = sen_en.lower()
 			sen_en = cleanPunc(sen_en)
 			sen_en = keepAlpha(sen_en)
-			sen_en  = stemming_en(sen_en)
-
+			sen_en  = stemming(sen_en,stemmer_en)
 
 			#make feedback a list - needed for further processing
 			sen_en = [sen_en]

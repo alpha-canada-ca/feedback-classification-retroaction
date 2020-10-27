@@ -67,8 +67,11 @@ def bypage():
         data['URL_function'] = data['URL_function'].str.replace('/content/canadasite', 'www.canada.ca')
         data['URL_function'] = data['URL_function'].str.replace('www.canada.ca', 'https://www.canada.ca')
         data['URL_function'] = data['URL_function'].str.replace('https://https://', 'https://')
+        # gets page data for current page
         page_data = data.loc[data['URL_function'] == page]
+        # Reset indexes (0,1,2,3.. etc)
         page_data = page_data.reset_index(drop=True)
+        # grab data from 90 days ago onwards
         page_data = page_data[page_data['Date'] >= earliest]
 
         if page_data.empty:
@@ -80,17 +83,18 @@ def bypage():
             url = page_data['URL_function'][0]
 
             if page_data['Lang'][0] == 'EN':
-
+                #limit page_data_en to 10 columns below
                 page_data_en = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title', 'Lookup_group_EN', 'Lookup_group_FR']]
                 page_data_en = page_data_en[page_data_en.Status != 'Spam']
                 page_data_en = page_data_en[page_data_en.Status != 'Ignore']
                 page_data_en = page_data_en[page_data_en.Status != 'Duplicate']
                 page_data_en = page_data_en.reset_index(drop=True)
-
+                #set nulls to [none]
                 page_data_en['Lookup_group_EN'].fillna('[None]', inplace=True)
+                #adds commas in between each character
                 page_data_en['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_en['Lookup_page_title']]
 
-
+                #set variable & convert to string
                 group_link = (page_data_en['Lookup_group_EN'][0])
                 group_link = ' '.join(map(str, group_link))
 
@@ -101,25 +105,33 @@ def bypage():
                 if lang == 'fr':
                     group_name = page_data_en['Lookup_group_FR'][0]
                     group_name = ' '.join(map(str, group_name))
-
+                #grab page title
                 title = page_data_en['Lookup_page_title'][0]
 
                 #yes_no for all period
-
+                #grab relevant columns
                 yes_no_db = yes_no_db[["url", "yesno", "problemDate", "problem"]]
+                #Fix urls
                 yes_no_db['url'] = yes_no_db['url'].str.replace('/content/canadasite', 'www.canada.ca')
                 yes_no_db['url'] = yes_no_db['url'].str.replace('www.canada.ca', 'https://www.canada.ca')
                 yes_no_db['url'] = yes_no_db['url'].str.replace('https://https://', 'https://')
+                #grab current page only and reset indexes
                 yes_no_db = yes_no_db.loc[yes_no_db['url'] == page]
                 yes_no_db = yes_no_db.reset_index(drop=True)
+                #Parse date to Y-M-D
                 yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
                 yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
+                #90 days db
                 yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
+                #period selected db
                 yes_no_period = yes_no_db[yes_no_db['problemDate'] <= end_date]
                 yes_no_period = yes_no_db[yes_no_db['problemDate'] >= start_date]
 
+                #90 days reasons
                 reasons = yes_no_db[['problem']]
+                #period selected reasons
                 reasons_period = yes_no_period[['problem']]
+                #Grabs yes/no & sorts by date, resets indexes, renames columns
                 yes_no = yes_no_db[['problemDate', 'yesno']]
                 yes_no = yes_no.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
                 yes_no = yes_no.dropna()
@@ -129,7 +141,7 @@ def bypage():
                 by_date = {}
                 for date in yes_no['Date']:
                   by_date[date] = yes_no.loc[yes_no['Date'] == date]
-
+                #Populates by_date with number of yes/nos on given date
                 for date in by_date:
                   by_date[date] =  by_date[date]['Yes/No'].value_counts()
 
@@ -141,43 +153,50 @@ def bypage():
                   if 'Yes' not in by_date[date]:
                     by_date[date]['Yes'] = 0
 
+                #Convert to dict of key value pairs.      key:date   value:(yes,no,yes %)
                 for date in by_date:
                   by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No']))]
 
-
+                #format into dataframe and sort by date
                 df_yes = pd.DataFrame(list(by_date.values()),columns = ['Yes', 'No', 'Percentage'])
                 df_yes['Date'] = list(by_date.keys())
                 df_yes = df_yes[['Date', 'Yes', 'No', 'Percentage']]
-
                 df_yes = df_yes.sort_values(by = 'Date')
+                #add column rolling mean
                 df_yes['Rolling mean'] = df_yes.iloc[:,3].rolling(window=7).mean()
+                #dates list and dates_r list
                 dates = list(df_yes['Date'])
                 dates_r = dates[::-1]
+                #yes list and yes list reversed
                 chart_yes = list(df_yes['Yes'])
                 chart_yes = chart_yes[::-1]
+                #no list and no list reversed
                 chart_no = list(df_yes['No'])
                 chart_no = chart_no[::-1]
+                #Generate seperate lists of percentage & rolling mean
                 daily_values = list(df_yes['Percentage'])
                 weekly_values = list(df_yes['Rolling mean'])
+                #new list but rounded too nearest 2 decimal places
                 daily_perc = ["%.2f" % number for number in daily_values]
                 weekly_perc = ["%.2f" % number for number in weekly_values]
+                #new reversed lists
                 daily_perc_r = daily_perc[::-1]
                 weekly_perc_r = weekly_perc[::-1]
-
-
 
                 start_plot = start_date
                 end_plot = end_date
 
+                #if less than dates range set to index 0
                 if start_plot < dates[0]:
                     start_plot = dates[0]
-
+                #if greater than dates range set to last index
                 if end_plot > dates[-1]:
                     end_plot = dates[-1]
 
                 all_start = dates[0]
                 all_end = dates[-1]
 
+                #Generates graph
                 img = io.BytesIO()
                 x = dates
                 y1 = daily_values
@@ -197,6 +216,7 @@ def bypage():
                 plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
                 plt.legend()
                 fig.autofmt_xdate()
+                #x axis labels every 7 days
                 loc = plticker.MultipleLocator(base=7.0)
                 plt.gcf().subplots_adjust(bottom=0.2)
                 ax.xaxis.set_major_locator(loc)
@@ -210,6 +230,7 @@ def bypage():
                     score = 'unavailable'
                     yes = 'unavailable'
                     no = 'unavailable'
+                #Grab number of yes/no to calculate yes percentage 90 days
                 else:
                     total = yes_no['Yes/No'].value_counts()
                     if 'Yes' in total:
@@ -225,20 +246,17 @@ def bypage():
                     score = format(score, '.2f')
 
 
-
+                #replace nulls with false
                 page_data_en["What's wrong"].fillna(False, inplace=True)
                 page_data_en["Tags confirmed"].fillna(False, inplace=True)
 
-
-
                 all_data_en = page_data_en.copy()
 
-
                 #limit page_data to period
-
                 page_data_en = page_data_en[page_data_en['Date'] <= end_date]
                 page_data_en = page_data_en[page_data_en['Date'] >= start_date]
 
+                #Generate list of date and yes/nos for selected period
                 yes_no_period = yes_no_period[['problemDate', 'yesno']]
                 yes_no_period = yes_no_period.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
                 yes_no_period = yes_no_period.dropna()
@@ -251,6 +269,7 @@ def bypage():
                     yes_period = 'unavailable'
                     no_period = 'unavailable'
                     delta = 'unavailable'
+                #Grab number of yes/no to calculate yes percentage of period selected.
                 else:
                     total_period = yes_no_period['Yes/No'].value_counts()
                     if 'Yes' in total_period:
@@ -265,6 +284,8 @@ def bypage():
 
                     score_period = (yes_period / ( yes_period +  no_period))
                     score_period = format(score_period, '.2f')
+
+                    #Calculate score difference
                     if score_period > score:
                         delta = '+' + format(float(score_period)-float(score), '.2f')
                     elif score_period < score:
@@ -277,7 +298,7 @@ def bypage():
 
 
                 #by what's wrong reason
-
+                #Grabs reasons counts and generates a dataframe for 90 days
                 reasons[["problem"]] = reasons[["problem"]].replace([''], ['None'])
                 reasons_db = reasons["problem"].value_counts()
                 by_reason = reasons_db.to_frame()
@@ -285,6 +306,7 @@ def bypage():
                 by_reason.reset_index(level=0, inplace=True)
                 by_reason = by_reason[['Feedback count', 'index']]
 
+                #Grabs reasons counts and generates a dataframe for selected period
                 reasons_period[["problem"]] = reasons_period[["problem"]].replace([''], ['None'])
                 reasons_period_db = reasons_period["problem"].value_counts()
                 by_reason_period = reasons_period_db.to_frame()
@@ -292,8 +314,7 @@ def bypage():
                 by_reason_period.reset_index(level=0, inplace=True)
                 by_reason_period = by_reason_period[['Feedback count', 'index']]
 
-
-
+                #drop nulls
                 all_data_en = all_data_en.dropna()
 
                 if all_data_en.empty:
@@ -305,15 +326,18 @@ def bypage():
                         return render_template("info_by_page_fr.html", title = title, url = url, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group_link = group_link, group_name = group_name, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
                 else:
-
+                    #create tags column
                     all_data_en['tags'] = [','.join(map(str, l)) for l in all_data_en['Lookup_tags']]
 
                     #remove the Lookup_tags column (it's not needed anymore)
                     all_data_en = all_data_en.drop(columns=['Lookup_tags'])
+                    #dataf of all tags seperated (3 max?)
                     all_tags_en = all_data_en["tags"].str.split(",", n = 3, expand = True)
+                    #add tags to alldata
                     all_data_en = all_data_en.join(all_tags_en)
                     all_data_en = all_data_en.drop(columns=['tags'])
 
+                    #organizes and orders tags
                     tag_count = all_tags_en.apply(pd.Series.value_counts)
                     tag_count = tag_count.fillna(0)
                     tag_count = tag_count.astype(int)
@@ -378,7 +402,7 @@ def bypage():
                       tag_dates[tag].index = pd.DatetimeIndex(tag_dates[tag].index)
                       tag_dates[tag] = tag_dates[tag].reindex(idx, fill_value=0)
 
-
+                    #generate graph for tags
                     tag_plots = {}
                     for tag in tag_dates:
                       tag_dates[tag]= tag_dates[tag].to_frame()
@@ -428,7 +452,7 @@ def bypage():
 
 
                     #look at comments for period
-
+                    #drop columns and replace nulls with false
                     page_data_en = page_data_en.drop(columns=['Status'])
                     page_data_en = page_data_en.drop(columns=['Yes/No'])
                     page_data_en["What's wrong"].fillna(False, inplace=True)
@@ -438,7 +462,7 @@ def bypage():
 
 
                     #get most frequent words for all of page
-                    #get all words in a list
+                    #get all words in a list parse to string and generate string of all words (all_words_en)
                     word_list_en = page_data_en["Comment"].tolist()
                     word_list_en = [str(i) for i in word_list_en]
                     all_words_en = ' '.join([str(elem) for elem in word_list_en])
@@ -446,6 +470,7 @@ def bypage():
                     #tokenize words
                     tokenizer = nltk.RegexpTokenizer(r"\w+")
                     tokens_en = tokenizer.tokenize(all_words_en)
+                    #generate list of all words
                     words_en = []
                     for word in tokens_en:
                             words_en.append(word.lower())
@@ -455,6 +480,7 @@ def bypage():
                     sw = nltk.corpus.stopwords.words('english')
                     sw.append('covid')
                     sw.append('19')
+                    #generate list of words and make sure they are all characters
                     words_ns_en = []
                     for word in words_en:
                             if word not in sw and word.isalpha():
@@ -467,7 +493,7 @@ def bypage():
                     mc = mc[['Count', 'Word']]
 
 
-                    #Generate WordCloud
+                    #Generate WordCloud from words_ns_en
                     if not words_ns_en:
                         cloud_url = ""
 
