@@ -32,6 +32,7 @@ def bygroup():
     data = deserialize('data/all_data.pickle')
     yes_no_db = deserialize('data/yes_no_db.pickle')
 
+
     today = DT.date.today()
     week_ago = today - DT.timedelta(days=7)
     earliest = today - DT.timedelta(days=90)
@@ -103,10 +104,13 @@ def bygroup():
             yes_no_db['url'] = yes_no_db['url'].str.replace('www.canada.ca', 'https://www.canada.ca')
             yes_no_db['url'] = yes_no_db['url'].str.replace('https://https://', 'https://')
             yes_no_db = yes_no_db[yes_no_db['url'].isin(list(urls['URL_function']))]
+
             yes_no_db = yes_no_db.reset_index(drop=True)
             yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
+
             yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
             yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
+
 
 
             yes_no_period = yes_no_db[yes_no_db['problemDate'] <= end_date]
@@ -115,37 +119,25 @@ def bygroup():
             reasons = yes_no_db[['problem']]
             reasons_period = yes_no_period[['problem']]
 
-
             yes_no = yes_no_db[['problemDate', 'yesno']]
             yes_no = yes_no.rename(columns={"problemDate": "Date", "yesno": "Yes/No"})
             yes_no = yes_no.dropna()
             yes_no = yes_no.sort_values(by = 'Date', ascending=False)
             yes_no = yes_no.reset_index(drop=True)
 
-            by_date = {}
-            for date in yes_no['Date']:
-              by_date[date] = yes_no.loc[yes_no['Date'] == date]
-
-            for date in by_date:
-              by_date[date] =  by_date[date]['Yes/No'].value_counts()
-
-            for date in by_date:
-              if 'No' not in by_date[date]:
-                by_date[date]['No'] = 0
-
-            for date in by_date:
-              if 'Yes' not in by_date[date]:
-                by_date[date]['Yes'] = 0
-
-            for date in by_date:
-              by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No']))]
+            df_yes = (yes_no.groupby("Date")["Yes/No"]
+                   .value_counts()
+                   .unstack(fill_value=0)
+                   .rename_axis(columns=None)
+                   .eval("Percentage = Yes / (Yes + No)")
+                  )
 
 
-            df_yes = pd.DataFrame(list(by_date.values()),columns = ['Yes', 'No', 'Percentage'])
-            df_yes['Date'] = list(by_date.keys())
+            df_yes= df_yes.reset_index(drop=False)
             df_yes = df_yes[['Date', 'Yes', 'No', 'Percentage']]
+            df_yes= df_yes.reset_index(drop=True)
 
-            df_yes = df_yes.sort_values(by = 'Date')
+            df_yes = df_yes.sort_values(by = 'Date', ascending = False)
             df_yes['Rolling mean'] = df_yes.iloc[:,3].rolling(window=7).mean()
             dates = list(df_yes['Date'])
             dates_r = dates[::-1]
@@ -219,8 +211,6 @@ def bygroup():
                   no = 0
                 score = (yes/ ( yes +  no))
                 score = format(score, '.2f')
-
-
 
 
 
@@ -459,7 +449,6 @@ def bygroup():
                 plots = list(tag_plots.values())
 
 
-
                 #look at comments for period
 
                 group_data = group_data.drop(columns=['Status'])
@@ -662,7 +651,7 @@ def bygroup():
 
                     if lang == 'en':
 
-                        return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, zip = zip, page = page, list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
+                        return render_template("by_group_en.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score, zip = zip, list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
 
                     if lang == 'fr':
                         return render_template("info_by_page_fr.html", group_name = group_name, start_date = start_date, end_date = end_date, yes = yes, no = no, plot_url = plot_url, score = score,  list = list, tag_columns = tag_columns, yes_period = yes_period, no_period = no_period, score_period = score_period, all_start = all_start, all_end = all_end, over_tags = zip(over_unique_tags, list(over_tags['Feedback count'].values.tolist()), over_plots, over_unique_tags), over_dict = over_dict, under_tags = zip(under_unique_tags, list(under_tags['Feedback count'].values.tolist()), under_plots, under_unique_tags), under_dict = under_dict, delta = delta, lang = lang, chart_columns = chart_columns, daily_perc_r = daily_perc_r, weekly_perc_r = weekly_perc_r, dates_r = dates_r, chart_yes = chart_yes, chart_no = chart_no, zip=zip, group = group, urls=urls, reason_column_names = reason_column_names, row_data_reason = list(by_reason.values.tolist()), row_data_reason_period = list(by_reason_period.values.tolist()))
