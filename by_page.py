@@ -150,7 +150,7 @@ def bypage():
                 df_yes = df_yes[['Date', 'Yes', 'No', 'Percentage']]
                 df_yes= df_yes.reset_index(drop=True)
 
-                df_yes = df_yes.sort_values(by = 'Date', ascending = False)
+                df_yes = df_yes.sort_values(by = 'Date')
                 df_yes= df_yes.reset_index(drop=True)
 
                 #add column rolling mean
@@ -920,9 +920,9 @@ def bypage():
                 df_yes = df_yes[['Date', 'Yes', 'No', 'Percentage']]
                 df_yes= df_yes.reset_index(drop=True)
 
-                df_yes = df_yes.sort_values(by = 'Date', ascending = False)
+                df_yes = df_yes.sort_values(by = 'Date')
                 df_yes= df_yes.reset_index(drop=True)
-                
+
                 df_yes['Rolling mean'] = df_yes.iloc[:,3].rolling(window=7).mean()
                 dates = list(df_yes['Date'])
                 dates_r = dates[::-1]
