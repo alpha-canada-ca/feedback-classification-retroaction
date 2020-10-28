@@ -138,30 +138,21 @@ def bypage():
                 yes_no = yes_no.sort_values(by = 'Date', ascending=False)
                 yes_no = yes_no.reset_index(drop=True)
 
-                by_date = {}
-                for date in yes_no['Date']:
-                  by_date[date] = yes_no.loc[yes_no['Date'] == date]
-                #Populates by_date with number of yes/nos on given date
-                for date in by_date:
-                  by_date[date] =  by_date[date]['Yes/No'].value_counts()
+                df_yes = (yes_no.groupby("Date")["Yes/No"]
+                    .value_counts()
+                    .unstack(fill_value=0)
+                    .rename_axis(columns=None)
+                    .eval("Percentage = Yes / (Yes + No)")
+                    )
 
-                for date in by_date:
-                  if 'No' not in by_date[date]:
-                    by_date[date]['No'] = 0
 
-                for date in by_date:
-                  if 'Yes' not in by_date[date]:
-                    by_date[date]['Yes'] = 0
-
-                #Convert to dict of key value pairs.      key:date   value:(yes,no,yes %)
-                for date in by_date:
-                  by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No']))]
-
-                #format into dataframe and sort by date
-                df_yes = pd.DataFrame(list(by_date.values()),columns = ['Yes', 'No', 'Percentage'])
-                df_yes['Date'] = list(by_date.keys())
+                df_yes= df_yes.reset_index(drop=False)
                 df_yes = df_yes[['Date', 'Yes', 'No', 'Percentage']]
-                df_yes = df_yes.sort_values(by = 'Date')
+                df_yes= df_yes.reset_index(drop=True)
+
+                df_yes = df_yes.sort_values(by = 'Date', ascending = False)
+                df_yes= df_yes.reset_index(drop=True)
+
                 #add column rolling mean
                 df_yes['Rolling mean'] = df_yes.iloc[:,3].rolling(window=7).mean()
                 #dates list and dates_r list
@@ -917,30 +908,21 @@ def bypage():
                 yes_no = yes_no.sort_values(by = 'Date', ascending=False)
                 yes_no = yes_no.reset_index(drop=True)
 
-                by_date = {}
-                for date in yes_no['Date']:
-                  by_date[date] = yes_no.loc[yes_no['Date'] == date]
-
-                for date in by_date:
-                  by_date[date] =  by_date[date]['Yes/No'].value_counts()
-
-                for date in by_date:
-                  if 'No' not in by_date[date]:
-                    by_date[date]['No'] = 0
-
-                for date in by_date:
-                  if 'Yes' not in by_date[date]:
-                    by_date[date]['Yes'] = 0
-
-                for date in by_date:
-                  by_date[date] = [by_date[date]['Yes'], by_date[date]['No'], (by_date[date]['Yes']/(by_date[date]['Yes'] + by_date[date]['No']))]
+                df_yes = (yes_no.groupby("Date")["Yes/No"]
+                    .value_counts()
+                    .unstack(fill_value=0)
+                    .rename_axis(columns=None)
+                    .eval("Percentage = Yes / (Yes + No)")
+                    )
 
 
-                df_yes = pd.DataFrame(list(by_date.values()),columns = ['Yes', 'No', 'Percentage'])
-                df_yes['Date'] = list(by_date.keys())
+                df_yes= df_yes.reset_index(drop=False)
                 df_yes = df_yes[['Date', 'Yes', 'No', 'Percentage']]
+                df_yes= df_yes.reset_index(drop=True)
 
-                df_yes = df_yes.sort_values(by = 'Date')
+                df_yes = df_yes.sort_values(by = 'Date', ascending = False)
+                df_yes= df_yes.reset_index(drop=True)
+                
                 df_yes['Rolling mean'] = df_yes.iloc[:,3].rolling(window=7).mean()
                 dates = list(df_yes['Date'])
                 dates_r = dates[::-1]
