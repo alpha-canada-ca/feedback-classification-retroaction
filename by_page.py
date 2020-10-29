@@ -44,6 +44,9 @@ def bypage():
     start_date = request.args.get('start_date', week_ago)
     end_date = request.args.get('end_date', today)
 
+    monthDict = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 
+                'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
+
 
     if lang == 'en':
         tag_columns = ['Date', 'Comment']
@@ -118,9 +121,15 @@ def bypage():
                 #grab current page only and reset indexes
                 yes_no_db = yes_no_db.loc[yes_no_db['url'] == page]
                 yes_no_db = yes_no_db.reset_index(drop=True)
+
                 #Parse date to Y-M-D
-                yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
-                yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
+                counter = 0
+                for index in yes_no_db['problemDate']:
+                    arrWords = index.split(" ")
+                    index = arrWords[3] + "-" + monthDict[arrWords[1]] + "-" + arrWords[2] 
+                    yes_no_db['problemDate'][counter] = index
+                    counter += 1
+
                 #90 days db
                 yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
                 #period selected db
@@ -892,8 +901,14 @@ def bypage():
                 yes_no_db['url'] = yes_no_db['url'].str.replace('https://https://', 'https://')
                 yes_no_db = yes_no_db.loc[yes_no_db['url'] == page]
                 yes_no_db = yes_no_db.reset_index(drop=True)
-                yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
-                yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
+
+                counter = 0
+                for index in yes_no_db['problemDate']:
+                    arrWords = index.split(" ")
+                    index = arrWords[3] + "-" + monthDict[arrWords[1]] + "-" + arrWords[2] 
+                    yes_no_db['problemDate'][counter] = index
+                    counter += 1
+
                 yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
 
                 yes_no_period = yes_no_db[yes_no_db['problemDate'] <= end_date]
