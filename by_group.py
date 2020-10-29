@@ -106,9 +106,15 @@ def bygroup():
             yes_no_db = yes_no_db[yes_no_db['url'].isin(list(urls['URL_function']))]
 
             yes_no_db = yes_no_db.reset_index(drop=True)
-            yes_no_db['problemDate'] = pd.to_datetime(yes_no_db.problemDate.str.extract('^\w* ([\w]+ \d+ \d+)')[0])
+            
+            #Parse date to Y-M-D
+            counter = 0
+            for index in yes_no_db['problemDate']:
+                arrWords = index.split(" ")
+                index = arrWords[3] + "-" + monthDict[arrWords[1]] + "-" + arrWords[2] 
+                yes_no_db['problemDate'][counter] = index
+                counter += 1
 
-            yes_no_db['problemDate'] = yes_no_db.problemDate.dt.strftime('%Y-%m-%d')
             yes_no_db = yes_no_db[yes_no_db['problemDate'] >= earliest]
 
 

@@ -10,6 +10,7 @@ def bypage():
     from nltk.corpus import stopwords
     import nltk
     from nltk.stem.snowball import SnowballStemmer
+    from nltk import FreqDist
     import re
     import sys
     import warnings
@@ -23,6 +24,7 @@ def bypage():
     import matplotlib.ticker as plticker
     import datetime as DT
     from wordcloud import WordCloud
+    
 
     #define deserialize
     def deserialize(file):
@@ -46,7 +48,8 @@ def bypage():
 
     monthDict = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 
                 'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
-
+                
+    nltk.download('stopwords')
 
     if lang == 'en':
         tag_columns = ['Date', 'Comment']
@@ -476,7 +479,6 @@ def bypage():
                             words_en.append(word.lower())
 
                     #remove English stop words to get most frequent words
-                    nltk.download('stopwords')
                     sw = nltk.corpus.stopwords.words('english')
                     sw.append('covid')
                     sw.append('19')
@@ -486,7 +488,7 @@ def bypage():
                             if word not in sw and word.isalpha():
                                 words_ns_en.append(word)
                     #get most common words
-                    from nltk import FreqDist
+                    
                     fdist1 = FreqDist(words_ns_en)
                     most_common = fdist1.most_common(15)
                     mc = pd.DataFrame(most_common, columns =['Word', 'Count'])
@@ -1242,7 +1244,7 @@ def bypage():
 
 
                     #remove English stop words to get most frequent words
-                    nltk.download('stopwords')
+                    
                     sw = nltk.corpus.stopwords.words('french')
                     sw.append('covid')
                     sw.append('19')
@@ -1281,7 +1283,6 @@ def bypage():
 
 
                     #get most common words
-                    from nltk import FreqDist
                     fdist1 = FreqDist(words_ns_fr)
                     most_common = fdist1.most_common(15)
                     mc = pd.DataFrame(most_common, columns =['Mots', 'Nombre'])
