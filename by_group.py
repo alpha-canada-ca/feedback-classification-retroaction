@@ -45,6 +45,10 @@ def bygroup():
     start_date = request.args.get('start_date', week_ago)
     end_date = request.args.get('end_date', today)
 
+    monthDict = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 
+                'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
+            
+
 
     if lang == 'en':
         tag_columns = ['Date', 'Comment']
@@ -106,7 +110,7 @@ def bygroup():
             yes_no_db = yes_no_db[yes_no_db['url'].isin(list(urls['URL_function']))]
 
             yes_no_db = yes_no_db.reset_index(drop=True)
-            
+
             #Parse date to Y-M-D
             counter = 0
             for index in yes_no_db['problemDate']:
