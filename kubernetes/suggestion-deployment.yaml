@@ -21,9 +21,9 @@ spec:
         name: suggestion
         resources: 
           limits:
-            cpu: 1000m
-            memory: 1024Mi
+            cpu: 2000m
+            memory:2048Mi
           requests:
-            cpu: 500m
-            memory: 512Mi  
+            cpu: 1000m
+            memory: 1024Mi  
 
