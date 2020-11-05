@@ -189,70 +189,14 @@
          </script>
          <div id='content'>
             <h2 class='h3'>On this page</h2>
-            <ul><a href="#found">Found their answer?</a></li>
+            <ul>
                <li><a href="#tag">By tag</a></li>
-               <li><a href="#reason">By reason</a></li>
                <li><a href="#common">Most frequent words</a></li>
                <li><a href="#group">Feedback by group of pages</a></li>
             </ul>
-            <h2 id="found">Said they found their answer?</h2>
-            <!--<p>Data about the percentage of people who found their answer is not available at this time.</p>  -->
-
-            <details>
-               <summary>How to interpret this data</summary>
-               <p>This data is <strong>not the equivalent of a task success rate</strong> or an accurate measure of the performance of the page. </p>
-
-               <p>Look for trends: a ratio of yes vs no going up or down may be meaningful and indicate that something needs to be looked into.</p>
-
-               <p>The number itself is not very meaningful because:</p>
-               <ul>
-                  <li>only a small percentage of visitors will use the widget</li>
-                  <li>people who can't find their answer are more likely to use the widget (skewing the numbers towards no's)</li>
-                  <li>navigation pages, where people are just transiting to an answer page, are less likely to have a "yes" answer - averages on navigation pages will generaly be lower than on answer pages</li>
-               </ul>
-            </details>
-            <div class="row">
-               <div class="col-md-6">
-                  <h3>For the selected date range</h3>
-                  <p>From {{ start_date }} to {{ end_date }}: </p>
-                  <ul>
-                     <li>Yes: <strong>{{ yes_period }}</strong></li>
-                     <li>No: <strong>{{ no_period }}</strong></li>
-                     <li>Ratio: <strong>{{ score_period }}</strong> ({{ delta }} compared to last 90 days)</li>
-                  </ul>
-               </div>
-               <div class="col-md-6">
-                  <h3>For the last 90 days</h3>
-                  <p>From {{ all_start }} to {{ all_end }}:</p>
-                  <ul>
-                     <li>Yes: <strong>{{ yes }}</strong></li>
-                     <li>No: <strong>{{ no }}</strong></li>
-                     <li>Ratio: <strong>{{ score }}</strong></li>
-                  </ul>
-               </div>
-            </div>
-            <img src="data:image/png;base64,{{ plot_url }}" alt="See table below for numbers">
-            <details>
-               <summary>Table: Proportion of people of who said they found their answer</summary>
-               <table class="wb-tables table table-striped">
-                  <tr>
-                     {% for col in chart_columns %}
-                     <th>{{col}}</th>
-                     {% endfor %}
-                  </tr>
-                  {% for row in zip(dates_r, chart_yes, chart_no, daily_perc_r, weekly_perc_r) %}
-                  <tr>
-                     {% for col, row_ in zip(chart_columns, row) %}
-                     <td>
-                        {{row_}}
-                     </td>
-                     {% endfor %}
-                  </tr>
-                  {% endfor %}
-               </table>
-            </details>
 
             <h2 id="tag">By tag</h2>
+            <h3>Confirmed tags</h3>
             <p>From {{ start_date }} to {{ end_date }}: </p>
             <ul class="list-unstyled">
                {% for tag, count, plot, unique_tag in over_tags %}
@@ -348,49 +292,7 @@
                   {% endfor %}
                </ul>
             </details>
-            <h2 id="reason">By reason</h2>
-            <!--<p>Data about the number of comments by reason is not available at the moment.</p>-->
-
-            <div class="row">
-               <div class="col-md-6">
-                  <h3>For the selected date range</h3>
-                  <p>From {{ start_date }} to {{ end_date }}: </p>
-                  <table class="wb-tables table table-striped">
-                     <tr>
-                        {% for col in reason_column_names %}
-                        <th>{{col}}</th>
-                        {% endfor %}
-                     </tr>
-                     {% for row in row_data_reason_period %}
-                     <tr>
-                        {% for col, row_ in zip(reason_column_names, row) %}
-                        <td>{{row_}}</td>
-                        {% endfor %}
-                     </tr>
-                     {% endfor %}
-                  </table>
-               </div>
-               <div class="col-md-6">
-                  <h3>For the last 90 days</h3>
-                  <p>From {{ all_start }} to {{ all_end }}:</p>
-                  <table class="wb-tables table table-striped">
-                     <tr>
-                        {% for col in reason_column_names %}
-                        <th>{{col}}</th>
-                        {% endfor %}
-                     </tr>
-                     {% for row in row_data_reason %}
-                     <tr>
-                        {% for col, row_ in zip(reason_column_names, row) %}
-                        <td>{{row_}}</td>
-                        {% endfor %}
-                     </tr>
-                     {% endfor %}
-                  </table>
-               </div>
-            </div>
-
-
+    
 
             <h2 id="common">Most frequent words</h2>
             <p>From {{ start_date }} to {{ end_date }}: </p>

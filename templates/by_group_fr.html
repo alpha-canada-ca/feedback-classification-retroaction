@@ -182,73 +182,9 @@
             langElem.setAttribute("href", toggleURL);
          </script>
          <div id='content'>
-            <h2 class='h3'>Sur cette page</h2>
-            <ul>
-               <li><a href="#found">Trouvé leur réponse?</a></li>
-               <li><a href="#tag">Par étiquette</a></li>
-               <li><a href="#reason">Par raison</a></li>
-               <li><a href="#pages">Pages dans ce groupe</a></li>
-            </ul>
-            <h2 id="found">Disent avoir trouvé leur réponse?</h2>
-            <!-- <p>Les données sur la proportion de gens qui ont trouvé leur réponse ne sont pas disponibles pour le moment.</p> -->
-
-            <details>
-               <summary>Comment interpréter ces données</summary>
-               <p>Ces données <strong>ne sont pas l'équivalent d'un taux de réussite de la tâche</strong> ou une mesure précise de la performance de la page.</p>
-               <p>Portez attention aux tendances : un ratio oui/non à la hausse ou à la baisse peut être significatif et indiquer que quelque chose doit être examiné</p>
-
-               <p>Le nombre lui-même n'est pas très significatif parce que :</p>
-               <ul>
-                  <li>seul un petit pourcentage de visiteurs utilisent l'outil de rétroaction</li>
-                  <li>les personnes qui ne trouvent pas leur réponse sont plus susceptibles d'utiliser l'outil de rétroaction (les données sont ainsi biaisées vers les « non »)</li>
-                  <li>les pages de navigation, où les personnes ne font que transiter vers une page de réponse, sont moins susceptibles d'avoir une réponse « oui » - les moyennes sur les pages de navigation seront généralement plus basses que sur les pages
-                     de réponse
-                  </li>
-               </ul>
-            </details>
-            <div class="row">
-               <div class="col-md-6">
-                  <h3>Pour les dates sélectionnées</h3>
-                  <p>De {{ start_date }} à {{ end_date }} :</p>
-                  <ul>
-                     <li>Oui : <strong>{{ yes_period }}</strong></li>
-                     <li>Non : <strong>{{ no_period }}</strong></li>
-                     <li>Ratio : <strong>{{ score_period }}</strong> ({{ delta }} comparé aux 90 derniers jours)</li>
-                  </ul>
-               </div>
-               <div class="col-md-6">
-                  <h3>Pour les derniers 90 jours</h3>
-                  <p>De {{ all_start }} à {{ all_end }} :</p>
-                  <ul>
-                     <li>Oui : <strong>{{ yes }}</strong></li>
-                     <li>Non : <strong>{{ no }}</strong></li>
-                     <li>Ratio : <strong>{{ score }}</strong></li>
-                  </ul>
-               </div>
-            </div>
-            <img src="data:image/png;base64,{{ plot_url }}" alt="">
-            <details>
-               <summary>Proportion de gens qui disent ont trouvé leur réponse</summary>
-               <table class="wb-tables table table-striped">
-                  <tr>
-                     {% for col in chart_columns %}
-                     <th>{{col}}</th>
-                     {% endfor %}
-                  </tr>
-                  {% for row in zip(dates_r, chart_yes, chart_no, daily_perc_r, weekly_perc_r) %}
-                  <tr>
-                     {% for col, row_ in zip(chart_columns, row) %}
-                     <td>
-                        {{row_}}
-                     </td>
-                     {% endfor %}
-                  </tr>
-                  {% endfor %}
-               </table>
-            </details>
-            </details>
 
             <h2 id="tag">Par étiquette</h2>
+            <h3>Étiquettes confirmées</h3>
             <p>De {{ start_date }} à {{ end_date }} :</p>
             <ul class="list-unstyled">
                {% for tag, count, plot, unique_tag in over_tags %}
@@ -344,50 +280,7 @@
                   {% endfor %}
                </ul>
             </details>
-            <h2 id="reason">Par raison</h2>
-            <!--<p>Les données sur le nombre de rétroactions par raison ne sont pas disponibles pour le moment.</p>-->
-
-            <div class="row">
-               <div class="col-md-6">
-                  <h3>Pour les dates sélectionnées</h3>
-                  <p>De {{ start_date }} à {{ end_date }} :</p>
-                  <table class="wb-tables table table-striped">
-                     <tr>
-                        {% for col in reason_column_names %}
-                        <th>{{col}}</th>
-                        {% endfor %}
-                     </tr>
-                     {% for row in row_data_reason_period %}
-                     <tr>
-                        {% for col, row_ in zip(reason_column_names, row) %}
-                        <td>{{row_}}</td>
-                        {% endfor %}
-                     </tr>
-                     {% endfor %}
-                  </table>
-
-               </div>
-               <div class="col-md-6">
-                  <h3>Pour les derniers 90 jours</h3>
-                  <p>De {{ all_start }} à {{ all_end }} :</p>
-                  <table class="wb-tables table table-striped">
-                     <tr>
-                        {% for col in reason_column_names %}
-                        <th>{{col}}</th>
-                        {% endfor %}
-                     </tr>
-                     {% for row in row_data_reason %}
-                     <tr>
-                        {% for col, row_ in zip(reason_column_names, row) %}
-                        <td>{{row_}}</td>
-                        {% endfor %}
-                     </tr>
-                     {% endfor %}
-                  </table>
-
-               </div>
-            </div>
-            
+        
             <h2 id="pages">Page dans le groupe « {{ group_name }} »</h2>
             <table class="wb-tables table table-striped table-hover" data-page-length='20'>
                <thead>
