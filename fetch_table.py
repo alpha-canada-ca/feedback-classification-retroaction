@@ -35,4 +35,4 @@ serialize(data, 'data/all_data.pickle')
 serialize(yes_no_db, 'data/yes_no_db.pickle')
 
 print('Saved dataframes as pickle files')
-print('Process complete')
+print('Fetching data process complete')
