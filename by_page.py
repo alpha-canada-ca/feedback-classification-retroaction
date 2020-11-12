@@ -84,7 +84,7 @@ def bypage():
 
             if page_data['Lang'][0] == 'EN':
                 #limit page_data_en to 10 columns below
-                page_data_en = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title', 'Lookup_group_EN', 'Lookup_group_FR']]
+                page_data_en = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Lookup_page_title', 'Lookup_group_EN', 'Lookup_group_FR']]
                 page_data_en = page_data_en[page_data_en.Status != 'Spam']
                 page_data_en = page_data_en[page_data_en.Status != 'Ignore']
                 page_data_en = page_data_en[page_data_en.Status != 'Duplicate']
@@ -260,7 +260,6 @@ def bypage():
                     #look at comments for period
                     #drop columns and replace nulls with false
                     page_data_en = page_data_en.drop(columns=['Status'])
-                    page_data_en = page_data_en.drop(columns=['Yes/No'])
                     page_data_en["What's wrong"].fillna(False, inplace=True)
                     page_data_en["Tags confirmed"].fillna(False, inplace=True)
 
@@ -681,7 +680,7 @@ def bypage():
             else:
 
                 #keep only relevant columns from the dataframe
-                page_data_fr = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_FR_tag", 'Tags confirmed', 'Yes/No', 'Lookup_page_title', 'Lookup_group_EN', 'Lookup_group_FR']]
+                page_data_fr = page_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_FR_tag", 'Tags confirmed', 'Lookup_page_title', 'Lookup_group_EN', 'Lookup_group_FR']]
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Spam']
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Ignore']
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Duplicate']
@@ -845,7 +844,6 @@ def bypage():
                     plots = list(tag_plots.values())
 
                     page_data_fr = page_data_fr.drop(columns=['Status'])
-                    page_data_fr = page_data_fr.drop(columns=['Yes/No'])
                     page_data_fr["What's wrong"].fillna(False, inplace=True)
                     page_data_fr["Tags confirmed"].fillna(False, inplace=True)
 

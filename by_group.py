@@ -81,7 +81,7 @@ def bygroup():
 
         else:
 
-            group_data = group_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title', 'URL_function', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR" ]]
+            group_data = group_data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Lookup_page_title', 'URL_function', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR" ]]
             group_data = group_data[group_data.Status != 'Spam']
             group_data = group_data[group_data.Status != 'Ignore']
             group_data = group_data[group_data.Status != 'Duplicate']
@@ -116,7 +116,6 @@ def bygroup():
 
             # only keep commments
 
-            all_data = all_data.drop(columns=['Yes/No'])
             all_data = all_data.dropna()
 
             if all_data.empty:
@@ -256,7 +255,6 @@ def bygroup():
                 #look at comments for period
 
                 group_data = group_data.drop(columns=['Status'])
-                group_data = group_data.drop(columns=['Yes/No'])
                 group_data["What's wrong"].fillna(False, inplace=True)
                 group_data["Tags confirmed"].fillna(False, inplace=True)
 
