@@ -73,6 +73,7 @@ def bypage():
         page_data = page_data.reset_index(drop=True)
         # grab data from 90 days ago onwards
         page_data = page_data[page_data['Date'] >= earliest]
+        page_data = page_data.reset_index(drop=True)
 
         if page_data.empty:
 
