@@ -91,6 +91,7 @@ def bypage():
                 page_data_en = page_data_en.reset_index(drop=True)
                 #set nulls to [none]
                 page_data_en['Lookup_group_EN'].fillna('[None]', inplace=True)
+                page_data_en['Lookup_group_FR'].fillna('[None]', inplace=True)
                 #adds commas in between each character
                 page_data_en['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_en['Lookup_page_title']]
 
@@ -686,6 +687,8 @@ def bypage():
                 page_data_fr = page_data_fr[page_data_fr.Status != 'Duplicate']
                 page_data_fr = page_data_fr.reset_index(drop=True)
 
+                page_data_fr['Lookup_group_EN'].fillna('[None]', inplace=True)
+                page_data_fr['Lookup_group_FR'].fillna('[None]', inplace=True)
                 page_data_fr['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_page_title']]
                 page_data_fr['Lookup_group_EN'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_group_EN']]
                 page_data_fr['Lookup_group_FR'] = [','.join(map(str, l)) for l in page_data_fr['Lookup_group_FR']]
