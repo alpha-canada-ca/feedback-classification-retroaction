@@ -243,7 +243,7 @@ def bypage():
                           plt.title(tag + '\n' + 'Nombre de commentaires par jour   ')
 
                       plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
-                      plt.legend()
+                      ax.legend()
                       plt.ylim(0, max_y)
                       loc = plticker.MultipleLocator(base=7.0)
                       plt.gcf().subplots_adjust(bottom=0.2)
@@ -833,7 +833,7 @@ def bypage():
                           plt.title(tag + '\n' + 'Nombre de commentaires par jour')
 
                       plt.axvspan(start_plot, end_plot, color='blue', alpha=0.3)
-                      plt.legend()
+                      ax.legend()
                       plt.ylim(0, max_y)
                       loc = plticker.MultipleLocator(base=7.0)
                       plt.gcf().subplots_adjust(bottom=0.2)
