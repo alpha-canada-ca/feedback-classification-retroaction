@@ -254,7 +254,7 @@ def bypage():
                       plt.close()
                       img.seek(0)
                       tag_plots[tag] = base64.b64encode(img.getvalue()).decode()
-
+                      plt.clf()
                     plots = list(tag_plots.values())
 
 
@@ -317,7 +317,7 @@ def bypage():
                         img.seek(0)
 
                         cloud_url = base64.b64encode(img.getvalue()).decode()
-
+                        plt.clf()
 
 
                     unconfirmed_en = page_data_en.loc[page_data_en['Tags confirmed'] == False]
@@ -844,6 +844,7 @@ def bypage():
                       plt.close()
                       img.seek(0)
                       tag_plots[tag] = base64.b64encode(img.getvalue()).decode()
+                      plt.clf()
 
                     plots = list(tag_plots.values())
 
@@ -932,7 +933,8 @@ def bypage():
                         img.seek(0)
 
                         cloud_url = base64.b64encode(img.getvalue()).decode()
-
+                        plt.clf()
+                        
                     #get unconfirmed tags
 
                     unconfirmed_fr = page_data_fr.loc[page_data_fr['Tags confirmed'] == False]

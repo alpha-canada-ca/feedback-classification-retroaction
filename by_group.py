@@ -248,6 +248,7 @@ def bygroup():
                   plt.close()
                   img.seek(0)
                   tag_plots[tag] = base64.b64encode(img.getvalue()).decode()
+                  plt.clf()
 
                 plots = list(tag_plots.values())
 
