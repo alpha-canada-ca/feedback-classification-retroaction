@@ -7,26 +7,26 @@ from configparser import ConfigParser
 config = ConfigParser()
 config.read('config/config.ini')
 key = config.get('default', 'api_key')
-base_main = config.get('default', 'base_main')
-base_old = config.get('default', 'base_old')
-airtable_main = Airtable(base_main, 'Page feedback', api_key=key)
-airtable_old = Airtable(base_old, 'Page feedback', api_key=key)
+base = config.get('default', 'base')
+base_health= config.get('default', 'base_health')
+airtable_main = Airtable(base, 'Page feedback', api_key=key)
+airtable_health = Airtable(base_health, 'Page feedback', api_key=key)
 
 
 
 print('Accessed the key')
 record_list_main = airtable_main.get_all()
-record_list_old = airtable_old.get_all()
+record_list_health = airtable_health.get_all()
 
 print('Fetched the data')
 #convert data to Pandas dataframe
 data_main = pd.DataFrame([record['fields'] for record in record_list_main])
-data_old = pd.DataFrame([record['fields'] for record in record_list_old])
+data_health = pd.DataFrame([record['fields'] for record in record_list_health])
 
-data = data_main.append(data_old, ignore_index=True)
+data = data_main.append(data_health, ignore_index=True)
 
 
-data = data[["Comment", "Date", "Status",  "What's wrong", "Lookup_tags", 'Tags confirmed', 'Yes/No', 'Lookup_page_title', 'URL_function', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR", "Lang"]]
+data = data[["Comment", "Date", "Status", "Lookup_tags", 'Tags confirmed', 'Lookup_page_title', 'URL_function', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR", "Lang", "What's wrong"]]
 
 
 
