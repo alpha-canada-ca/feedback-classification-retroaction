@@ -8,14 +8,31 @@ config = ConfigParser()
 config.read('config/config.ini')
 key = config.get('default', 'api_key')
 base = config.get('default', 'base')
-airtable = Airtable(base, 'Page feedback', api_key=key)
+base_health= config.get('default', 'base_health')
+airtable_main = Airtable(base, 'Page feedback', api_key=key)
+airtable_health = Airtable(base_health, 'Page feedback', api_key=key)
+
+
 
 print('Accessed the key')
-record_list = airtable.get_all()
+record_list_main = airtable_main.get_all()
+record_list_health = airtable_health.get_all()
 
 print('Fetched the data')
 #convert data to Pandas dataframe
-data = pd.DataFrame([record['fields'] for record in record_list])
+data_main = pd.DataFrame([record['fields'] for record in record_list_main])
+data_health = pd.DataFrame([record['fields'] for record in record_list_health])
+
+data = data_main.append(data_health, ignore_index=True, sort=True)
+
+
+
+data = data[["Comment", "Date", "Status", "Lookup_tags", 'Tags confirmed', 'Lookup_page_title', 'URL_function', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR", "Lang", "What's wrong"]]
+data = data[data.Status != 'Spam']
+data = data[data.Status != 'Ignore']
+data = data[data.Status != 'Duplicate']
+
+data = data.drop_duplicates(subset ="Comment")
 
 
 print('Created the dataframes')

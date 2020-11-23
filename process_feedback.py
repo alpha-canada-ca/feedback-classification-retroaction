@@ -16,22 +16,36 @@ config = ConfigParser()
 config.read('config/config.ini')
 key = config.get('default', 'api_key')
 base = config.get('default', 'base')
-airtable = Airtable(base, 'Page feedback', api_key=key)
-record_list = airtable.get_all()
+base_health = config.get('default', 'base_health')
+airtable_main = Airtable(base, 'Page feedback', api_key=key)
+airtable_health = Airtable(base_health, 'Page feedback', api_key=key)
+record_list_main = airtable_main.get_all()
+record_list_health = airtable_health.get_all()
+
 
 #convert data to Pandas dataframe
-data = pd.DataFrame([record['fields'] for record in record_list])
+data_main = pd.DataFrame([record['fields'] for record in record_list_main])
+data_health = pd.DataFrame([record['fields'] for record in record_list_health])
+
 
 #If you want to experiment with this script without setting up an AirTable, you can do so by loading the tagged_feedback.csv file from the repo and convert it to a Pandas dataframe, with this line of code: "data = pd.read_csv('tagged_feedback.csv')".
+
+
+data = data_main.append(data_health, ignore_index=True, sort=True)
+
+data = data[['Comment', 'Lookup_tags', 'Model function', 'Tags confirmed', 'Lang']]
+
+
 
 #split dataframe for English comments
 data_en = data[data['Lang'].str.contains("EN", na=False)]
 
 #keep only relevant columns from the dataframe
-data_en_topic = data_en[['Comment', 'Lookup_tags', 'Model function', 'Tags confirmed']]
 
 #remove all rows thave have null content - this, in effect, removes comments for which the tags haven't been confirmed by a human
-data_en_topic = data_en_topic.dropna()
+data_en_topic = data_en.dropna()
+
+data_en_topic = data_en_topic.drop_duplicates(subset ="Comment")
 
 #remove the Tags confirmed column (it's not needed anymore)
 data_en_topic = data_en_topic.drop(columns=['Tags confirmed'])
@@ -47,8 +61,8 @@ data_en_topic = data_en_topic.reset_index(drop=True)
 
 #split dataframe for French comments - same comments as above for each line
 data_fr = data[data['Lang'].str.contains("FR", na=False)]
-data_fr_topic = data_fr[['Comment', 'Lookup_tags', 'Model function', 'Tags confirmed']]
-data_fr_topic = data_fr_topic.dropna()
+data_fr_topic = data_fr.dropna()
+data_fr_topic = data_fr_topic.drop_duplicates(subset ="Comment")
 data_fr_topic = data_fr_topic.drop(columns=['Tags confirmed'])
 data_fr_topic['topics'] = [','.join(map(str, l)) for l in data_fr_topic['Lookup_tags']]
 data_fr_topic = data_fr_topic.drop(columns=['Lookup_tags'])
