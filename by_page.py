@@ -93,6 +93,13 @@ def bypage():
                 #set nulls to [none]
                 page_data_en['Lookup_group_EN'].fillna('[None]', inplace=True)
                 page_data_en['Lookup_group_FR'].fillna('[None]', inplace=True)
+
+                if lang == 'en':
+                    page_data_en['Lookup_tags'].loc[page_data_en['Lookup_tags'].isnull()] = page_data_en['Lookup_tags'].loc[page_data_en['Lookup_tags'].isnull()].apply(lambda x: ['Untagged'])
+
+                if lang == 'fr':
+                    page_data_en['Lookup_tags'].loc[page_data_en['Lookup_tags'].isnull()] = page_data_en['Lookup_tags'].loc[page_data_en['Lookup_tags'].isnull()].apply(lambda x: ['Non-étiquettés'])
+
                 #adds commas in between each character
                 page_data_en['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_en['Lookup_page_title']]
 
@@ -708,6 +715,12 @@ def bypage():
                 page_data_fr["What's wrong"].fillna(False, inplace=True)
                 page_data_fr["Tags confirmed"].fillna(False, inplace=True)
 
+                if lang == 'en':
+                    page_data_fr['Lookup_FR_tag'].loc[page_data_fr['Lookup_FR_tag'].isnull()] = page_data_fr['Lookup_FR_tag'].loc[page_data_fr['Lookup_FR_tag'].isnull()].apply(lambda x: ['Untagged'])
+
+                if lang == 'fr':
+                    page_data_fr['Lookup_FR_tag'].loc[page_data_fr['Lookup_FR_tag'].isnull()] = page_data_fr['Lookup_FR_tag'].loc[page_data_fr['Lookup_FR_tag'].isnull()].apply(lambda x: ['Non-étiquettés'])
+
                 all_data_fr = page_data_fr.copy()
 
 
@@ -934,7 +947,7 @@ def bypage():
 
                         cloud_url = base64.b64encode(img.getvalue()).decode()
                         plt.clf()
-                        
+
                     #get unconfirmed tags
 
                     unconfirmed_fr = page_data_fr.loc[page_data_fr['Tags confirmed'] == False]

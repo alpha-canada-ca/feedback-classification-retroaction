@@ -102,8 +102,18 @@ def bygroup():
 
             group_data["What's wrong"].fillna(False, inplace=True)
             group_data["Tags confirmed"].fillna(False, inplace=True)
+            if lang == 'en':
+                group_data['Lookup_tags'].loc[group_data['Lookup_tags'].isnull()] = group_data['Lookup_tags'].loc[group_data['Lookup_tags'].isnull()].apply(lambda x: ['Untagged'])
+
+            if lang == 'fr':
+                group_data['Lookup_tags'].loc[group_data['Lookup_tags'].isnull()] = group_data['Lookup_tags'].loc[group_data['Lookup_tags'].isnull()].apply(lambda x: ['Non-étiquettés'])
 
 
+            if lang == 'en':
+                group_data['Lookup_FR_tag'].loc[group_data['Lookup_FR_tag'].isnull()] = group_data['Lookup_FR_tag'].loc[group_data['Lookup_FR_tag'].isnull()].apply(lambda x: ['Untagged'])
+
+            if lang == 'fr':
+                group_data['Lookup_FR_tag'].loc[group_data['Lookup_FR_tag'].isnull()] = group_data['Lookup_FR_tag'].loc[group_data['Lookup_FR_tag'].isnull()].apply(lambda x: ['Non-étiquettés'])
 
             all_data = group_data.copy()
 
