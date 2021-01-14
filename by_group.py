@@ -30,7 +30,6 @@ def bygroup():
 
     #import data as pickle
     data = deserialize('data/all_data.pickle')
-    yes_no_db = deserialize('data/yes_no_db.pickle')
 
 
     today = DT.date.today()
