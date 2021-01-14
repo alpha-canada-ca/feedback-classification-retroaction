@@ -1,2 +1,3 @@
 @reboot cd /app && $(which python3) ./fetch_table.py > /proc/1/fd/1 2>/proc/1/fd/2
 0 14 * * * cd /app && $(which python3) ./fetch_table.py > /proc/1/fd/1 2>/proc/1/fd/2
+0 14 * * 5 cd /app && $(which python3) ./update_mongo_tags.py > /proc/1/fd/1 2>/proc/1/fd/2
