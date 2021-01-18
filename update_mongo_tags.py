@@ -44,10 +44,3 @@ for index in range(len(data)):
             if x != (data['Lookup_tags'][index]):
                 print("updated index: " + str(index))
                 problem.find_one_and_update({"_id" : ObjectId((data['Unique ID'][index]))},{"$set":{"tags": [(data['Lookup_tags'][index])]}})
-                print()
-            else:
-                print("already updated. " + str(index))
-        else:
-            print("didnt find")
-    else:
-        print("contains '-'. " + str(index))
