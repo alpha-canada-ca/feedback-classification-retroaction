@@ -7,12 +7,15 @@ def bypage():
     import requests
     import pandas as pd
     import pickle
-    from nltk.corpus import stopwords
     import nltk
+    from nltk.corpus import stopwords
+    nltk.download('stopwords', quiet=True)
     from nltk.stem.snowball import SnowballStemmer
+    from nltk import FreqDist
     import re
     import sys
     import warnings
+    warnings.filterwarnings("ignore")
     import matplotlib
     from pandas.plotting import register_matplotlib_converters
     register_matplotlib_converters()
@@ -95,11 +98,9 @@ def bypage():
                 page_data_en['Lookup_group_FR'].fillna('[None]', inplace=True)
 
                 if lang == 'en':
-                    page_data_en['Lookup_tags'].loc[page_data_en['Lookup_tags'].isnull()] = page_data_en['Lookup_tags'].loc[page_data_en['Lookup_tags'].isnull()].apply(lambda x: ['Untagged'])
-
+                    page_data_en['Lookup_tags'] = page_data_en['Lookup_tags'].apply(lambda d: d if isinstance(d, list) else ['Untagged'])
                 if lang == 'fr':
-                    page_data_en['Lookup_tags'].loc[page_data_en['Lookup_tags'].isnull()] = page_data_en['Lookup_tags'].loc[page_data_en['Lookup_tags'].isnull()].apply(lambda x: ['Non-étiquettés'])
-
+                    page_data_en['Lookup_tags'] = page_data_en['Lookup_tags'].apply(lambda d: d if isinstance(d, list) else ['Non-étiquettés'])
                 #adds commas in between each character
                 page_data_en['Lookup_page_title'] = [','.join(map(str, l)) for l in page_data_en['Lookup_page_title']]
 
@@ -290,17 +291,16 @@ def bypage():
                             words_en.append(word.lower())
 
                     #remove English stop words to get most frequent words
-                    nltk.download('stopwords')
+                    
                     sw = nltk.corpus.stopwords.words('english')
                     sw.append('covid')
                     sw.append('19')
                     #generate list of words and make sure they are all characters
                     words_ns_en = []
                     for word in words_en:
-                            if word not in sw and word.isalpha():
+                            if (word.isalpha()) and (word not in sw):
                                 words_ns_en.append(word)
                     #get most common words
-                    from nltk import FreqDist
                     fdist1 = FreqDist(words_ns_en)
                     most_common = fdist1.most_common(15)
                     mc = pd.DataFrame(most_common, columns =['Word', 'Count'])
@@ -316,15 +316,15 @@ def bypage():
                         img = io.BytesIO()
                         wordcloud = WordCloud(background_color='white', max_font_size = 100, width=600, height=300).generate(cloud_words)
                         plt.figure(figsize=(10,5))
-                        plt.imshow(wordcloud, interpolation='bilinear')
                         plt.axis("off")
                         plt.show()
+                        plt.imshow(wordcloud, interpolation='bilinear')
                         plt.savefig(img, format='png')
                         plt.close()
                         img.seek(0)
 
                         cloud_url = base64.b64encode(img.getvalue()).decode()
-                        plt.clf()
+
 
 
                     unconfirmed_en = page_data_en.loc[page_data_en['Tags confirmed'] == False]
@@ -479,7 +479,7 @@ def bypage():
                                     tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
 
                         if 2 in confirmed_en.columns:
-                            for tag, topic_df_en in page_data_en.groupby(2):
+                            for tag, topic_df_en in confirmed_en.groupby(2):
                                 if tag_dico[tag].empty:
                                     tag_dico[tag] = topic_df_en[['Date', 'Comment']]
                                 else:
@@ -584,7 +584,7 @@ def bypage():
                                     tag_dico[tag] = tag_dico[tag].append(topic_df_en[['Date', 'Comment']])
 
                         if 2 in confirmed_en.columns:
-                            for tag, topic_df_en in page_data_en.groupby(2):
+                            for tag, topic_df_en in confirmed_en.groupby(2):
                                 if tag_dico[tag].empty:
                                     tag_dico[tag] = topic_df_en[['Date', 'Comment']]
                                 else:
@@ -716,10 +716,10 @@ def bypage():
                 page_data_fr["Tags confirmed"].fillna(False, inplace=True)
 
                 if lang == 'en':
-                    page_data_fr['Lookup_FR_tag'].loc[page_data_fr['Lookup_FR_tag'].isnull()] = page_data_fr['Lookup_FR_tag'].loc[page_data_fr['Lookup_FR_tag'].isnull()].apply(lambda x: ['Untagged'])
+                    page_data_fr['Lookup_FR_tag'] = page_data_fr['Lookup_FR_tag'].apply(lambda d: d if isinstance(d, list) else ['Untagged'])
 
                 if lang == 'fr':
-                    page_data_fr['Lookup_FR_tag'].loc[page_data_fr['Lookup_FR_tag'].isnull()] = page_data_fr['Lookup_FR_tag'].loc[page_data_fr['Lookup_FR_tag'].isnull()].apply(lambda x: ['Non-étiquettés'])
+                    page_data_fr['Lookup_FR_tag'] = page_data_fr['Lookup_FR_tag'].apply(lambda d: d if isinstance(d, list) else ['Non-étiquettés'])
 
                 all_data_fr = page_data_fr.copy()
 
@@ -883,7 +883,6 @@ def bypage():
 
 
                     #remove English stop words to get most frequent words
-                    nltk.download('stopwords')
                     sw = nltk.corpus.stopwords.words('french')
                     sw.append('covid')
                     sw.append('19')
@@ -917,7 +916,7 @@ def bypage():
 
                     words_ns_fr = []
                     for word in words_fr:
-                            if word not in sw and word.isalpha():
+                            if (word.isalpha()) and (word not in sw):
                                 words_ns_fr.append(word)
 
 
@@ -938,15 +937,14 @@ def bypage():
                         img = io.BytesIO()
                         wordcloud = WordCloud(background_color='white', max_font_size = 100, width=600, height=300).generate(cloud_words)
                         plt.figure(figsize=(10,5))
-                        plt.imshow(wordcloud, interpolation='bilinear')
                         plt.axis("off")
                         plt.show()
+                        plt.imshow(wordcloud, interpolation='bilinear')
                         plt.savefig(img, format='png')
                         plt.close()
                         img.seek(0)
 
                         cloud_url = base64.b64encode(img.getvalue()).decode()
-                        plt.clf()
 
                     #get unconfirmed tags
 

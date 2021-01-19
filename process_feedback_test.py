@@ -2,8 +2,8 @@
 import requests
 from airtable import Airtable
 import pandas as pd
-from nltk.corpus import stopwords
 import nltk
+from nltk.corpus import stopwords
 from nltk.stem.snowball import SnowballStemmer
 import re
 import sys

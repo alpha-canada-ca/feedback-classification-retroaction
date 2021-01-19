@@ -7,8 +7,8 @@ def bygroup():
     import requests
     import pandas as pd
     import pickle
-    from nltk.corpus import stopwords
     import nltk
+    from nltk.corpus import stopwords
     from nltk.stem.snowball import SnowballStemmer
     import re
     import sys
@@ -102,18 +102,15 @@ def bygroup():
             group_data["What's wrong"].fillna(False, inplace=True)
             group_data["Tags confirmed"].fillna(False, inplace=True)
             if lang == 'en':
-                group_data['Lookup_tags'].loc[group_data['Lookup_tags'].isnull()] = group_data['Lookup_tags'].loc[group_data['Lookup_tags'].isnull()].apply(lambda x: ['Untagged'])
-
+                group_data['Lookup_tags'] = group_data['Lookup_tags'].apply(lambda d: d if isinstance(d, list) else ['Untagged'])
             if lang == 'fr':
-                group_data['Lookup_tags'].loc[group_data['Lookup_tags'].isnull()] = group_data['Lookup_tags'].loc[group_data['Lookup_tags'].isnull()].apply(lambda x: ['Non-étiquettés'])
+                group_data['Lookup_tags'] = group_data['Lookup_tags'].apply(lambda d: d if isinstance(d, list) else ['Non-étiquettés'])
 
 
             if lang == 'en':
-                group_data['Lookup_FR_tag'].loc[group_data['Lookup_FR_tag'].isnull()] = group_data['Lookup_FR_tag'].loc[group_data['Lookup_FR_tag'].isnull()].apply(lambda x: ['Untagged'])
-
+                group_data['Lookup_FR_tag'] = group_data['Lookup_FR_tag'].apply(lambda d: d if isinstance(d, list) else ['Untagged'])
             if lang == 'fr':
-                group_data['Lookup_FR_tag'].loc[group_data['Lookup_FR_tag'].isnull()] = group_data['Lookup_FR_tag'].loc[group_data['Lookup_FR_tag'].isnull()].apply(lambda x: ['Non-étiquettés'])
-
+                group_data['Lookup_FR_tag'] = group_data['Lookup_FR_tag'].apply(lambda d: d if isinstance(d, list) else ['Non-étiquettés'])
             all_data = group_data.copy()
 
 
