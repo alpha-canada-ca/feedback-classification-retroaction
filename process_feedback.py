@@ -53,9 +53,11 @@ data_en_topic = data_en_topic.drop(columns=['Tags confirmed'])
 
 #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
 data_en_topic['topics'] = [','.join(map(str, l)) for l in data_en_topic['Lookup_tags']]
+data_en_topic['model'] = [','.join(map(str, l)) for l in data_en_topic['Model function']]
 
 #remove the Lookup_tags column (it's not needed anymore)
 data_en_topic = data_en_topic.drop(columns=['Lookup_tags'])
+data_en_topic = data_en_topic.drop(columns=['Model function'])
 
 #resets the index for each row - needed for further processing
 data_en_topic = data_en_topic.reset_index(drop=True)
@@ -66,17 +68,20 @@ data_fr_topic = data_fr.dropna()
 data_fr_topic = data_fr_topic.drop_duplicates(subset ="Comment")
 data_fr_topic = data_fr_topic.drop(columns=['Tags confirmed'])
 data_fr_topic['topics'] = [','.join(map(str, l)) for l in data_fr_topic['Lookup_tags']]
+data_fr_topic['model'] = [','.join(map(str, l)) for l in data_fr_topic['Model function']]
 data_fr_topic = data_fr_topic.drop(columns=['Lookup_tags'])
+data_fr_topic = data_fr_topic.drop(columns=['Model function'])
 data_fr_topic = data_fr_topic.reset_index(drop=True)
 
 
 #get the different possible models
-topics_en = list(data_en_topic['Model function'].unique())
-topics_fr = list(data_fr_topic['Model function'].unique())
+
+topics_en = list(data_en_topic['model'].unique())
+topics_fr = list(data_fr_topic['model'].unique())
 
 #creates a dictionary (key = model, value = tagged feedback for that model)
-sections_en = {topic : data_en_topic[data_en_topic['Model function'].str.contains(topic, na=False)] for topic in topics_en}
-sections_fr = {topic : data_fr_topic[data_fr_topic['Model function'].str.contains(topic, na=False)] for topic in topics_fr}
+sections_en = {topic : data_en_topic[data_en_topic['model'].str.contains(topic, na=False)] for topic in topics_en}
+sections_fr = {topic : data_fr_topic[data_fr_topic['model'].str.contains(topic, na=False)] for topic in topics_fr}
 
 #reset index for each model
 for cat in sections_en:
