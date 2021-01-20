@@ -312,18 +312,27 @@ def bypage():
                         cloud_url = ""
 
                     else:
-                        cloud_words = " ".join(words_ns_en)
-                        img = io.BytesIO()
-                        wordcloud = WordCloud(background_color='white', max_font_size = 100, width=600, height=300).generate(cloud_words)
-                        plt.figure(figsize=(10,5))
-                        plt.axis("off")
-                        plt.show()
-                        plt.imshow(wordcloud, interpolation='bilinear')
-                        plt.savefig(img, format='png')
-                        plt.close()
-                        img.seek(0)
+                        tries = 30
+                        for i in range(tries):
+                            try:
+                                cloud_words = " ".join(words_ns_en)
+                                img = io.BytesIO()
+                                wordcloud = WordCloud(background_color='white', max_font_size = 100, width=600, height=300).generate(cloud_words)
+                                plt.figure(figsize=(10,5))
+                                plt.axis("off")
+                                plt.show()
+                                plt.imshow(wordcloud, interpolation='bilinear')
+                                plt.savefig(img, format='png')
+                                plt.close()
+                                img.seek(0)
 
-                        cloud_url = base64.b64encode(img.getvalue()).decode()
+                                cloud_url = base64.b64encode(img.getvalue()).decode()
+                            except ValueError as e:
+                                if i < tries - 1: # i is zero indexed
+                                    continue
+                                else:
+                                    raise
+                            break
 
 
 
@@ -933,18 +942,27 @@ def bypage():
                         cloud_url = ""
 
                     else:
-                        cloud_words = " ".join(words_ns_fr)
-                        img = io.BytesIO()
-                        wordcloud = WordCloud(background_color='white', max_font_size = 100, width=600, height=300).generate(cloud_words)
-                        plt.figure(figsize=(10,5))
-                        plt.axis("off")
-                        plt.show()
-                        plt.imshow(wordcloud, interpolation='bilinear')
-                        plt.savefig(img, format='png')
-                        plt.close()
-                        img.seek(0)
+                        tries = 30
+                        for i in range(tries):
+                            try:
+                                cloud_words = " ".join(words_ns_fr)
+                                img = io.BytesIO()
+                                wordcloud = WordCloud(background_color='white', max_font_size = 100, width=600, height=300).generate(cloud_words)
+                                plt.figure(figsize=(10,5))
+                                plt.axis("off")
+                                plt.show()
+                                plt.imshow(wordcloud, interpolation='bilinear')
+                                plt.savefig(img, format='png')
+                                plt.close()
+                                img.seek(0)
 
-                        cloud_url = base64.b64encode(img.getvalue()).decode()
+                                cloud_url = base64.b64encode(img.getvalue()).decode()
+                            except ValueError as e:
+                                if i < tries - 1: # i is zero indexed
+                                    continue
+                                else:
+                                    raise
+                            break
 
                     #get unconfirmed tags
 
