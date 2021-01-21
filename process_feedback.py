@@ -9,6 +9,7 @@ import re
 import sys
 import warnings
 import pickle
+import gzip, pickletools
 from configparser import ConfigParser
 
 #get api key from config file and get data from Airtable - base and api key are in a hidden config folder
@@ -252,10 +253,11 @@ for cat in categories_fr:
 
 
 #save to pickle files
-def serialize(obj, file):
-    with open(file, 'wb') as f:
-        pickle.dump(obj, f)
-
+def serialize(obj, file, protocol=-1):
+    with gzip.open(file, "wb") as f:
+        pickled = pickle.dumps(obj)
+        optimized_pickle = pickletools.optimize(pickled)
+        f.write(optimized_pickle)
 
 serialize(categories_en, 'data/categories_en.pickle')
 serialize(categories_fr, 'data/categories_fr.pickle')

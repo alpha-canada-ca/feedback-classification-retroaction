@@ -9,6 +9,8 @@ import re
 import sys
 import warnings
 import pickle
+import pickletools
+import gzip
 #import alogrithms
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
@@ -16,8 +18,9 @@ from sklearn.multiclass import OneVsRestClassifier
 
 #function to import pickle file
 def deserialize(file):
-	with open(file, 'rb') as f:
-		return pickle.load(f)
+	with gzip.open(file, 'rb') as f:
+		p = pickle.Unpickler(f)
+		return p.load()
 
 #function to clean the word of any punctuation or special characters
 def cleanPunc(sentence):

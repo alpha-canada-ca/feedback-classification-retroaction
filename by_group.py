@@ -22,11 +22,13 @@ def bygroup():
     import base64
     import matplotlib.ticker as plticker
     import datetime as DT
+    import gzip, pickletools
 
     #define deserialize
     def deserialize(file):
-        with open(file, 'rb') as f:
-            return pickle.load(f)
+        with gzip.open(file, 'rb') as f:
+            p = pickle.Unpickler(f)
+            return p.load()
 
     #import data as pickle
     data = deserialize('data/all_data.pickle')

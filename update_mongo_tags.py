@@ -1,11 +1,13 @@
 from airtable import Airtable
 import pandas as pd
 import pickle
+import gzip
+import pickletools
 from configparser import ConfigParser
 from pymongo import MongoClient
 from bson import ObjectId
 
-print("test test test test test test")
+
 #get api key from config file and get data from AirTabe
 config = ConfigParser()
 config.read('config/config.ini')
@@ -22,9 +24,11 @@ print('Fetched the problem collection.')
 
 print('Fetched Airtable Tags')
 
+#define deserialize
 def deserialize(file):
-    with open(file, 'rb') as f:
-        return pickle.load(f)
+    with gzip.open(file, 'rb') as f:
+        p = pickle.Unpickler(f)
+        return p.load()
 
 #import data as pickle
 data = deserialize('data/all_data.pickle')

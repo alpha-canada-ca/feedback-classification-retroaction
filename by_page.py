@@ -26,11 +26,13 @@ def bypage():
     import matplotlib.ticker as plticker
     import datetime as DT
     from wordcloud import WordCloud
+    import gzip, pickletools
 
     #define deserialize
     def deserialize(file):
-        with open(file, 'rb') as f:
-            return pickle.load(f)
+        with gzip.open(file, 'rb') as f:
+            p = pickle.Unpickler(f)
+            return p.load()
 
     #import data as pickle
     data = deserialize('data/all_data.pickle')

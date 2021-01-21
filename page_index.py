@@ -5,13 +5,15 @@ def pageindex():
     from flask import request
     from flask import app, render_template
     import requests
+    import gzip, pickletools
     import pandas as pd
     import pickle
 
     #define deserialize
     def deserialize(file):
-        with open(file, 'rb') as f:
-            return pickle.load(f)
+        with gzip.open(file, 'rb') as f:
+            p = pickle.Unpickler(f)
+            return p.load()
 
     #import data as pickle
     data = deserialize('data/all_data.pickle')

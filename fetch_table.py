@@ -1,6 +1,8 @@
 from airtable import Airtable
 import pandas as pd
 import pickle
+import gzip
+import pickletools
 from configparser import ConfigParser
 
 #get api key from config file and get data from AirTabe
@@ -41,10 +43,13 @@ data = data.drop_duplicates(subset ="Comment")
 
 
 print('Created the dataframes')
-#define serialize function
-def serialize(obj, file):
-    with open(file, 'wb') as f:
-        pickle.dump(obj, f)
+
+def serialize(obj, file, protocol=-1):
+    with gzip.open(file, "wb") as f:
+        pickled = pickle.dumps(obj)
+        optimized_pickle = pickletools.optimize(pickled)
+        f.write(optimized_pickle)
+
 
 #save data as a pickle
 serialize(data, 'data/all_data.pickle')
