@@ -46,5 +46,8 @@ for index in range(len(data)):
             x = problem.find_one({"_id" : ObjectId(data['Unique ID'][index])})
             x = ', '.join(x['tags'])
             if x != (data['Lookup_tags'][index]):
-                print("updated index: " + str(index))
+                #print("updated index: " + str(index))
+                counter += 1
                 problem.find_one_and_update({"_id" : ObjectId((data['Unique ID'][index]))},{"$set":{"tags": [(data['Lookup_tags'][index])]}})
+
+print("Entries updated: " + str(counter))
