@@ -43,9 +43,9 @@ counter = 0
 for index in range(len(data)):
     if "-" not in data['Unique ID'][index]:
         if(problem.find_one({"_id" : ObjectId(data['Unique ID'][index])})):
-            x = problem.find_one({"_id" : ObjectId(data['Unique ID'][index])})
-            x = ', '.join(x['tags'])
-            if x != (data['Lookup_tags'][index]):
+            mutualEntry = problem.find_one({"_id" : ObjectId(data['Unique ID'][index])})
+            mutualEntry = ', '.join(mutualEntry['tags'])
+            if mutualEntry != (data['Lookup_tags'][index]):
                 #print("updated index: " + str(index))
                 counter += 1
                 problem.find_one_and_update({"_id" : ObjectId((data['Unique ID'][index]))},{"$set":{"tags": [(data['Lookup_tags'][index])]}})
