@@ -41,12 +41,12 @@ print(problemCount)
 
 counter = 0
 for index in range(len(data)):
-    if "-" not in data['Unique ID'][index]:
+    if "-" not in data['Unique ID'][index] and len(data['Unique ID'][index]) == 24:
         if(problem.find_one({"_id" : ObjectId(data['Unique ID'][index])})):
             mutualEntry = problem.find_one({"_id" : ObjectId(data['Unique ID'][index])})
             mutualEntry = ', '.join(mutualEntry['tags'])
             if mutualEntry != (data['Lookup_tags'][index]):
-                #print("updated index: " + str(index))
+                print("updated index: " + str(index))
                 counter += 1
                 problem.find_one_and_update({"_id" : ObjectId((data['Unique ID'][index]))},{"$set":{"tags": [(data['Lookup_tags'][index])]}})
 
