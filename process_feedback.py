@@ -19,28 +19,34 @@ key = config.get('default', 'api_key')
 base = config.get('default', 'base')
 base_health = config.get('default', 'base_health')
 base_cra= config.get('default', 'base_cra')
+base_travel= config.get('default', 'base_travel')
 print('Accessed the keys')
 
 airtable_main = Airtable(base, 'Page feedback', api_key=key)
 airtable_health = Airtable(base_health, 'Page feedback', api_key=key)
 airtable_cra = Airtable(base_cra, 'Page feedback', api_key=key)
+airtable_travel= Airtable(base_travel, 'Page feedback', api_key=key)
 
 record_list_main = airtable_main.get_all()
 record_list_health = airtable_health.get_all()
 record_list_cra = airtable_cra.get_all()
+record_list_travel = airtable_travel.get_all()
 print('Fetched the data')
 
 #convert data to Pandas dataframe
 data_main = pd.DataFrame([record['fields'] for record in record_list_main])
 data_health = pd.DataFrame([record['fields'] for record in record_list_health])
 data_cra = pd.DataFrame([record['fields'] for record in record_list_cra])
+data_travel = pd.DataFrame([record['fields'] for record in record_list_travel])
 
 #If you want to experiment with this script without setting up an AirTable, you can do so by loading the tagged_feedback.csv file from the repo and convert it to a Pandas dataframe, with this line of code: "data = pd.read_csv('tagged_feedback.csv')".
 
 
-data_1 = data_main.append(data_health, ignore_index=True, sort=True)
+data_2 = data_main.append(data_health, ignore_index=True, sort=True)
 
-data = data_1.append(data_cra, ignore_index=True, sort=True)
+data_1 = data_2.append(data_cra, ignore_index=True, sort=True)
+
+data = data_1.append(data_travel, ignore_index=True, sort=True)
 
 data = data[['Comment', 'Lookup_tags', 'Model function', 'Tags confirmed', 'Lang']]
 
@@ -265,6 +271,7 @@ def serialize(obj, file, protocol=-1):
         pickled = pickle.dumps(obj)
         optimized_pickle = pickletools.optimize(pickled)
         f.write(optimized_pickle)
+
 
 serialize(categories_en, 'data/categories_en.pickle')
 serialize(categories_fr, 'data/categories_fr.pickle')
