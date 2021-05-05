@@ -26,7 +26,7 @@ data_en = data_en.reset_index(drop=True)
 data_fr = data.loc[data['Language'] == 'fr']
 data_fr = data_fr.reset_index(drop=True)
 
- 
+  
 if data_en.empty == False:
     def cleanPunc(sentence):
         cleaned = re.sub(r'[?|!|\'|"|#]',r'',sentence)
