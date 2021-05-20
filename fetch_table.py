@@ -45,8 +45,6 @@ data = data[data.Status != 'Spam']
 data = data[data.Status != 'Ignore']
 data = data[data.Status != 'Duplicate']
 
-data = data.drop_duplicates(subset ="Comment")
-
 
 print('Created the dataframes')
 
