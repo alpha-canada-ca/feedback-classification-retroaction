@@ -27,7 +27,7 @@ def bypage():
     import datetime as DT
     from wordcloud import WordCloud
     import gzip, pickletools
- 
+  
     #define deserialize
     def deserialize(file):
         with gzip.open(file, 'rb') as f:
