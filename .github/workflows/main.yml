@@ -43,7 +43,7 @@ jobs:
         images: |
           tbsacr.azurecr.io/suggestion:${{ github.sha }}
         namespace: |
-          pagesuccess2
+          pagesuccess
 
     - uses: Azure/k8s-deploy@v1
       with:
@@ -53,4 +53,4 @@ jobs:
         images: |
           tbsacr.azurecr.io/feedback-by-page:${{ github.sha }}
         namespace: |
-          pagesuccess2
+          pagesuccess
