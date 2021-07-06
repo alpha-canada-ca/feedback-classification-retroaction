@@ -30,7 +30,7 @@ data = data_main.append(data_health, ignore_index=True, sort=True)
 data = data[["Comment", "Date", "Status", "Lookup_tags", 'Tags confirmed', 'Lookup_page_title', 'URL_function', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR", "Lang", "What's wrong"]]
 data = data[data.Status != 'Spam']
 data = data[data.Status != 'Ignore']
-data = data[data.Status != 'Duplicate']
+data = data[data.Status != 'Duplicate'] 
 
 data = data.drop_duplicates(subset ="Comment")
 
