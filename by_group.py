@@ -88,6 +88,11 @@ def bygroup():
             group_data = group_data[group_data.Status != 'Duplicate']
             group_data = group_data.reset_index(drop=True)
 
+            #check if any titles are empty and fill them with NA (Can cause 200 errors if empty)
+            for i in range(len(group_data['Lookup_page_title'])):
+                if group_data['Lookup_page_title'][i] == ['']:
+                    group_data['Lookup_page_title'][i] = ['NA']
+
             group_data['Lookup_page_title'] = [','.join(map(str, l)) for l in group_data['Lookup_page_title']]
             group_data['Lookup_group_FR'] = [','.join(map(str, l)) for l in group_data['Lookup_group_FR']]
 
