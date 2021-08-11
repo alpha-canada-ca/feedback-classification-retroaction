@@ -5,3 +5,6 @@ ls -la
 gpg --quiet --batch --yes --decrypt --passphrase="$CONFIG_INI_PASSPHRASE" \
 --output ./config/config.ini config.ini.gpg
 ls -la ./config
+
+gpg --quiet --batch --yes --decrypt --passphrase="$CONFIG_INI_PASSPHRASE" \
+--output client_secret.json client_secret.json.gpg
