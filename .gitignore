@@ -2,6 +2,9 @@
 **/config/
 *.ini
 
+#ignore client_secret.json
+client_secret.json
+
 ### macOS ###
 # General
 .DS_Store
