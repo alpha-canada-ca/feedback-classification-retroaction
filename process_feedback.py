@@ -167,7 +167,7 @@ for section in sections_en:
 
 #convert French feedback to sparse matrix
 cats_fr = {}
-for section in sections_en:
+for section in sections_fr:
     mlb = MultiLabelBinarizer()
     mhv= mlb.fit_transform(sections_fr[section]['topics'].apply(lambda x: set(x.split(','))))
     cats_fr[section] = pd.DataFrame(mhv,columns=mlb.classes_)
