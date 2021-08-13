@@ -22,7 +22,7 @@ base = config.get('default', 'base')
 base_health = config.get('default', 'base_health')
 base_cra= config.get('default', 'base_cra')
 base_travel= config.get('default', 'base_travel')
-print('Accessed the keys')
+print('Accessed the keys - PF')
 
 airtable_main = Airtable(base, 'Page feedback', api_key=key)
 airtable_health = Airtable(base_health, 'Page feedback', api_key=key)
@@ -33,7 +33,7 @@ record_list_main = airtable_main.get_all()
 record_list_health = airtable_health.get_all()
 record_list_cra = airtable_cra.get_all()
 record_list_travel = airtable_travel.get_all()
-print('Fetched the data')
+print('Fetched the data - PF')
 
 #convert data to Pandas dataframe
 data_main = pd.DataFrame([record['fields'] for record in record_list_main])
@@ -330,4 +330,4 @@ serialize(vects_fr, 'data/vectorizer_fr.pickle')
 serialize(model_en, 'data/model_en.pickle')
 serialize(model_fr, 'data/model_fr.pickle')
 
-print('Processing feedback process complete')
+print('Processing feedback process complete - PF')
