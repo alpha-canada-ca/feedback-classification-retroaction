@@ -17,6 +17,7 @@ RUN pip3 install -U nltk
 RUN pip3 install -U requests
 RUN pip3 install -U pandas
 RUN pip3 install -U gspread
+RUN pip3 install -U oauth2client
 RUN pip3 install -U scikit-learn
 
 COPY suggest.py /app/
