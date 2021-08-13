@@ -23,6 +23,7 @@ RUN pip3 install -U gspread
 RUN pip3 install -U oauth2client
 RUN pip3 install airtable-python-wrapper
 
+COPY client_secret.json /app/
 COPY process_feedback.py /app/
 RUN mkdir /app/data   
 COPY ./docker/train/crontab /crontab
