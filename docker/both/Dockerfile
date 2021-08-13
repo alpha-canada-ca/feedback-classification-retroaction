@@ -4,6 +4,8 @@ COPY suggest.py /app/
 COPY process_feedback.py /app/
 COPY docker/both/entrypoint.sh /app/
 COPY ./docker/train/crontab /crontab
+RUN pip3 install -U gspread
+RUN pip3 install -U oauth2client
 RUN chmod a+x /app/process_feedback.py
 COPY docker/both/entrypoint.sh /app/
 RUN chmod a+x /app/entrypoint.sh
