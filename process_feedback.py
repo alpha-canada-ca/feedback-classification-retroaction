@@ -1,8 +1,6 @@
 #import libraries
 import requests
 from airtable import Airtable
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import nltk
 from nltk.corpus import stopwords
@@ -41,8 +39,6 @@ data_health = pd.DataFrame([record['fields'] for record in record_list_health])
 data_cra = pd.DataFrame([record['fields'] for record in record_list_cra])
 data_travel = pd.DataFrame([record['fields'] for record in record_list_travel])
 
-
-
 #If you want to experiment with this script without setting up an AirTable, you can do so by loading the tagged_feedback.csv file from the repo and convert it to a Pandas dataframe, with this line of code: "data = pd.read_csv('tagged_feedback.csv')".
 
 
@@ -52,35 +48,9 @@ data_1 = data_2.append(data_cra, ignore_index=True, sort=True)
 
 data = data_1.append(data_travel, ignore_index=True, sort=True)
 
-
-# use creds to create a client to interact with the Google Drive API
-scope = [
-'https://www.googleapis.com/auth/spreadsheets',
-'https://www.googleapis.com/auth/drive'
-]
-creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
-client = gspread.authorize(creds)
-
-# Find a spreadsheet by name and open the first sheet
-sheet = client.open("Tier 1 - CronJob Models by URL ").sheet1
-
-# Add URLs to dictionary as key, with model as value
-list_of_entries = sheet.get_all_records()
-url_model_dict = {}
-for i in range(len(list_of_entries)):
-    if list_of_entries[i]['URL'] not in url_model_dict.keys():
-        url_model_dict[list_of_entries[i]['URL']] = list_of_entries[i]['MODEL']
+data = data[['Comment', 'Lookup_tags', 'Model function', 'Tags confirmed', 'Lang']]
 
 
-# Remove unneccessary columns
-data = data[['Comment', 'Lookup_tags', 'URL', 'Model function', 'Tags confirmed', 'Lang']]
-
-# Add model column
-data['model'] = ""
-
-# Add appropriate models to model column by retreiving URL in dict
-for i in range(len(data)):
-    data['model'][i] = url_model_dict.get(data['URL'][i])
 
 #split dataframe for English comments
 data_en = data[data['Lang'].str.contains("EN", na=False)]
@@ -89,58 +59,38 @@ data_en = data[data['Lang'].str.contains("EN", na=False)]
 
 #remove all rows thave have null content - this, in effect, removes comments for which the tags haven't been confirmed by a human
 data_en_topic = data_en.dropna()
+
 data_en_topic = data_en_topic.drop_duplicates(subset ="Comment")
-data_en_topic = data_en_topic.reset_index(drop=True)
+
+#remove the Tags confirmed column (it's not needed anymore)
+data_en_topic = data_en_topic.drop(columns=['Tags confirmed'])
 
 #converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
 data_en_topic['topics'] = [','.join(map(str, l)) for l in data_en_topic['Lookup_tags']]
-data_en_topic['Model function']  = [','.join(map(str, l)) for l in data_en_topic['Model function']] ####### might not be needed
+data_en_topic['model'] = [','.join(map(str, l)) for l in data_en_topic['Model function']]
 
-# Check if models are the same
-for i in range(len(data_en_topic)):
-    if data_en_topic['Model function'][i] != data_en_topic['model'][i]:
-        print("Found unmatching models - EN")
-        # print(data_en_topic['Model function'][i]) 
-        # print(data_en_topic['model'][i])
-        # print(i)
-        # print()
-
-# Remove unneccessary columns
+#remove the Lookup_tags column (it's not needed anymore)
 data_en_topic = data_en_topic.drop(columns=['Lookup_tags'])
 data_en_topic = data_en_topic.drop(columns=['Model function'])
-data_en_topic = data_en_topic.drop(columns=['Tags confirmed'])
 
-for i in range(len(data_en_topic)):
-    data_en_topic['model'][i] = data_en_topic['model'][i].lower()
+#resets the index for each row - needed for further processing
+data_en_topic = data_en_topic.reset_index(drop=True)
 
 #split dataframe for French comments - same comments as above for each line
 data_fr = data[data['Lang'].str.contains("FR", na=False)]
 data_fr_topic = data_fr.dropna()
 data_fr_topic = data_fr_topic.drop_duplicates(subset ="Comment")
-data_fr_topic = data_fr_topic.reset_index(drop=True)
+data_fr_topic = data_fr_topic.drop(columns=['Tags confirmed'])
 data_fr_topic['topics'] = [','.join(map(str, l)) for l in data_fr_topic['Lookup_tags']]
-data_fr_topic['Model function'] = [','.join(map(str, l)) for l in data_fr_topic['Model function']]
-
-# Check if models are the same
-for i in range(len(data_fr_topic)):
-    if data_fr_topic['Model function'][i] != data_fr_topic['model'][i]:
-        print("Found unmatching models - FR")
-        # print(data_en_topic['Model function'][i]) 
-        # print(data_en_topic['model'][i])
-        # print(i)
-        # print()
-
+data_fr_topic['model'] = [','.join(map(str, l)) for l in data_fr_topic['Model function']]
 data_fr_topic = data_fr_topic.drop(columns=['Lookup_tags'])
 data_fr_topic = data_fr_topic.drop(columns=['Model function'])
-data_fr_topic = data_fr_topic.drop(columns=['Tags confirmed'])
+data_fr_topic = data_fr_topic.reset_index(drop=True)
 
-for i in range(len(data_fr_topic)):
-    data_fr_topic['model'][i] = data_fr_topic['model'][i].lower()
 
 #get the different possible models
 
 topics_en = list(data_en_topic['model'].unique())
-
 topics_fr = list(data_fr_topic['model'].unique())
 
 #creates a dictionary (key = model, value = tagged feedback for that model)
