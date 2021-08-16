@@ -110,8 +110,8 @@ data_en_topic = data_en_topic.drop(columns=['Lookup_tags'])
 data_en_topic = data_en_topic.drop(columns=['Model function'])
 data_en_topic = data_en_topic.drop(columns=['Tags confirmed'])
 
-for i in range(len(data_en_topic)):
-    data_en_topic['model'][i] = data_en_topic['model'][i].lower()
+# for i in range(len(data_en_topic)):
+#     data_en_topic['model'][i] = data_en_topic['model'][i].lower()
 
 #split dataframe for French comments - same comments as above for each line
 data_fr = data[data['Lang'].str.contains("FR", na=False)]
@@ -134,8 +134,8 @@ data_fr_topic = data_fr_topic.drop(columns=['Lookup_tags'])
 data_fr_topic = data_fr_topic.drop(columns=['Model function'])
 data_fr_topic = data_fr_topic.drop(columns=['Tags confirmed'])
 
-for i in range(len(data_fr_topic)):
-    data_fr_topic['model'][i] = data_fr_topic['model'][i].lower()
+# for i in range(len(data_fr_topic)):
+#     data_fr_topic['model'][i] = data_fr_topic['model'][i].lower()
 
 #get the different possible models
 
