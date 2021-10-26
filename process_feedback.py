@@ -17,40 +17,45 @@ from configparser import ConfigParser
 #get api key from config file and get data from Airtable - base and api key are in a hidden config folder
 config = ConfigParser()
 config.read('config/config.ini')
-key = config.get('default', 'api_key')
-base = config.get('default', 'base')
+key         = config.get('default', 'api_key')
+base        = config.get('default', 'base')
 base_health = config.get('default', 'base_health')
-base_cra= config.get('default', 'base_cra')
-base_travel= config.get('default', 'base_travel')
+base_cra    = config.get('default', 'base_cra')
+base_travel = config.get('default', 'base_travel')
+base_ircc   = config.get('default', 'base_ircc')
 print('Accessed the keys - PF')
 
-airtable_main = Airtable(base, 'Page feedback', api_key=key)
+airtable_main   = Airtable(base, 'Page feedback', api_key=key)
 airtable_health = Airtable(base_health, 'Page feedback', api_key=key)
-airtable_cra = Airtable(base_cra, 'Page feedback', api_key=key)
-airtable_travel= Airtable(base_travel, 'Page feedback', api_key=key)
+airtable_cra    = Airtable(base_cra, 'Page feedback', api_key=key)
+airtable_travel = Airtable(base_travel, 'Page feedback', api_key=key)
+airtable_ircc   = Airtable(base_ircc, 'Page feedback', api_key=key)
 
-record_list_main = airtable_main.get_all()
-record_list_health = airtable_health.get_all()
-record_list_cra = airtable_cra.get_all()
-record_list_travel = airtable_travel.get_all()
+record_list_main    = airtable_main.get_all()
+record_list_health  = airtable_health.get_all()
+record_list_cra     = airtable_cra.get_all()
+record_list_travel  = airtable_travel.get_all()
+record_list_ircc    = airtable_ircc.get_all()
 print('Fetched the data - PF')
 
 #convert data to Pandas dataframe
-data_main = pd.DataFrame([record['fields'] for record in record_list_main])
+data_main   = pd.DataFrame([record['fields'] for record in record_list_main])
 data_health = pd.DataFrame([record['fields'] for record in record_list_health])
-data_cra = pd.DataFrame([record['fields'] for record in record_list_cra])
+data_cra    = pd.DataFrame([record['fields'] for record in record_list_cra])
 data_travel = pd.DataFrame([record['fields'] for record in record_list_travel])
+data_ircc   = pd.DataFrame([record['fields'] for record in record_list_ircc])
 
 
 
 #If you want to experiment with this script without setting up an AirTable, you can do so by loading the tagged_feedback.csv file from the repo and convert it to a Pandas dataframe, with this line of code: "data = pd.read_csv('tagged_feedback.csv')".
 
+data_3  = data_main.append(data_health, ignore_index=True, sort=True)
 
-data_2 = data_main.append(data_health, ignore_index=True, sort=True)
+data_2  = data_3.append(data_cra, ignore_index=True, sort=True)
 
-data_1 = data_2.append(data_cra, ignore_index=True, sort=True)
+data_1  = data_2.append(data_travel, ignore_index=True, sort=True)
 
-data = data_1.append(data_travel, ignore_index=True, sort=True)
+data    = data_1.append(data_ircc, ignore_index=True, sort=True)
 
 
 # use creds to create a client to interact with the Google Drive API
