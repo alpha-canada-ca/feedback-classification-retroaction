@@ -19,6 +19,7 @@ COPY data/ /app/data/
 RUN mkdir /app/config
 COPY ./config/config.ini /app/config/config.ini
 COPY templates/ /app/templates/
+RUN pip3 install -U pip
 RUN pip3 install -U pillow
 RUN pip3 install -U setuptools
 RUN pip3 install -U pymongo
