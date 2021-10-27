@@ -35,3 +35,10 @@ Temporary Items
 
 # Azure
 __azurite*
+data/vectorizer_fr.pickle
+data/vectorizer_en.pickle
+data/model_fr.pickle
+data/model_en.pickle
+data/categories_fr.pickle
+data/categories_en.pickle
+data/all_data.pickle
