@@ -40,11 +40,11 @@ data_travel = pd.DataFrame([record['fields'] for record in record_list_travel])
 data_ircc   = pd.DataFrame([record['fields'] for record in record_list_ircc])
 
 
-data_3  = data_1.append(data_travel, ignore_index=True, sort=True)
+data_1  = data_main.append(data_health, ignore_index=True, sort=True)
 
-data_2  = data_main.append(data_health, ignore_index=True, sort=True)
+data_2  = data_1.append(data_travel, ignore_index=True, sort=True)
 
-data_1  = data_2.append(data_cra, ignore_index=True, sort=True)
+data_3  = data_2.append(data_cra, ignore_index=True, sort=True)
 
 data    = data_3.append(data_ircc, ignore_index=True, sort=True)
 
