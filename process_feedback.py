@@ -104,7 +104,12 @@ data_en_topic['Model function']  = [','.join(map(str, l)) for l in data_en_topic
 # Check if models are the same
 for i in range(len(data_en_topic)):
     if data_en_topic['Model function'][i] != data_en_topic['model'][i]:
-        print("Found unmatching models - EN")
+        if (data_en_topic['Model function'][i] == 'Vaccines' or data_en_topic['Model function'][i] == 'travel-wizard') and data_en_topic['model'][i] == 'proof':
+            data_en_topic['Model function'][i] = 'proof'
+        else:
+            print("Found unmatching models - EN. Index: " + str(i))
+            print("data_en_topic['Model function'][i] is " + data_en_topic['Model function'][i])
+            print("data_en_topic['model'][i] is " + data_en_topic['model'][i])
         # print(data_en_topic['Model function'][i]) 
         # print(data_en_topic['model'][i])
         # print(i)
