@@ -38,7 +38,7 @@ data = data.reset_index(drop=True)
 data['Lookup_tags'] = [', '.join(map(str, l)) for l in data['Lookup_tags']]
 problemCount = problem.count_documents({})
 print(problemCount)
-
+ 
 counter = 0
 for index in range(len(data)):
     if "-" not in data['Unique ID'][index] and len(data['Unique ID'][index]) == 24:
