@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: extensions/v1
 kind: Ingress
 metadata:
   name: suggestion-ingress
@@ -15,7 +15,9 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: suggestion
-          servicePort: 5000
+          service:
+            name: suggestion
+            port:
+              number: 5000
         path: /
       
