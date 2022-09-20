@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: extensions/v1
 kind: Ingress
 metadata:
   name: feedback-by-page-ingress
@@ -15,7 +15,9 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: feedback-by-page
-          servicePort: 5000
+          service:
+            name: feedback-by-page
+            port:
+              number: 5000
         path: /
       
