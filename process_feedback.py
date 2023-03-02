@@ -40,8 +40,8 @@ def cleanPunc(sentence):
     return cleaned
 
 
-# function to convert to lowercase
-def keepAlpha(sentence):
+# function to remove non alpha chars
+def remove_non_alpha_chars(sentence):
     alpha_sent = ""
     for word in sentence.split():
         alpha_word = re.sub("[^a-z A-Z]+", " ", word)
@@ -51,7 +51,7 @@ def keepAlpha(sentence):
     return alpha_sent
 
 
-def stemming_en(sentence):
+def get_stemmed_text_en(sentence):
     stemSentence = ""
     for word in sentence.split():
         stem = stemmer_en.stem(word)
@@ -61,7 +61,7 @@ def stemming_en(sentence):
     return stemSentence
 
 
-def stemming_fr(sentence):
+def get_stemmed_text_fr(sentence):
     stemSentence = ""
     for word in sentence.split():
         stem = stemmer_fr.stem(word)
@@ -100,7 +100,6 @@ client = gspread.authorize(creds)
 # open the specific Google Sheet
 sheet = client.open("Tier 1 - CronJob Models by URL ").sheet1
 
-# get all records from the sheet
 list_of_entries = sheet.get_all_records()
 
 # create a dictionary mapping URLs to model names from the records
@@ -147,13 +146,10 @@ data["model"] = data["URL"].map(url_model_dict)
 # select only the English feedback
 data_en = data[data["Lang"].str.contains("EN", na=False)]
 
-# drop rows with missing values in the Lookup_tags column
 data_en_topic = data_en.dropna()
 
-# drop duplicate rows based on the Comment column
 data_en_topic = data_en_topic.drop_duplicates(subset="Comment")
 
-# reset the index of the DataFrame after dropping rows
 data_en_topic = data_en_topic.reset_index(drop=True)
 
 # create a new column "topics" that concatenates all tags associated with each feedback
@@ -179,7 +175,6 @@ for i in range(len(data_en_topic)):
             + data_en_topic["URL"][i]
         )
 
-# Remove unnecessary columns
 data_en_topic = data_en_topic.drop(columns=["Lookup_tags"])
 data_en_topic = data_en_topic.drop(columns=["Model function"])
 data_en_topic = data_en_topic.drop(columns=["Tags confirmed"])
@@ -226,8 +221,8 @@ for cat in cats_en:
         cats_en[cat]["Feedback"]
         .str.lower()
         .apply(cleanPunc)
-        .apply(keepAlpha)
-        .apply(stemming_en)
+        .apply(remove_non_alpha_chars)
+        .apply(get_stemmed_text_en)
         .apply(remove_stopwords)
     )
 
@@ -328,8 +323,10 @@ stemmer_fr = SnowballStemmer("french")
 for cat in cats_fr:
     cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].str.lower()
     cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(cleanPunc)
-    cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(keepAlpha)
-    cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(stemming_fr)
+    cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(
+        remove_non_alpha_chars)
+    cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(
+        get_stemmed_text_fr)
 
 
 # get all French text to build vectorizer as a dictionary (one key per model)
