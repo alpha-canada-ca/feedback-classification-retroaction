@@ -7,17 +7,16 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
-  - hosts:
-    - feedback-by-page.tbs.alpha.canada.ca
-    secretName: feedback-by-page-tls-secret-prod
+    - hosts:
+        - feedback-by-page.tbs.alpha.canada.ca
+      secretName: feedback-by-page-tls-secret-prod
   rules:
-  - host: feedback-by-page.tbs.alpha.canada.ca
-    http:
-      paths:
-      - backend:
-          service:
-            name: feedback-by-page
-            port:
-              number: 5000
-        path: /
-      
+    - host: feedback-by-page.tbs.alpha.canada.ca
+      http:
+        paths:
+          - backend:
+              service:
+                name: feedback-by-page
+                port:
+                  number: 5000
+            path: /

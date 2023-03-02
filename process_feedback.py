@@ -1,4 +1,18 @@
 # import libraries
+import pickletools
+import gzip
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import OneHotEncoder, MultiLabelBinarizer
+from configparser import ConfigParser
+import pickle
+import warnings
+import sys
+import re
+from nltk.stem.snowball import SnowballStemmer
+from nltk.corpus import stopwords
 import requests
 from airtable import Airtable
 import gspread
@@ -8,27 +22,16 @@ import numpy as np
 import nltk
 
 nltk.download("stopwords")
-from nltk.corpus import stopwords
-from nltk.stem.snowball import SnowballStemmer
-import re
-import sys
-import warnings
-import pickle
-import gzip, pickletools
-from configparser import ConfigParser
 
 # import the OneHotEncoder
-from sklearn.preprocessing import OneHotEncoder, MultiLabelBinarizer
 
 # import Vectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 # import models to train algorithm
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.pipeline import Pipeline
-from sklearn.multiclass import OneVsRestClassifier
 
 # function to clean the word of any punctuation or special characters
+
+
 def cleanPunc(sentence):
     cleaned = re.sub(r'[?|!|\'|"|#]', r"", sentence)
     cleaned = re.sub(r"[.|,|)|(|\|/]", r" ", cleaned)
@@ -90,7 +93,8 @@ scope = [
 ]
 
 # use the credentials from client_secret.json to authorize Google Sheets API access
-creds = ServiceAccountCredentials.from_json_keyfile_name("client_secret.json", scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name(
+    "client_secret.json", scope)
 client = gspread.authorize(creds)
 
 # open the specific Google Sheet
@@ -204,7 +208,8 @@ for section in sections_en:
         return set(x.split(","))
 
     # Apply the split_topics function to the topics column and transform using the multi-label binarizer
-    mhv = mlb.fit_transform([split_topics(x) for x in sections_en[section]["topics"]])
+    mhv = mlb.fit_transform([split_topics(x)
+                            for x in sections_en[section]["topics"]])
 
     # Create a pandas DataFrame from the transformed data
     cats_en[section] = pd.DataFrame(mhv, columns=mlb.classes_)
@@ -236,7 +241,8 @@ vectorizer_en = TfidfVectorizer(
     strip_accents="unicode", analyzer="word", ngram_range=(1, 3), norm="l2"
 )
 vects_en = {cat: vectorizer_en.fit(all_text_en[cat]) for cat in all_text_en}
-all_x_en = {cat: vects_en[cat].transform(all_text_en[cat]) for cat in all_text_en}
+all_x_en = {cat: vects_en[cat].transform(
+    all_text_en[cat]) for cat in all_text_en}
 
 # Split the English labels from the value - get all possible tags for each model
 all_y_en = {}
@@ -253,7 +259,8 @@ model_en = {
                 (
                     "clf",
                     OneVsRestClassifier(
-                        MultinomialNB(alpha=0.3, fit_prior=True, class_prior=None)
+                        MultinomialNB(alpha=0.3, fit_prior=True,
+                                      class_prior=None)
                     ),
                 )
             ]
@@ -269,7 +276,8 @@ data_fr = data[data["Lang"].str.contains("FR", na=False)]
 data_fr_topic = data_fr.dropna()
 data_fr_topic = data_fr_topic.drop_duplicates(subset="Comment")
 data_fr_topic = data_fr_topic.reset_index(drop=True)
-data_fr_topic["topics"] = [",".join(map(str, l)) for l in data_fr_topic["Lookup_tags"]]
+data_fr_topic["topics"] = [",".join(map(str, l))
+                           for l in data_fr_topic["Lookup_tags"]]
 data_fr_topic["Model function"] = [
     ",".join(map(str, l)) for l in data_fr_topic["Model function"]
 ]
@@ -357,7 +365,8 @@ for cat in categories_fr:
                 (
                     "clf",
                     OneVsRestClassifier(
-                        MultinomialNB(alpha=0.3, fit_prior=True, class_prior=None)
+                        MultinomialNB(alpha=0.3, fit_prior=True,
+                                      class_prior=None)
                     ),
                 ),
             ]

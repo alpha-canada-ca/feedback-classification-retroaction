@@ -16,14 +16,13 @@ spec:
         app: feedback-by-page
     spec:
       containers:
-      - image: tbsacr.azurecr.io/feedback-by-page:latest
-        imagePullPolicy: Always
-        name: feedback-by-page
-        resources: 
-          limits:
-            cpu: 2000m
-            memory: 4Gi
-          requests:
-            cpu: 500m
-            memory: 512Mi
-
+        - image: tbsacr.azurecr.io/feedback-by-page:latest
+          imagePullPolicy: Always
+          name: feedback-by-page
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+            requests:
+              cpu: 500m
+              memory: 512Mi

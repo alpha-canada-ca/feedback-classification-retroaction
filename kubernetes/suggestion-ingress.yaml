@@ -7,17 +7,16 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
-  - hosts:
-    - suggestion.tbs.alpha.canada.ca
-    secretName: suggestion-tls-secret-prod
+    - hosts:
+        - suggestion.tbs.alpha.canada.ca
+      secretName: suggestion-tls-secret-prod
   rules:
-  - host: suggestion.tbs.alpha.canada.ca
-    http:
-      paths:
-      - backend:
-          service:
-            name: suggestion
-            port:
-              number: 5000
-        path: /
-      
+    - host: suggestion.tbs.alpha.canada.ca
+      http:
+        paths:
+          - backend:
+              service:
+                name: suggestion
+                port:
+                  number: 5000
+            path: /

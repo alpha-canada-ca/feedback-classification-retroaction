@@ -13,8 +13,6 @@ def index():
     if lang == 'fr':
         return render_template("index_fr.html", lang=lang)
 
+    # split feedback by What's wrongfully
 
-
-    #split feedback by What's wrongfully
-
-    #get most meaningful word by what's wrong
+    # get most meaningful word by what's wrong

@@ -38,8 +38,10 @@ print('Accessed the key')
 record_lists = [airtable.get_all() for airtable in airtables]
 
 print('Fetched the data')
-data = pd.concat([pd.DataFrame([record['fields'] for record in record_list]) for record_list in record_lists], ignore_index=True, sort=True)
-data = data[["Unique ID", "Comment", "Date", "Status", "Lookup_tags", 'Tags confirmed', 'Lookup_page_title', 'URL_function', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR", "Lang", "What's wrong"]]
+data = pd.concat([pd.DataFrame([record['fields'] for record in record_list])
+                 for record_list in record_lists], ignore_index=True, sort=True)
+data = data[["Unique ID", "Comment", "Date", "Status", "Lookup_tags", 'Tags confirmed', 'Lookup_page_title',
+             'URL_function', 'Lookup_FR_tag', "Lookup_group_EN", "Lookup_group_FR", "Lang", "What's wrong"]]
 data = filter_data(data)
 
 print('Created the dataframes')

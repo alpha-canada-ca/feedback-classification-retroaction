@@ -1,4 +1,9 @@
-#import libraries
+# import libraries
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import OneHotEncoder, MultiLabelBinarizer
 import requests
 from airtable import Airtable
 import pandas as pd
@@ -11,7 +16,7 @@ import warnings
 import pickle
 from configparser import ConfigParser
 
-#get api key from config file and get data from Airtable - base and api key are in a hidden config folder
+# get api key from config file and get data from Airtable - base and api key are in a hidden config folder
 config = ConfigParser()
 config.read('config/config.ini')
 key = config.get('default', 'api_key')
@@ -23,102 +28,110 @@ record_list_main = airtable_main.get_all()
 record_list_health = airtable_health.get_all()
 
 
-#convert data to Pandas dataframe
+# convert data to Pandas dataframe
 data_main = pd.DataFrame([record['fields'] for record in record_list_main])
 data_health = pd.DataFrame([record['fields'] for record in record_list_health])
 
 
-#If you want to experiment with this script without setting up an AirTable, you can do so by loading the tagged_feedback.csv file from the repo and convert it to a Pandas dataframe, with this line of code: "data = pd.read_csv('tagged_feedback.csv')".
+# If you want to experiment with this script without setting up an AirTable, you can do so by loading the tagged_feedback.csv file from the repo and convert it to a Pandas dataframe, with this line of code: "data = pd.read_csv('tagged_feedback.csv')".
 
 
 data = data_main.append(data_health, ignore_index=True, sort=True)
 
-data = data[['Comment', 'Lookup_tags', 'Model function', 'Tags confirmed', 'Lang']]
+data = data[['Comment', 'Lookup_tags',
+             'Model function', 'Tags confirmed', 'Lang']]
 
 
-
-#split dataframe for English comments
+# split dataframe for English comments
 data_en = data[data['Lang'].str.contains("EN", na=False)]
 
-#keep only relevant columns from the dataframe
+# keep only relevant columns from the dataframe
 
-#remove all rows thave have null content - this, in effect, removes comments for which the tags haven't been confirmed by a human
+# remove all rows thave have null content - this, in effect, removes comments for which the tags haven't been confirmed by a human
 data_en_topic = data_en.dropna()
 
-data_en_topic = data_en_topic.drop_duplicates(subset ="Comment")
+data_en_topic = data_en_topic.drop_duplicates(subset="Comment")
 
-#remove the Tags confirmed column (it's not needed anymore)
+# remove the Tags confirmed column (it's not needed anymore)
 data_en_topic = data_en_topic.drop(columns=['Tags confirmed'])
 
-#converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
-data_en_topic['topics'] = [','.join(map(str, l)) for l in data_en_topic['Lookup_tags']]
+# converts the tags to a string (instead of a list) - needed for further processing - and puts it in a new column
+data_en_topic['topics'] = [','.join(map(str, l))
+                           for l in data_en_topic['Lookup_tags']]
 
-#remove the Lookup_tags column (it's not needed anymore)
+# remove the Lookup_tags column (it's not needed anymore)
 data_en_topic = data_en_topic.drop(columns=['Lookup_tags'])
 
-#resets the index for each row - needed for further processing
+# resets the index for each row - needed for further processing
 data_en_topic = data_en_topic.reset_index(drop=True)
 
-#split dataframe for French comments - same comments as above for each line
+# split dataframe for French comments - same comments as above for each line
 data_fr = data[data['Lang'].str.contains("FR", na=False)]
 data_fr_topic = data_fr.dropna()
-data_fr_topic = data_fr_topic.drop_duplicates(subset ="Comment")
+data_fr_topic = data_fr_topic.drop_duplicates(subset="Comment")
 data_fr_topic = data_fr_topic.drop(columns=['Tags confirmed'])
-data_fr_topic['topics'] = [','.join(map(str, l)) for l in data_fr_topic['Lookup_tags']]
+data_fr_topic['topics'] = [','.join(map(str, l))
+                           for l in data_fr_topic['Lookup_tags']]
 data_fr_topic = data_fr_topic.drop(columns=['Lookup_tags'])
 data_fr_topic = data_fr_topic.reset_index(drop=True)
 
 
-#get the different possible models
+# get the different possible models
 topics_en = list(data_en_topic['Model function'].unique())
 topics_fr = list(data_fr_topic['Model function'].unique())
 
-#creates a dictionary (key = model, value = tagged feedback for that model)
-sections_en = {topic : data_en_topic[data_en_topic['Model function'].str.contains(topic, na=False)] for topic in topics_en}
-sections_fr = {topic : data_fr_topic[data_fr_topic['Model function'].str.contains(topic, na=False)] for topic in topics_fr}
+# creates a dictionary (key = model, value = tagged feedback for that model)
+sections_en = {topic: data_en_topic[data_en_topic['Model function'].str.contains(
+    topic, na=False)] for topic in topics_en}
+sections_fr = {topic: data_fr_topic[data_fr_topic['Model function'].str.contains(
+    topic, na=False)] for topic in topics_fr}
 
-#reset index for each model
+# reset index for each model
 for cat in sections_en:
     sections_en[cat] = sections_en[cat].reset_index(drop=True)
 
 for cat in sections_fr:
     sections_fr[cat] = sections_fr[cat].reset_index(drop=True)
 
-#import the OneHotEncoder
-from sklearn.preprocessing import OneHotEncoder, MultiLabelBinarizer
+# import the OneHotEncoder
 
-#convert English feedback to sparse matrix
+# convert English feedback to sparse matrix
 cats_en = {}
 for section in sections_en:
     mlb = MultiLabelBinarizer()
-    mhv= mlb.fit_transform(sections_en[section]['topics'].apply(lambda x: set(x.split(','))))
-    cats_en[section] = pd.DataFrame(mhv,columns=mlb.classes_)
+    mhv = mlb.fit_transform(
+        sections_en[section]['topics'].apply(lambda x: set(x.split(','))))
+    cats_en[section] = pd.DataFrame(mhv, columns=mlb.classes_)
     cats_en[section].insert(0, 'Feedback', sections_en[section]['Comment'])
 
-#convert French feedback to sparse matrix
+# convert French feedback to sparse matrix
 cats_fr = {}
 for section in sections_en:
     mlb = MultiLabelBinarizer()
-    mhv= mlb.fit_transform(sections_fr[section]['topics'].apply(lambda x: set(x.split(','))))
-    cats_fr[section] = pd.DataFrame(mhv,columns=mlb.classes_)
+    mhv = mlb.fit_transform(
+        sections_fr[section]['topics'].apply(lambda x: set(x.split(','))))
+    cats_fr[section] = pd.DataFrame(mhv, columns=mlb.classes_)
     cats_fr[section].insert(0, 'Feedback', sections_fr[section]['Comment'])
 
 
-
-#pre-process feedback for NLP
+# pre-process feedback for NLP
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
-#function to clean the word of any punctuation or special characters
+# function to clean the word of any punctuation or special characters
+
+
 def cleanPunc(sentence):
-    cleaned = re.sub(r'[?|!|\'|"|#]',r'',sentence)
-    cleaned = re.sub(r'[.|,|)|(|\|/]',r' ',cleaned)
+    cleaned = re.sub(r'[?|!|\'|"|#]', r'', sentence)
+    cleaned = re.sub(r'[.|,|)|(|\|/]', r' ', cleaned)
     cleaned = cleaned.strip()
-    cleaned = cleaned.replace("\n"," ")
+    cleaned = cleaned.replace("\n", " ")
     return cleaned
 
-#function to convert to lowercase
+# function to convert to lowercase
+
+
 def keepAlpha(sentence):
     alpha_sent = ""
     for word in sentence.split():
@@ -129,8 +142,10 @@ def keepAlpha(sentence):
     return alpha_sent
 
 
-#function to stem feedbck (English)
+# function to stem feedbck (English)
 stemmer_en = SnowballStemmer("english")
+
+
 def stemming_en(sentence):
     stemSentence = ""
     for word in sentence.split():
@@ -140,7 +155,8 @@ def stemming_en(sentence):
     stemSentence = stemSentence.strip()
     return stemSentence
 
-#apply pre-process functions to English
+
+# apply pre-process functions to English
 for cat in cats_en:
     cats_en[cat]['Feedback'] = cats_en[cat]['Feedback'].str.lower()
     cats_en[cat]['Feedback'] = cats_en[cat]['Feedback'].apply(cleanPunc)
@@ -148,8 +164,10 @@ for cat in cats_en:
     cats_en[cat]['Feedback'] = cats_en[cat]['Feedback'].apply(stemming_en)
 
 
-#function to stem French feedback
+# function to stem French feedback
 stemmer_fr = SnowballStemmer("french")
+
+
 def stemming_fr(sentence):
     stemSentence = ""
     for word in sentence.split():
@@ -159,7 +177,8 @@ def stemming_fr(sentence):
     stemSentence = stemSentence.strip()
     return stemSentence
 
-#apply processing function to French feedback
+
+# apply processing function to French feedback
 for cat in cats_fr:
     cats_fr[cat]['Feedback'] = cats_fr[cat]['Feedback'].str.lower()
     cats_fr[cat]['Feedback'] = cats_fr[cat]['Feedback'].apply(cleanPunc)
@@ -167,85 +186,82 @@ for cat in cats_fr:
     cats_fr[cat]['Feedback'] = cats_fr[cat]['Feedback'].apply(stemming_fr)
 
 
-
-#import Vectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
+# import Vectorizer
 
 
-#get all English text to build vectorizer as a dictionary (one key per model)
+# get all English text to build vectorizer as a dictionary (one key per model)
 all_text_en = {}
 for cat in cats_en:
     all_text_en[cat] = cats_en[cat]['Feedback'].values.astype('U')
 
-#peform vectoriztion for each English model (using dictionaries)
+# peform vectoriztion for each English model (using dictionaries)
 vects_en = {}
 all_x_en = {}
 for cat in all_text_en:
-    vectorizer_en = TfidfVectorizer(strip_accents='unicode', analyzer='word', ngram_range=(1,3), norm='l2')
+    vectorizer_en = TfidfVectorizer(
+        strip_accents='unicode', analyzer='word', ngram_range=(1, 3), norm='l2')
     vects_en[cat] = vectorizer_en.fit(all_text_en[cat])
     all_x_en[cat] = vects_en[cat].transform(all_text_en[cat])
 
-#split the English labels from the value - get all possible tags for each model
+# split the English labels from the value - get all possible tags for each model
 all_y_en = {}
 categories_en = {}
 for cat in all_x_en:
-    all_y_en[cat] = cats_en[cat].drop(labels = ['Feedback'], axis=1)
+    all_y_en[cat] = cats_en[cat].drop(labels=['Feedback'], axis=1)
     categories_en[cat] = list(all_y_en[cat].columns.values)
 
 
-#get all French text to build vectorizer as a dictionary (one key per model)
+# get all French text to build vectorizer as a dictionary (one key per model)
 all_text_fr = {}
 for cat in cats_fr:
     all_text_fr[cat] = cats_fr[cat]['Feedback'].values.astype('U')
 
-#peform vectoriztion for each French model (using dictionaries)
+# peform vectoriztion for each French model (using dictionaries)
 all_x_fr = {}
 vects_fr = {}
 for cat in all_text_fr:
-    vectorizer_fr = TfidfVectorizer(strip_accents='unicode', analyzer='word', ngram_range=(1,3), norm='l2')
+    vectorizer_fr = TfidfVectorizer(
+        strip_accents='unicode', analyzer='word', ngram_range=(1, 3), norm='l2')
     vects_fr[cat] = vectorizer_fr.fit(all_text_fr[cat])
     all_x_fr[cat] = vects_fr[cat].transform(all_text_fr[cat])
 
-#split the French labels from the value - get all possible tags for each model
+# split the French labels from the value - get all possible tags for each model
 all_y_fr = {}
 categories_fr = {}
 for cat in all_x_fr:
-    all_y_fr[cat] = cats_fr[cat].drop(labels = ['Feedback'], axis=1)
+    all_y_fr[cat] = cats_fr[cat].drop(labels=['Feedback'], axis=1)
     categories_fr[cat] = list(all_y_fr[cat].columns.values)
 
 
+# import models to train algorithm
 
 
-#import models to train algorithm
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.pipeline import Pipeline
-from sklearn.multiclass import OneVsRestClassifier
-
-
-#create English model
+# create English model
 model_en = {}
 for cat in categories_en:
     model_en[cat] = {}
     for category in categories_en[cat]:
         NB_pipeline = Pipeline([
-            ('clf', OneVsRestClassifier(MultinomialNB(alpha=0.3, fit_prior=True, class_prior=None))),
-            ])
+            ('clf', OneVsRestClassifier(MultinomialNB(
+                alpha=0.3, fit_prior=True, class_prior=None))),
+        ])
         NB_pipeline.fit(all_x_en[cat], cats_en[cat][category])
         model_en[cat][category] = NB_pipeline
 
-#create French model
+# create French model
 model_fr = {}
 for cat in categories_fr:
     model_fr[cat] = {}
     for category in categories_fr[cat]:
         NB_pipeline = Pipeline([
-            ('clf', OneVsRestClassifier(MultinomialNB(alpha=0.3, fit_prior=True, class_prior=None))),
-            ])
+            ('clf', OneVsRestClassifier(MultinomialNB(
+                alpha=0.3, fit_prior=True, class_prior=None))),
+        ])
         NB_pipeline.fit(all_x_fr[cat], cats_fr[cat][category])
         model_fr[cat][category] = NB_pipeline
 
 
-#save to pickle files
+# save to pickle files
 def serialize(obj, file):
     with open(file, 'wb') as f:
         pickle.dump(obj, f)

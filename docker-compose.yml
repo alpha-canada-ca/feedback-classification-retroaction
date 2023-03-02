@@ -2,13 +2,9 @@ version: '3'
 services:
   suggestion:
     image: "tbsacr.azurecr.io/suggestion:1.0.0"
-    build: 
+    build:
       context: .
       dockerfile: docker/both/Dockerfile
     working_dir: /app
     ports:
-    - 5000:5000
-    
-
-
-  
+      - 5000:5000
