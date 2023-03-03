@@ -182,7 +182,6 @@ data_en_topic = data_en_topic.drop(columns=["Tags confirmed"])
 # Get the different possible models
 topics_en = list(data_en_topic["model"].unique())
 
-# Create a dictionary (key = model, value = tagged feedback for that model)
 sections_en = {
     topic: data_en_topic[data_en_topic["model"].str.contains(topic, na=False)]
     for topic in topics_en
@@ -194,21 +193,19 @@ for cat in sections_en:
 
 # Convert English feedback to sparse matrix
 cats_en = {}
+
 for section in sections_en:
     # Instantiate a multi-label binarizer
     mlb = MultiLabelBinarizer()
-
     # Define a function to split topics and convert to set
+
     def split_topics(x):
         return set(x.split(","))
-
     # Apply the split_topics function to the topics column and transform using the multi-label binarizer
     mhv = mlb.fit_transform([split_topics(x)
                             for x in sections_en[section]["topics"]])
-
     # Create a pandas DataFrame from the transformed data
     cats_en[section] = pd.DataFrame(mhv, columns=mlb.classes_)
-
     # Add the 'Feedback' column to the DataFrame
     cats_en[section].insert(0, "Feedback", sections_en[section]["Comment"])
 
