@@ -2,55 +2,43 @@ name: Deploy to AKS Cluster
 on:
   push:
     branches:
-    - master
+      - master
   pull_request:
     branches:
-    - master
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: Decrypt large secret
-      run: ./decrypt.sh
-      env:
-        CONFIG_INI_PASSPHRASE: ${{ secrets.CONFIG_INI_PASSPHRASE }}
-    
-    - uses: Azure/docker-login@v1
-      with:
-        login-server: tbsacr.azurecr.io
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
-    
-    - run: |
-        docker build -f ./docker/both/Dockerfile . -t tbsacr.azurecr.io/suggestion:${{ github.sha }}
-        docker push tbsacr.azurecr.io/suggestion:${{ github.sha }}
-        docker build -f ./docker/feedback-by-page/Dockerfile . -t tbsacr.azurecr.io/feedback-by-page:${{ github.sha }}
-        docker push tbsacr.azurecr.io/feedback-by-page:${{ github.sha }}
+      - uses: actions/checkout@master
+      - name: Decrypt large secret
+        run: ./decrypt.sh
+        env:
+          CONFIG_INI_PASSPHRASE: ${{ secrets.CONFIG_INI_PASSPHRASE }}
 
-    # Set the target AKS cluster.
-    - uses: Azure/aks-set-context@v1
-      with:
-        creds: '${{ secrets.AZURE_CREDENTIALS }}'
-        cluster-name: tbs-prod-aks
-        resource-group: tbs-prod-rg
-        
-    - uses: Azure/k8s-deploy@v1
-      with:
-        manifests: |
-          kubernetes/suggestion-deployment.yaml
-          kubernetes/suggestion-service.yaml
-        images: |
-          tbsacr.azurecr.io/suggestion:${{ github.sha }}
-        namespace: |
-          pagesuccess
+      - uses: Azure/docker-login@v1
+        with:
+          login-server: tbsacr.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
-    - uses: Azure/k8s-deploy@v1
-      with:
-        manifests: |
-          kubernetes/feedback-by-page-deployment.yaml
-          kubernetes/feedback-by-page-service.yaml
-        images: |
-          tbsacr.azurecr.io/feedback-by-page:${{ github.sha }}
-        namespace: |
-          pagesuccess
+      - run: |
+          docker build -f ./docker/both/Dockerfile . -t tbsacr.azurecr.io/suggestion:${{ github.sha }}
+          docker push tbsacr.azurecr.io/suggestion:${{ github.sha }}
+
+      # Set the target AKS cluster.
+      - uses: Azure/aks-set-context@v1
+        with:
+          creds: "${{ secrets.AZURE_CREDENTIALS }}"
+          cluster-name: tbs-prod-aks
+          resource-group: tbs-prod-rg
+
+      - uses: Azure/k8s-deploy@v1
+        with:
+          manifests: |
+            kubernetes/suggestion-deployment.yaml
+            kubernetes/suggestion-service.yaml
+          images: |
+            tbsacr.azurecr.io/suggestion:${{ github.sha }}
+          namespace: |
+            pagesuccess
