@@ -1,23 +1,26 @@
 FROM python:3.8-slim
 
-# Install any additional system dependencies here if necessary
+# Install cron and other system dependencies
+RUN apt-get update && apt-get install -y cron
 
-# Copy your application files
+# Install your Python dependencies
+RUN pip install -U gspread oauth2client pyairtable
+
+# Copy and set permissions for your scripts and crontab file
 COPY suggest.py /app/
 COPY client_secret.json /app/
 COPY process_feedback.py /app/
 COPY docker/both/entrypoint.sh /app/
 COPY ./docker/train/crontab /crontab
-COPY data/ /app/data/
-COPY ./config/config.ini /app/config/
-
-# Install your Python dependencies
-RUN pip install -U gspread oauth2client pyairtable
-
-# Set up file permissions and cron job
 RUN chmod a+x /app/process_feedback.py
 RUN chmod a+x /app/entrypoint.sh
+
+# Apply crontab
 RUN crontab /crontab
+
+# Copy data and config files
+COPY data/ /app/data/
+COPY ./config/config.ini /app/config/
 
 # Set the working directory and Flask environment variable
 WORKDIR /app
