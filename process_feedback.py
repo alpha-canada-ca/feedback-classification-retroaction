@@ -92,8 +92,10 @@ scope = [
     "https://www.googleapis.com/auth/drive",
 ]
 
-# use the credentials from client_secret.json to authorize Google Sheets API access
-creds = ServiceAccountCredentials.from_json_keyfile_name("client_secret.json", scope)
+# Use the credentials from client_secret.json in the config directory to authorize Google Sheets API access
+creds = ServiceAccountCredentials.from_json_keyfile_name(
+    "config/client_secret.json", scope
+)
 client = gspread.authorize(creds)
 
 # open the specific Google Sheet

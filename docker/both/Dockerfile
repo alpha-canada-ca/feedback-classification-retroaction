@@ -11,7 +11,7 @@ RUN pip install -U Flask gspread oauth2client pyairtable pandas numpy scikit-lea
 
 # Copy and set permissions for your scripts and crontab file
 COPY suggest.py /app/
-COPY client_secret.json /app/
+COPY config/client_secret.json /app/
 COPY process_feedback.py /app/
 COPY docker/both/entrypoint.sh /app/
 COPY ./docker/train/crontab /crontab
