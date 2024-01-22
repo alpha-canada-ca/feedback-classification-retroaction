@@ -5,8 +5,12 @@ COPY client_secret.json /app/
 COPY process_feedback.py /app/
 COPY docker/both/entrypoint.sh /app/
 COPY ./docker/train/crontab /crontab
-RUN pip3 install -U gspread
-RUN pip3 install -U oauth2client
+
+# Install additional Python packages
+RUN pip3 install -U gspread \
+    oauth2client \
+    pyairtable
+
 RUN chmod a+x /app/process_feedback.py
 COPY docker/both/entrypoint.sh /app/
 RUN chmod a+x /app/entrypoint.sh
@@ -19,5 +23,3 @@ WORKDIR /app
 ENV FLASK_APP=suggest.py
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]
-
-
