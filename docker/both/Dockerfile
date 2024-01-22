@@ -5,7 +5,9 @@ FROM python:3.8-slim
 RUN apt-get update && apt-get install -y cron
 
 # Install Flask and your other Python dependencies
-RUN pip install -U Flask gspread oauth2client pyairtable
+RUN pip install -U Flask gspread oauth2client pyairtable pandas numpy scikit-learn nltk
+
+
 
 # Copy and set permissions for your scripts and crontab file
 COPY suggest.py /app/
