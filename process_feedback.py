@@ -1,4 +1,6 @@
 # import libraries
+import os
+from pyairtable import Api
 import pickletools
 import gzip
 from sklearn.multiclass import OneVsRestClassifier
@@ -14,7 +16,6 @@ import re
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 import requests
-from airtable import Airtable
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
@@ -93,8 +94,7 @@ scope = [
 ]
 
 # use the credentials from client_secret.json to authorize Google Sheets API access
-creds = ServiceAccountCredentials.from_json_keyfile_name(
-    "client_secret.json", scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name("client_secret.json", scope)
 client = gspread.authorize(creds)
 
 # open the specific Google Sheet
@@ -109,21 +109,29 @@ url_model_dict = {row["URL"]: row["MODEL"] for row in list_of_entries}
 config = ConfigParser()
 config.read("config/config.ini")
 
-# get the API key and bases to search from config.ini
-key = config.get("default", "api_key")
-bases = [
-    config.get("default", "base"),
-    config.get("default", "base_health"),
-    config.get("default", "base_cra"),
-    config.get("default", "base_travel"),
-    config.get("default", "base_ircc"),
+# Get the API key from config.ini
+api_key = config.get("default", "api_key")
+
+# Initialize the API with your Airtable API key
+api = Api(api_key)
+
+base_ids_and_tables = [
+    (config.get("default", "base"), config.get("default", "base_table_name")),
+    (config.get("default", "base_health"), config.get("default", "base_table_name")),
+    (config.get("default", "base_cra"), config.get("default", "base_table_name")),
+    (config.get("default", "base_travel"), config.get("default", "base_table_name")),
+    (config.get("default", "base_ircc"), config.get("default", "base_table_name")),
+    # ... and so on for other bases
 ]
 
-# create an Airtable instance for each base using the API key
-airtables = [Airtable(base, "Page feedback", api_key=key) for base in bases]
+# Initialize list to store records
+record_lists = []
 
-# get all feedback records from each Airtable instance
-record_lists = [airtable.get_all() for airtable in airtables]
+# Fetch records for each base and table
+for base_id, table_name in base_ids_and_tables:
+    table = api.table(base_id, table_name)
+    records = table.all()  # Fetch all records
+    record_lists.append(records)
 
 # concatenate all the feedback records into one DataFrame
 data = pd.concat(
@@ -197,20 +205,23 @@ cats_en = {}
 for section in sections_en:
     # Instantiate a multi-label binarizer
     mlb = MultiLabelBinarizer()
-    # Define a function to split topics and convert to set
 
+    # Define a function to split topics and convert to set
     def split_topics(x):
         return set(x.split(","))
+
     # Apply the split_topics function to the topics column and transform using the multi-label binarizer
-    mhv = mlb.fit_transform([split_topics(x)
-                            for x in sections_en[section]["topics"]])
+    mhv = mlb.fit_transform([split_topics(x) for x in sections_en[section]["topics"]])
+
     # Create a pandas DataFrame from the transformed data
     cats_en[section] = pd.DataFrame(mhv, columns=mlb.classes_)
+
     # Add the 'Feedback' column to the DataFrame
     cats_en[section].insert(0, "Feedback", sections_en[section]["Comment"])
 
 # Instantiate an English stemmer
 stemmer_en = SnowballStemmer("english")
+
 
 # Apply pre-process functions to English feedback
 for cat in cats_en:
@@ -233,8 +244,7 @@ vectorizer_en = TfidfVectorizer(
     strip_accents="unicode", analyzer="word", ngram_range=(1, 3), norm="l2"
 )
 vects_en = {cat: vectorizer_en.fit(all_text_en[cat]) for cat in all_text_en}
-all_x_en = {cat: vects_en[cat].transform(
-    all_text_en[cat]) for cat in all_text_en}
+all_x_en = {cat: vects_en[cat].transform(all_text_en[cat]) for cat in all_text_en}
 
 # Split the English labels from the value - get all possible tags for each model
 all_y_en = {}
@@ -251,8 +261,7 @@ model_en = {
                 (
                     "clf",
                     OneVsRestClassifier(
-                        MultinomialNB(alpha=0.3, fit_prior=True,
-                                      class_prior=None)
+                        MultinomialNB(alpha=0.3, fit_prior=True, class_prior=None)
                     ),
                 )
             ]
@@ -268,8 +277,7 @@ data_fr = data[data["Lang"].str.contains("FR", na=False)]
 data_fr_topic = data_fr.dropna()
 data_fr_topic = data_fr_topic.drop_duplicates(subset="Comment")
 data_fr_topic = data_fr_topic.reset_index(drop=True)
-data_fr_topic["topics"] = [",".join(map(str, l))
-                           for l in data_fr_topic["Lookup_tags"]]
+data_fr_topic["topics"] = [",".join(map(str, l)) for l in data_fr_topic["Lookup_tags"]]
 data_fr_topic["Model function"] = [
     ",".join(map(str, l)) for l in data_fr_topic["Model function"]
 ]
@@ -320,10 +328,8 @@ stemmer_fr = SnowballStemmer("french")
 for cat in cats_fr:
     cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].str.lower()
     cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(cleanPunc)
-    cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(
-        remove_non_alpha_chars)
-    cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(
-        get_stemmed_text_fr)
+    cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(remove_non_alpha_chars)
+    cats_fr[cat]["Feedback"] = cats_fr[cat]["Feedback"].apply(get_stemmed_text_fr)
 
 
 # get all French text to build vectorizer as a dictionary (one key per model)
@@ -359,8 +365,7 @@ for cat in categories_fr:
                 (
                     "clf",
                     OneVsRestClassifier(
-                        MultinomialNB(alpha=0.3, fit_prior=True,
-                                      class_prior=None)
+                        MultinomialNB(alpha=0.3, fit_prior=True, class_prior=None)
                     ),
                 ),
             ]
