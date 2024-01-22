@@ -1,10 +1,11 @@
+# Use a base image with Python
 FROM python:3.8-slim
 
 # Install cron and other system dependencies
 RUN apt-get update && apt-get install -y cron
 
-# Install your Python dependencies
-RUN pip install -U gspread oauth2client pyairtable
+# Install Flask and your other Python dependencies
+RUN pip install -U Flask gspread oauth2client pyairtable
 
 # Copy and set permissions for your scripts and crontab file
 COPY suggest.py /app/
