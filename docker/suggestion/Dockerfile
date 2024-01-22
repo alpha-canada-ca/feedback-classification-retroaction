@@ -23,9 +23,6 @@ RUN pip3 install -U Flask \
     numpy \
     pyairtable
 
-# Download NLTK data
-RUN python3 -m nltk.downloader stopwords
-
 # Create app directory
 RUN mkdir /app
 
